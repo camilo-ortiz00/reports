@@ -1,0 +1,132 @@
+.report_container{
+	font-size: 0.7em;
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	align-items: center;
+	margin: 0 auto;
+	border: 2px solid black;
+	width: 70%;
+}
+
+.num_report{
+	margin-left: 2%;
+	margin-top: 4%;
+}
+
+.logo{
+	height: 10em;
+	width: 10em;
+	border-radius: 50%;
+	border: 2px solid black;
+	margin-left: 55em;
+	margin-top: 2%;
+}
+
+.header {
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+  }
+
+  .user_name {
+	background-color: #47C5FB;
+	width: 40%;
+	height: 9.5em;
+	color: white;
+	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+  }
+  
+  .project_name {
+	background-color: #00569E;
+	width: 60%;
+	height: 10em;
+	font-size: 1.5em;
+	color: white;
+	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+  }
+
+  .names{
+	display: flex;
+	justify-content: center;
+    align-items: center;
+	margin: 0 auto;
+	width: 100%;
+  }
+  .names h1{
+	font-size: 2em;
+	font-weight: 700;
+  }
+
+  .summary{
+	width: 65%;
+	margin-left: 2%;
+  }
+
+  .summary p{
+	font-size: 1.5em;
+  }
+
+  .porcent{
+	width: 35%;
+	font-size: 0.7em;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+  }
+
+  .porcent h1{
+	background-color: #D9D9D9;
+	height: 1.8em;
+	width: 15em;
+	border-radius: 10px;
+	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center; 
+  }
+
+  .porcent p{
+	font-size: 6em;
+	font-weight: 900;
+	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 0px;
+  }
+
+  .middle{
+	display: flex;
+	justify-content: center;
+    align-items: center;
+	margin: 0 auto;
+	width: 100%;
+  }
+
+  .table1 h1{
+	margin-left: 1em;
+  }
+
+  .table2 h1{
+	margin-left: 1em;
+  }
+
+  .table3 h1{
+	margin-left: 1em;
+  }
+
+  .table2{
+	margin-top: 2em;
+  }
+  .table3{
+	margin-top: 2em;
+  }

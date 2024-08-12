@@ -1,0 +1,106 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL") // O puedes usar POSTGRES_PRISMA_URL si prefieres
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                     Int      @id @default(autoincrement())
+  name                   String
+  email                  String   @unique
+  date                   DateTime
+  phone                  Int
+  password               String
+  role_id                Int
+  address                String
+  cv_file                String
+  academic_support_files String
+  id_file                String
+  profile_picture        String
+  work_lines             String
+  contact_person_name    String
+  contact_person_phone   String
+  contact_person_email   String
+  reports                Report[]
+  role                   Role     @relation(fields: [role_id], references: [id])
+}
+
+model Role {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+  users       User[]
+}
+
+model Project {
+  id           Int       @id @default(autoincrement())
+  component_id Int
+  name         String
+  description  String
+  reports      Report[]
+  component    Component @relation(fields: [component_id], references: [id])
+}
+
+model Report {
+  id               Int               @id @default(autoincrement())
+  project_id       Int
+  user_id          Int
+  status           Float
+  summary          String
+  user             User              @relation(fields: [user_id], references: [id])
+  project          Project           @relation(fields: [project_id], references: [id])
+  trackings        ReportTracking[]
+  technicalSummary TechnicalSummary?
+  deliverables     Deliverable[]
+  annexes          Annex[]
+}
+
+model ReportTracking {
+  id         Int      @id @default(autoincrement())
+  report_id  Int
+  status     Int
+  updated_at DateTime
+  note       String
+  report     Report   @relation(fields: [report_id], references: [id])
+}
+
+model Component {
+  id          Int       @id @default(autoincrement())
+  project_id  Int
+  work_lines  String
+  name        String
+  description String
+  projects    Project[]
+}
+
+model Annex {
+  id          Int    @id @default(autoincrement())
+  report_id   Int
+  description String
+  url         String
+  report      Report @relation(fields: [report_id], references: [id])
+}
+
+model Deliverable {
+  id               Int      @id @default(autoincrement())
+  report_id        Int
+  description      String
+  date             DateTime
+  support_annex    String
+  approved_changes String
+  contingency_plan String
+  report           Report   @relation(fields: [report_id], references: [id])
+}
+
+model TechnicalSummary {
+  id                  Int    @id @default(autoincrement())
+  report_id           Int    @unique
+  obtained_result     String
+  product_description String
+  support_annex       String
+  observations        String
+  report              Report @relation(fields: [report_id], references: [id])
+}
