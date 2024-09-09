@@ -25,6 +25,7 @@
 
 .table{
 	margin-top: 2em;
+	width: 90em;
 }
 
 .form{
@@ -59,4 +60,9 @@
 
 .createButton{
 	margin-left: 600px;
+}
+
+.SwitchButton{
+	display: flex;
+	flex-direction: row;
 }

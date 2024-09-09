@@ -1,10 +1,10 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_URL") // O puedes usar POSTGRES_PRISMA_URL si prefieres
-}
-
 generator client {
   provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -40,22 +40,22 @@ model Project {
   component_id Int
   name         String
   description  String
-  reports      Report[]
   component    Component @relation(fields: [component_id], references: [id])
+  reports      Report[]
 }
 
 model Report {
-  id               Int               @id @default(autoincrement())
-  project_id       Int
-  user_id          Int
-  status           Float
+  id               Int                @id @default(autoincrement())
+  project_id       Int?
+  user_id          Int?
+  status           Float?
   summary          String
-  user             User              @relation(fields: [user_id], references: [id])
-  project          Project           @relation(fields: [project_id], references: [id])
-  trackings        ReportTracking[]
-  technicalSummary TechnicalSummary?
-  deliverables     Deliverable[]
   annexes          Annex[]
+  deliverables     Deliverable[]
+  project          Project?           @relation(fields: [project_id], references: [id])
+  user             User?              @relation(fields: [user_id], references: [id])
+  trackings        ReportTracking[]
+  technicalSummary TechnicalSummary[]
 }
 
 model ReportTracking {
@@ -76,25 +76,6 @@ model Component {
   projects    Project[]
 }
 
-model Annex {
-  id          Int    @id @default(autoincrement())
-  report_id   Int
-  description String
-  url         String
-  report      Report @relation(fields: [report_id], references: [id])
-}
-
-model Deliverable {
-  id               Int      @id @default(autoincrement())
-  report_id        Int
-  description      String
-  date             DateTime
-  support_annex    String
-  approved_changes String
-  contingency_plan String
-  report           Report   @relation(fields: [report_id], references: [id])
-}
-
 model TechnicalSummary {
   id                  Int    @id @default(autoincrement())
   report_id           Int    @unique
@@ -102,5 +83,23 @@ model TechnicalSummary {
   product_description String
   support_annex       String
   observations        String
-  report              Report @relation(fields: [report_id], references: [id])
+  report              Report @relation(fields: [report_id], references: [id], onDelete: Cascade)
+}
+
+model Annex {
+  id          Int    @id @default(autoincrement())
+  report_id   Int
+  description String
+  url         String
+  report      Report @relation(fields: [report_id], references: [id], onDelete: Cascade)
+}
+
+model Deliverable {
+  id               Int      @id @default(autoincrement())
+  report_id        Int
+  description      String
+  date             DateTime
+  approved_changes String
+  contingency_plan String
+  report           Report   @relation(fields: [report_id], references: [id], onDelete: Cascade)
 }
