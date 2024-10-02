@@ -1,13 +1,19 @@
 // models/reports.props.ts
 
 export interface FormData {
-  id?: string;
-  project_name: string;
-  researcher_name: string;
+  id?: number;
   summary: string;
-  technicalSummary: TechnicalSummary[]; // Usando la interfaz TechnicalSummary
+  technicalSummary: TechnicalSummaryData[]; // Usando la interfaz TechnicalSummary
   deliverables: DeliverableData[]; // Usando la interfaz DeliverableData
   annexes: AnnexData[]; // Usando la interfaz AnnexData
+  user: {
+    id: number;
+    name: string;
+  };
+  project: {
+    id: number;
+    name: string;
+  };
 }
 
 export interface ReportFormProps {
@@ -18,6 +24,7 @@ export interface ReportFormProps {
 
 export interface DeliverableData {
   id?: number;
+  report_id: number;
   description: string;
   date: string;
   approved_changes: string;
@@ -26,14 +33,34 @@ export interface DeliverableData {
 
 export interface AnnexData {
   id?: number;
+  report_id: number;
   description: string;
   url: string;
 }
 
-export interface TechnicalSummary {
+export interface TechnicalSummaryData {
   id?: number;
+  report_id: number;
   obtained_result: string;
   product_description: string;
   support_annex: string;
   observations: string;
+}
+
+export interface TechnicalFormProps {
+  onSubmit: (data: TechnicalSummaryData) => void;
+  initialData?: TechnicalSummaryData;
+  handleClose: () => void;
+}
+
+export interface DeliverableFormProps {
+  onSubmit: (data: DeliverableData) => void;
+  initialData?: DeliverableData;
+  handleClose: () => void;
+}
+
+export interface AnnexFormProps {
+  onSubmit: (data: AnnexData) => void;
+  initialData?: AnnexData;
+  handleClose: () => void;
 }

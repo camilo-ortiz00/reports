@@ -1,7 +1,6 @@
 import React, { FC, useState } from 'react';
 import DataTable, { TableColumn } from 'react-data-table-component';
 import { FormData } from '../../model/reports.props';
-import AlertComponent from '@/components/Alert';
 
 interface ReportListTableProps {
   reports: FormData[];

@@ -49,7 +49,7 @@ model Report {
   project_id       Int?
   user_id          Int?
   status           Float?
-  summary          String
+  summary          String?
   annexes          Annex[]
   deliverables     Deliverable[]
   project          Project?           @relation(fields: [project_id], references: [id])
@@ -78,7 +78,7 @@ model Component {
 
 model TechnicalSummary {
   id                  Int    @id @default(autoincrement())
-  report_id           Int    @unique
+  report_id           Int    
   obtained_result     String
   product_description String
   support_annex       String
@@ -98,7 +98,7 @@ model Deliverable {
   id               Int      @id @default(autoincrement())
   report_id        Int
   description      String
-  date             DateTime
+  date             String
   approved_changes String
   contingency_plan String
   report           Report   @relation(fields: [report_id], references: [id], onDelete: Cascade)

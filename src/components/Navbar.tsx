@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 const Navbar = () => {
   const [theme, setTheme] = useState('light');
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -11,6 +12,22 @@ const Navbar = () => {
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const response = await fetch('/api/reports'); // Ajusta la URL según tu API
+        const data = await response.json();
+        if (data.length > 0 && data[0].user) {
+          setUserName(data[0].user.name); // Asumiendo que los datos del usuario están en el primer reporte
+        }
+      } catch (error) {
+        console.error('Error fetching user name:', error);
+      }
+    };
+
+    fetchUserName();
+  }, []);
 
   return (
     <div className="navbar bg-base-100">
@@ -43,6 +60,7 @@ const Navbar = () => {
         </label>
       </div>
       <div className="flex-none">
+        <h1>{userName || 'Cargando...'}</h1> 
         <div className="dropdown dropdown-end">
           <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
             <div className="w-10 rounded-full">

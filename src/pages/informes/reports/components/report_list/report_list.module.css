@@ -13,19 +13,9 @@
 	margin: 5em;
   }
 
-.user_name{
-	margin-left: 200px;
-}
-
-.project_name{
-	position: absolute;
-    right: 0;
-	margin-right: 200px;
-}
-
 .table{
 	margin-top: 2em;
-	width: 90em;
+	width: 75em;
 }
 
 .form{
@@ -62,7 +52,21 @@
 	margin-left: 600px;
 }
 
+.ReportAction{
+	display: flex;
+	align-items: baseline;
+	margin-left: 2em;
+}
+
 .SwitchButton{
 	display: flex;
 	flex-direction: row;
 }
+
+.summary {
+	margin-right: 20em; /* Ajusta según sea necesario */
+	width: calc(100% - 30em); /* Asegura que el contenido no se desborde */
+	word-wrap: break-word; /* Permite que las palabras largas se dividan y se ajusten */
+  overflow-wrap: break-word;
+  }
+  
