@@ -11,6 +11,7 @@ import ModalComponent from '@/components/Modal';
 import styles from "./report_list.module.css";
 import { AnnexData, DeliverableData, FormData, TechnicalSummaryData } from '../../model/reports.props';
 import AlertComponent from '@/components/Alert';
+import ModalDeleteComponent from '@/components/ModalEliminacion';
 
 const Page = () => {
   const [technicalSummary, setTechnicalSummary] = useState<TechnicalSummaryData[]>([]);
@@ -31,9 +32,9 @@ const Page = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [summaryText, setSummaryText] = useState<string | null>(selectedReport?.summary || '');
   const [isCreatingNewReport, setIsCreatingNewReport] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false); // Controla el modal de confirmación
-  const [deleteItemType, setDeleteItemType] = useState<'technical' | 'deliverable' | 'annex' | null>(null);
-  const [deleteItemId, setDeleteItemId] = useState<number | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{ id: number; type: string } | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
 
   const fetchData = async () => {
     const fetchPromises = [
@@ -182,7 +183,41 @@ const handleButtonClick = (type: 'technical' | 'deliverable' | 'annex') => (even
     setShowModalTechnical(false);
     setShowModalDeliverable(false);
     setShowModalAnnex(false);
+    setSelectedReportAnnex(null);
   };
+
+  const handleDeleteClick = (id: number, type: string) => {
+    setItemToDelete({ id, type });
+    setShowDeleteModal(true); // Muestra el modal de confirmación
+  };
+  
+  const confirmDelete = async () => {
+    if (itemToDelete) { // Verifica que itemToDelete no sea null
+      const { id, type } = itemToDelete;
+      
+      try {
+        if (type === 'annex') {
+          await handleDeleteAnnex(id); // Llama a la función para eliminar el anexo
+        } else if (type === 'deliverable') {
+          await handleDeleteDeliverable(id); // Llama a la función para eliminar el entregable
+        } else if (type === 'activity') {
+          await handleDeleteTechnicalSummary(id); // Llama a la función para eliminar la actividad
+        }
+  
+        setShowDeleteModal(false); // Cierra el modal después de la eliminación
+        setItemToDelete(null); // Resetea el estado
+        setAlertMessage(`${type.charAt(0).toUpperCase() + type.slice(1)} eliminado con éxito`);
+        setAlertType('success');
+        setShowAlert(true);
+      } catch (error) {
+        console.error('Error:', error);
+        setAlertMessage(`Error al eliminar ${type}`);
+        setAlertType('error');
+        setShowAlert(true);
+      }
+    }
+  };
+    
 //Crear
 
 const handleCreateReport = async () => {
@@ -328,11 +363,20 @@ const handleCreateDeliverable = async (deliverables: DeliverableData) => {
 };  
 
 const handleCreateAnnex = async (annexes: AnnexData) => {
-  console.log('Datos a enviar:', annexes); 
+  debugger;
+  console.log('Datos a enviar:', annexes);
   const { report_id, id, description, url } = annexes;
 
+  // Asegúrate de que solo se llame a esta función cuando realmente se desee crear un nuevo anexo.
+  if (!description || !url) {
+    setAlertMessage('La descripción y la URL son necesarias para crear un anexo.');
+    setAlertType('error');
+    setShowAlert(true);
+    return;
+  }
+
   try {
-    const method = id ? 'PUT' : 'POST';
+    const method = id ? 'PUT' : 'POST'; // Usar POST para nuevos anexos, PUT para actualizarlos
     const response = await fetch('/api/annexes', {
       method,
       headers: {
@@ -356,7 +400,7 @@ const handleCreateAnnex = async (annexes: AnnexData) => {
     console.log('Anexo creado:', data);
     if (id) {
       setAnnexes((prevAnnexes) =>
-        prevAnnexes.map((annexes) => (annexes.id === id ? data : annexes))
+        prevAnnexes.map((annex) => (annex.id === id ? data : annex))
       );
       setAlertMessage('Anexo actualizado con éxito');
     } else {
@@ -371,7 +415,7 @@ const handleCreateAnnex = async (annexes: AnnexData) => {
     setAlertType('warning');
     setShowAlert(true);
   }
-};  
+};
 
 const handleDeleteTechnicalSummary = async (id: number) => {
   try {
@@ -414,72 +458,28 @@ const handleDeleteDeliverable = async (id: number) => {
 };
 
 const handleDeleteAnnex = async (id: number) => {
+  console.log('ID del anexo a eliminar:', id);
+
   try {
-    const response = await fetch(`/api/annexes?id=${id}`, {
+    debugger;
+    const response = await fetch(`/api/annexes/${id}`, {
       method: 'DELETE',
     });
-
-    if (!response.ok) throw new Error('Error al eliminar el anexo');
-
-    // Si la eliminación fue exitosa, actualiza el estado de anexos
-    setAnnexes(prev => prev.filter(annex => annex.id !== id));
-    setAlertMessage('Anexo eliminado con éxito');
-    setAlertType('success');
-    setShowAlert(true);
-  } catch (error) {
-    console.error('Error:', error);
-    setAlertMessage('Error al eliminar el anexo');
-    setAlertType('error');
-    setShowAlert(true);
-  }
-};
-
-const handleDeleteClick = (type: 'technical' | 'deliverable' | 'annex', id: number) => {
-  setDeleteItemType(type);
-  setDeleteItemId(id);
-  setShowDeleteModal(true);
-};
-
-// Función para confirmar eliminación
-const confirmDelete = async () => {
-  if (!deleteItemType || deleteItemId === null) return;
-
-  try {
-    switch (deleteItemType) {
-      case 'technical':
-        await handleDeleteTechnicalSummary(deleteItemId);
-        setTechnicalSummary(prev => prev.filter(item => item.id !== deleteItemId));
-        setAlertMessage('Resumen técnico eliminado con éxito.');
-        break;
-      case 'deliverable':
-        await handleDeleteDeliverable(deleteItemId);
-        setDeliverables(prev => prev.filter(item => item.id !== deleteItemId));
-        setAlertMessage('Entregable eliminado con éxito.');
-        break;
-      case 'annex':
-        await handleDeleteAnnex(deleteItemId);
-        setAnnexes(prev => prev.filter(item => item.id !== deleteItemId));
-        setAlertMessage('Anexo eliminado con éxito.');
-        break;
-      default:
-        break;
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      console.error('Error al eliminar el anexo:', errorResponse);
+      throw new Error('Error al eliminar el anexo');
     }
-    setAlertType('success');
+
+    console.log('Anexo eliminado correctamente');
+    // Actualiza el estado para eliminar el anexo en el frontend
+    setAnnexes(prevAnnexes => prevAnnexes.filter(annex => annex.id !== id));
   } catch (error) {
-    setAlertMessage('Error al eliminar el elemento.');
-    setAlertType('error');
+    console.error('Error en la eliminación:', error);
   }
-
-  setShowAlert(true);
-  setShowDeleteModal(false);
 };
 
-// Función para cerrar el modal sin eliminar
-const handleCloseDeleteModal = () => {
-  setShowDeleteModal(false);
-  setDeleteItemType(null);
-  setDeleteItemId(null);
-};
+
 
 const technicalInitialData = selectedReportTechnical || {
   report_id: selectedReport?.id || 0,
@@ -595,12 +595,12 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
             </button>
             {selectedReportTechnical && (
             <button
-              onClick={() => handleDeleteTechnicalSummary(selectedReportTechnical.id!)}
-              className={`${styles.deleteButton} mt-4 px-4 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700`}
-              >
-              Eliminar Actividad
-            </button>
-            )}
+            onClick={() => handleDeleteClick(selectedReportTechnical.id!, 'activity')}
+            className={`${styles.deleteButton} mt-4 px-4 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700`}
+          >
+            Eliminar Actividad
+          </button>
+        )}
           <ModalComponent
             show={showModalTechnical}
             title={selectedReportTechnical ? 'Editar Actividad Técnica' : 'Crear Actividad Técnica'}
@@ -631,12 +631,12 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
             </button>
             {selectedReportDeliverable && (
               <button
-              onClick={() => handleDeleteDeliverable(selectedReportDeliverable.id!)}
-                className={`${styles.deleteButton} mt-4 px-4 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700`}
-              >
-                Eliminar Entregable
-              </button>
-            )}
+              onClick={() => handleDeleteClick(selectedReportDeliverable.id!, 'deliverable')}
+              className={`${styles.deleteButton} mt-4 px-4 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700`}
+            >
+              Eliminar Entregable
+            </button>
+          )}
             <ModalComponent
               show={showModalDeliverable}
               title={selectedReportDeliverable ? 'Editar Entregable' : 'Crear Nuevo Entregable'}
@@ -664,15 +664,27 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
               className={`${styles.createButton} mt-4 px-4 py-2 ml-16 bg-blue-500 text-white rounded hover:bg-blue-700`}
             >
               {selectedReportAnnex ? 'Editar Anexo' : 'Crear Nuevo Anexo'}
-            </button>
-            {selectedReportAnnex && (
-              <button
-              onClick={() => handleDeleteAnnex(selectedReportAnnex.id!)}
-                className={`${styles.deleteButton} mt-4 px-4 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700`}
-              >
-                Eliminar Anexo
               </button>
-            )}
+              {selectedReportAnnex && (
+                  <button
+                    onClick={() => handleDeleteClick(selectedReportAnnex.id!, 'annex')}
+                    className={`${styles.deleteButton} mt-4 px-4 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700`}
+                  >
+                    Eliminar Anexo
+                  </button>
+                )}
+                {showDeleteModal && (
+                  <ModalDeleteComponent
+                    show={true}
+                    title="Confirmar eliminación"
+                    closeModal={() => setShowDeleteModal(false)}
+                    onConfirm={confirmDelete}
+                  >
+                    <p>
+                      ¿Estás seguro de que deseas eliminar esta {itemToDelete?.type === 'annex' ? 'anexo' : itemToDelete?.type === 'deliverable' ? 'entregable' : 'actividad'}?
+                    </p>
+                  </ModalDeleteComponent>
+                )}
             <ModalComponent
               show={showModalAnnex}
               title={selectedReportAnnex ? 'Editar Anexo' : 'Crear Nuevo Anexo'}

@@ -10,7 +10,6 @@ interface TechnicalFormProps {
 }
 
 const TechnicalSummaryTable: React.FC<TechnicalFormProps> = ({ technical, onActivityRowSelected, onRowDeselected, onSearch  }) => {
-  console.log(technical)
   const columns = [
     {
       name: 'N°',

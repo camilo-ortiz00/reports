@@ -1,5 +1,3 @@
-// /pages/api/annexes.ts
-
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 
@@ -45,25 +43,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       res.status(200).json(updatedannexes);
     } 
-    else if (req.method === 'DELETE') {
-      const { id } = req.query;
-    
-      if (!id) {
-        return res.status(400).json({ error: 'ID es obligatorio para eliminar' });
-      }
-    
-      console.log("ID recibido para eliminar:", id); 
-    
-      await prisma.annex.delete({
-        where: { id: Number(id) },
-      });
-    
-      res.status(204).end();
-    }    
     else {
       res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
       res.status(405).end(`Method ${req.method} Not Allowed`);
     }
+  } catch (error) {
+    console.error('Error en el manejo de deliverables:', (error as Error).message);
+    res.status(500).json({ error: 'Error del servidor', details: (error as Error).message });
   } finally {
     await prisma.$disconnect();
   }
