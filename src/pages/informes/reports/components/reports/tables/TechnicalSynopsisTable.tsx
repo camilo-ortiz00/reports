@@ -1,62 +1,43 @@
-'use client'
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTable, Column, HeaderGroup, Row } from 'react-table';
-import styles from './synopsis.module.css';
+import styles from '../reports.module.css';
 
-interface Data {
-  numeroActividad: string;
-  resultado: string;
-  producto: string;
-  anexo: string; 
-  observaciones: string;
+interface TechnicalSynopsisData {
+  id?: number;
+  report_id: number;
+  obtained_result: string;
+  product_description: string;
+  support_annex: string;
+  observations: string;
 }
 
-const data: Data[] = [
-  {
-    numeroActividad: '1',
-    resultado: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    producto: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    anexo: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    observaciones: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-  },
-];
+interface TechnicalSynopsisTableProps {
+  technical: TechnicalSynopsisData[];
+}
 
-const columns: Column<Data>[] = [
-  {
-    Header: 'N° Actividad',
-    accessor: 'numeroActividad' as const,
-  },
-  {
-    Header: 'RESULTADO OBTENIDO',
-    accessor: 'resultado' as const,
-  },
-  {
-    Header: 'PRODUCTO/DESCRIPCIÓN',
-    accessor: 'producto' as const,
-  },
-  {
-    Header: 'ANEXO SOPORTE DEL DESARROLLO Y OBTENCIÓN DE RESULTADOS',
-    accessor: 'anexo' as const,
-  },
-  {
-    Header: 'OBSERVACIONES',
-    accessor: 'observaciones' as const,
-  },
-];
+const TechnicalSynopsisTable: React.FC<TechnicalSynopsisTableProps> = ({ technical }) => {
+  const columns: Column<TechnicalSynopsisData>[] = useMemo(() => [
+    { Header: 'N° Actividad', accessor: 'id' },
+    { Header: 'RESULTADO OBTENIDO', accessor: 'obtained_result' },
+    { Header: 'PRODUCTO/DESCRIPCIÓN', accessor: 'product_description' },
+    { Header: 'ANEXO SOPORTE DEL DESARROLLO Y OBTENCIÓN DE RESULTADOS', accessor: 'support_annex' },
+    { Header: 'OBSERVACIONES', accessor: 'observations' },
+  ], []);
 
-const TechnicalSynopsisTable: React.FC = () => {
+  const data = useMemo(() => technical, [technical]);
+
   const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
     rows,
     prepareRow,
-  } = useTable<Data>({ columns, data });
+  } = useTable<TechnicalSynopsisData>({ columns, data });
 
   return (
     <table {...getTableProps()} className={styles.table}>
       <thead>
-        {headerGroups.map((headerGroup: HeaderGroup<Data>) => (
+        {headerGroups.map((headerGroup: HeaderGroup<TechnicalSynopsisData>) => (
           <tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id}>
             {headerGroup.headers.map(column => (
               <th {...column.getHeaderProps()} className={styles.th} key={column.id}>
@@ -67,10 +48,10 @@ const TechnicalSynopsisTable: React.FC = () => {
         ))}
       </thead>
       <tbody {...getTableBodyProps()}>
-        {rows.map((row: Row<Data>) => {
+        {rows.map((row: Row<TechnicalSynopsisData>) => {
           prepareRow(row);
           return (
-            <tr {...row.getRowProps()} key={row.id}>
+            <tr {...row.getRowProps()} key={row.original.id || row.index}>
               {row.cells.map(cell => (
                 <td {...cell.getCellProps()} className={styles.td} key={cell.column.id}>
                   {cell.render('Cell')}

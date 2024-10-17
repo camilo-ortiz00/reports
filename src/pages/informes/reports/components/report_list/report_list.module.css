@@ -16,6 +16,7 @@
 .table{
 	margin-top: 2em;
 	width: 75em;
+  	overflow-x: auto;
 }
 
 .form{
@@ -26,26 +27,35 @@
 	margin: 0 auto;
 	flex-wrap: wrap;
 }
+.formControl {
+	width: 35em;
+  }
+  
+.col{
+	display: flex;
+	flex-direction: column;
+	margin: 1em;
+}
 
 .container{
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
 	justify-content: space-evenly;
 }
 
-.right{
-	padding-left: 20px;
+.containerAnnex{
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
 }
 
-.left{
-	padding-right: 20px;
-}
 .actions{
 	margin-top: 30px !important;
 	display: flex;
 	justify-content: space-evenly;
 	align-items: center;
 	margin: 0 auto;
+	gap: 1em;
 }
 
 .createButton{
@@ -64,9 +74,11 @@
 }
 
 .summary {
-	margin-right: 20em; /* Ajusta según sea necesario */
-	width: calc(100% - 30em); /* Asegura que el contenido no se desborde */
-	word-wrap: break-word; /* Permite que las palabras largas se dividan y se ajusten */
-  overflow-wrap: break-word;
+	width: 80%; 
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+	padding: 1rem; /* Añadir algo de padding para separar del borde */
+	overflow-y: auto; /* Permite desplazamiento horizontal si es necesario */
+	max-width: 80em;
   }
   

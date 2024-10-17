@@ -1,0 +1,15 @@
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "id" DROP DEFAULT,
+ALTER COLUMN "date" DROP NOT NULL,
+ALTER COLUMN "date" SET DATA TYPE TEXT,
+ALTER COLUMN "phone" DROP NOT NULL,
+ALTER COLUMN "address" DROP NOT NULL,
+ALTER COLUMN "cv_file" DROP NOT NULL,
+ALTER COLUMN "academic_support_files" DROP NOT NULL,
+ALTER COLUMN "id_file" DROP NOT NULL,
+ALTER COLUMN "profile_picture" DROP NOT NULL,
+ALTER COLUMN "work_lines" DROP NOT NULL,
+ALTER COLUMN "contact_person_name" DROP NOT NULL,
+ALTER COLUMN "contact_person_phone" DROP NOT NULL,
+ALTER COLUMN "contact_person_email" DROP NOT NULL;
+DROP SEQUENCE "User_id_seq";

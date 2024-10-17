@@ -8,22 +8,22 @@ datasource db {
 }
 
 model User {
-  id                     Int      @id @default(autoincrement())
+  id                     Int      @id
   name                   String
   email                  String   @unique
-  date                   DateTime
-  phone                  Int
+  date                   String?
+  phone                  Int?
   password               String
   role_id                Int
-  address                String
-  cv_file                String
-  academic_support_files String
-  id_file                String
-  profile_picture        String
-  work_lines             String
-  contact_person_name    String
-  contact_person_phone   String
-  contact_person_email   String
+  address                String?
+  cv_file                String?
+  academic_support_files String?
+  id_file                String?
+  profile_picture        String?
+  work_lines             String?
+  contact_person_name    String?
+  contact_person_phone   String?
+  contact_person_email   String?
   reports                Report[]
   role                   Role     @relation(fields: [role_id], references: [id])
 }
@@ -46,8 +46,8 @@ model Project {
 
 model Report {
   id               Int                @id @default(autoincrement())
-  project_id       Int?
-  user_id          Int?
+  project_id       Int
+  user_id          Int
   status           Float?
   summary          String?
   annexes          Annex[]

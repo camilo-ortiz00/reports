@@ -1,50 +1,39 @@
-'use client'
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTable, Column, HeaderGroup, Row } from 'react-table';
-import styles from './annex.module.css';
+import styles from '../reports.module.css';
 
-interface Data {
-  numero: string;
-  descripcion: string;
+interface AnnexTableData {
+  id?: number;
+  report_id: number;
+  description: string;
   url: string;
 }
 
-const data: Data[] = [
-  {
-    numero: '1',
-    descripcion: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    url: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-  },
-];
+interface AnnexTableProps {
+  annexes: AnnexTableData[];
+}
 
-const columns: Column<Data>[] = [
-  {
-    Header: 'N°',
-    accessor: 'numero' as const,
-  },
-  {
-    Header: 'DESCRIPCIÓN',
-    accessor: 'descripcion' as const,
-  },
-  {
-    Header: 'URL',
-    accessor: 'url' as const,
-  },
-];
+const AnnexTable: React.FC<AnnexTableProps> = ({ annexes }) => {
+  const columns: Column<AnnexTableData>[] = useMemo(() => [
+    { Header: 'N° Actividad', accessor: 'id' },
+    {Header: 'DESCRIPCIÓN', accessor: 'description'},
+    {Header: 'URL', accessor: 'url'},
+  ], []);
 
-const AnnexTable: React.FC = () => {
+  const data = useMemo(() => annexes, [annexes]);
+
   const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
     rows,
     prepareRow,
-  } = useTable<Data>({ columns, data });
+  } = useTable<AnnexTableData>({ columns, data });
 
   return (
     <table {...getTableProps()} className={styles.table}>
       <thead>
-        {headerGroups.map((headerGroup: HeaderGroup<Data>) => (
+        {headerGroups.map((headerGroup: HeaderGroup<AnnexTableData>) => (
           <tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id}>
             {headerGroup.headers.map(column => (
               <th {...column.getHeaderProps()} className={styles.th} key={column.id}>
@@ -55,10 +44,10 @@ const AnnexTable: React.FC = () => {
         ))}
       </thead>
       <tbody {...getTableBodyProps()}>
-        {rows.map((row: Row<Data>) => {
+        {rows.map((row: Row<AnnexTableData>) => {
           prepareRow(row);
           return (
-            <tr {...row.getRowProps()} key={row.id}>
+            <tr {...row.getRowProps()} key={row.original.id || row.index}>
               {row.cells.map(cell => (
                 <td {...cell.getCellProps()} className={styles.td} key={cell.column.id}>
                   {cell.render('Cell')}

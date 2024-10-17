@@ -4,20 +4,52 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --b1: rgb(255, 255, 255); /* Cambia a un color compatible */
+  --bc: rgb(0, 0, 0);
+  --foreground-rgb: 0, 0, 0; /* Negro */
+  --background-start-rgb: 214, 219, 220; /* Gris claro */
+  --background-end-rgb: 255, 255, 255; /* Blanco */
+  --table-bg: rgb(255, 255, 255); /* Fondo de las filas en tema claro */
+  --table-text-color: rgb(0, 0, 0); /* Texto de las filas en tema claro */
+  --header-bg: rgb(243, 244, 246); /* Fondo del encabezado en tema claro */
+  --header-text-color: rgb(55, 65, 81); /* Texto del encabezado en tema claro */
 }
 
-@media (prefers-color-scheme: light) {
+[data-theme] {
+  background-color: var(--fallback-b1, rgb(255, 255, 255));
+  color: var(--fallback-bc, rgb(0, 0, 0));
+}
+
+@media (prefers-color-scheme: dark) {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --b1: rgb(0, 0, 0); /* Cambia a un color compatible */
+    --bc: rgb(255, 255, 255);
+    --foreground-rgb: 255, 255, 255; /* Blanco */
+    --background-start-rgb: 0, 0, 0; /* Negro */
+    --background-end-rgb: 0, 0, 0; /* Negro */
+    --table-bg: rgb(31, 41, 55); /* Fondo de las filas en tema oscuro */
+    --table-text-color: rgb(249, 250, 251); /* Texto de las filas en tema oscuro */
+    --header-bg: rgb(55, 65, 81); /* Fondo del encabezado en tema oscuro */
+    --header-text-color: rgb(249, 250, 251); /* Texto del encabezado en tema oscuro */
   }
 }
 
 body {
-  background-color: var(--fallback-b1, oklch(var(--b1) / var(--tw-bg-opacity)));
+  background-color: var(--fallback-b1, rgb(var(--b1) / var(--tw-bg-opacity)));
+  scrollbar-color: rgb(0, 0, 0) rgb(200, 200, 200); /* Ejemplo de colores en RGB */
 }
 
+@media print {
+	:global(html), :global(body) {
+	  width: 100%;
+	  height: 100%;
+	  margin: 0;
+	  padding: 0;
+	}
+  
+	:global(#reportContainer) {
+	  width: 100%;
+	  margin-top: 0;
+	  padding-top: 0;
+	}
+}

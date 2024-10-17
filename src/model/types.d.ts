@@ -14,3 +14,4 @@ declare module 'next-auth' {
     id: string;  // Especificamos que el id es un string
   }
 }
+

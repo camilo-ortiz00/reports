@@ -1,49 +1,166 @@
 import TechnicalSynopsisTable from './tables/TechnicalSynopsisTable';
-import DeriverablesTable from "./tables/DeliverablesTable";
+import DeliverablesTable from "./tables/DeliverablesTable";
 import AnnexTable from "./tables/AnnexTable";
 import styles from "./reports.module.css";
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { AnnexData, DeliverableData, TechnicalSummaryData, FormData } from '@/model/reports.props';
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
 const Reports = () => {
+  const router = useRouter();
+  const { report } = router.query;
+
+  const [selectedReport, setSelectedReport] = useState<FormData | null>(null);
+
+  const [technicalSummary, setTechnicalSummary] = useState<TechnicalSummaryData[]>([]);
+  const [deliverables, setDeliverables] = useState<DeliverableData[]>([]);
+  const [annexes, setAnnexes] = useState<AnnexData[]>([]);
+
+  const fetchData = async () => {
+    const fetchPromises = [
+      fetch('/api/reports'),
+      fetch('/api/technical-summary'),
+      fetch('/api/deliverables'),
+      fetch('/api/annexes'),
+    ];
+  
+    try {
+      const responses = await Promise.all(fetchPromises);
+      const data = await Promise.all(responses.map(res => {
+        if (!res.ok) throw new Error('Error en la respuesta');
+        return res.json();
+      }));
+  
+      setTechnicalSummary(data[1]);
+      setDeliverables(data[2]);
+      setAnnexes(data[3]);
+    } catch (error) {
+      console.error('Error al obtener los datos:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (report) {
+      const newReport = JSON.parse(report as string);
+      if (!selectedReport || selectedReport.id !== newReport.id) {
+        setSelectedReport(newReport);
+      }
+    }
+  }, [report, selectedReport]);
+
+  useEffect(() => {
+    if (selectedReport) {
+      fetchData();
+    }
+  }, [selectedReport]);
+
+  const filteredTechnical = selectedReport ? 
+    technicalSummary.filter(tech => tech.report_id === selectedReport.id) : [];
+  const filteredDeliverable = selectedReport ? 
+    deliverables.filter(del => del.report_id === selectedReport.id) : [];
+  const filteredAnnex = selectedReport ? 
+    annexes.filter(ann => ann.report_id === selectedReport.id) : [];
+
+    const exportToPDF = async () => {
+      const element = document.getElementById('reportContainer');
+    
+      if (!element) {
+        console.error('Element not found');
+        return;
+      }
+
+      element.style.margin = '0';
+      element.style.padding = '0';
+
+      try {
+        const canvas = await html2canvas(element, {
+          useCORS: true,
+          scale: 2,
+          backgroundColor: '#ffffff',
+          scrollX: 0,
+          scrollY: -window.scrollY,
+          ignoreElements: function (el) {
+            return el.classList.contains('no-print'); 
+          },
+        });
+        
+        
+        const imgData = canvas.toDataURL('image/png');
+    
+        const pdf = new jsPDF();
+        const imgWidth = 190;
+        const pageHeight = pdf.internal.pageSize.height;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+    
+        let position = 0;
+    
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+    
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+    
+        pdf.save('report.pdf');
+      } catch (error) {
+        console.error('Error exporting to PDF:', error);
+      }finally{
+        element.style.margin = '';
+        element.style.padding = '';
+      }
+    };
+
   return (
-    <div className={styles.report_container}>
-      <div className={styles.header}>
-        <div className={styles.num_report}>
-          <h2>Número del informe</h2>
+    <div className={styles.container}>
+      <button 
+        onClick={exportToPDF}               
+        className="btn btn-accent ml-4"
+      >Exportar PDF
+      </button>
+      <div className={styles.report_container} id="reportContainer">
+        <div className={styles.header}>
+          <div className={styles.num_report}>
+            <h2>Número del informe: {selectedReport ? selectedReport.id : 'Sin informe seleccionado'}</h2>
+          </div>
+          <div className={styles.logo}></div>
         </div>
-        <div className={styles.logo}></div>
-      </div>
-      <div className={styles.names}>
-        <div className={styles.project_name}>
-          <h1>Nombre del proyecto</h1>
+        <div className={styles.names}>
+          <div className={styles.project_name}>
+            <h1>Proyecto: {selectedReport ? selectedReport.project?.name : 'Sin informe seleccionado'}</h1>
+          </div>
+          <div className={styles.user_name}>
+            <h1>{selectedReport ? selectedReport.user?.name : 'Sin informe seleccionado'}</h1>
+          </div>
         </div>
-        <div className={styles.user_name}>
-          <h1>Camilo Ortiz</h1>
+        <div className={styles.middle}>
+          <div className={styles.summary}>
+            <h2>Resumen</h2>
+            <p>{selectedReport ? selectedReport.summary : 'Sin resumen disponible'}</p>
+          </div>
+          <div className={styles.porcent}>
+            <h1>Porcentaje terminado</h1>
+            <p>{selectedReport ? `${selectedReport.status}%` : 'Sin información'}</p>
+          </div>
         </div>
-      </div>
-      <div className={styles.middle}>
-        <div className={styles.summary}>
-          <h2>Resumen</h2>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-          </p>
-        </div>
-        <div className={styles.porcent}>
-          <h1>Porcentaje terminado</h1>
-          <p>100%</p>
-        </div>
-      </div>
-      <div className={styles.tables}>
-        <div className={styles.table1}>
-          <h1>Sipnosis Tecnica</h1>
-          <TechnicalSynopsisTable />
-        </div>
-        <div className={styles.table2}>
-          <h1>Entregables</h1>
-          <DeriverablesTable />
-        </div>
-        <div className={styles.table3}>
-          <h1>Anexos</h1>
-          <AnnexTable />
+        <div className={styles.tables}>
+          <div className={styles.table1}>
+            <h1>Sipnosis Tecnica</h1>
+            <TechnicalSynopsisTable technical={filteredTechnical} />
+          </div> 
+          <div className={styles.table2}>
+            <h1>Entregables</h1>
+            <DeliverablesTable deliverables={filteredDeliverable} />
+          </div> 
+          <div className={styles.table3}>
+            <h1>Anexos</h1>
+            <AnnexTable annexes={filteredAnnex} />
+          </div> 
         </div>
       </div>
     </div>

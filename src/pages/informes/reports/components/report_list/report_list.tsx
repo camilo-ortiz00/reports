@@ -1,5 +1,5 @@
 // pages/reports/Page.tsx
-
+import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import TechnicalSummaryTable from '../Tables/TechnicalSummaryTable'
 import DeliverableTable from '../Tables/DeliverablesTable';
@@ -9,8 +9,9 @@ import DeliverableForm from '../Forms/DeliverableForm';
 import AnnexForm from '../Forms/AnnexForm';
 import ModalComponent from '@/components/Modal';
 import styles from "./report_list.module.css";
-import { AnnexData, DeliverableData, FormData, TechnicalSummaryData } from '../../model/reports.props';
+import { AnnexData, DeliverableData, FormData, TechnicalSummaryData } from '../../../../../model/reports.props';
 import AlertComponent from '@/components/Alert';
+import SummaryAlert from '@/components/AlertSummary';
 import ModalDeleteComponent from '@/components/ModalEliminacion';
 
 const Page = () => {
@@ -25,6 +26,8 @@ const Page = () => {
   const [selectedReportAnnex, setSelectedReportAnnex] = useState<AnnexData | null>(null);
   const [alertType, setAlertType] = useState<'error' | 'success' | 'info' | 'warning'>('success');
   const [showAlert, setShowAlert] = useState(false);
+  const [showSummaryAlert, setShowSummaryAlert] = useState(false);
+  const [summaryAlertMessage, setSummaryAlertMessage] = useState(''); 
   const [alertMessage, setAlertMessage] = useState('');
   const [showModalTechnical, setShowModalTechnical] = useState(false);
   const [showModalDeliverable, setShowModalDeliverable] = useState(false);
@@ -34,7 +37,8 @@ const Page = () => {
   const [isCreatingNewReport, setIsCreatingNewReport] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: number; type: string } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
+  const [refresh, setRefresh] = useState(0);  
+  const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
 
   const fetchData = async () => {
     const fetchPromises = [
@@ -78,12 +82,12 @@ const Page = () => {
     }
   }, [selectedReport, technicalSummary, deliverables, annexes]);
   
-  
  //resumen
-const handleEditClick = () => {
+ const handleEditClick = () => {
   if (isEditing && selectedReport) {
     if (!summaryText) {
       setAlertMessage('El resumen no puede estar vacío.');
+      setShowAlert(true);
       return;
     }
 
@@ -96,10 +100,14 @@ const handleEditClick = () => {
     setReports(updatedReports);
     setSelectedReport(updatedReport);
     setFilteredReports(updatedReports);
+  } else {
+    setSummaryAlertMessage('Deslizar hacia abajo si el texto del resumen es muy grande o no se aprecia completamente');
+    setShowSummaryAlert(true);
   }
 
   setIsEditing(!isEditing);
 };
+
 
 const updateReportSummary = async (updatedReport: FormData) => {
   try {
@@ -134,14 +142,14 @@ const updateReportSummary = async (updatedReport: FormData) => {
 };
 
 //select
-const handleDropdownSelect = (reportId: number) => {
-  if (!isEditing) {
+const handleCheckboxChange = (reportId: number) => {
+  if (selectedReportId === reportId) {
+    setSelectedReportId(null); 
+    setSelectedReport(null);
+  } else {
+    setSelectedReportId(reportId); 
     const report = reports.find(report => report.id === reportId);
     setSelectedReport(report || null);
-    setSummaryText(report?.summary || '');
-    setSelectedReportTechnical(null);
-    setSelectedReportDeliverable(null);
-    setSelectedReportAnnex(null);
   }
 };
 
@@ -175,7 +183,7 @@ const handleDropdownSelect = (reportId: number) => {
 };
 
 const handleButtonClick = (type: 'technical' | 'deliverable' | 'annex') => (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault(); // Prevenir comportamiento por defecto si es necesario
+    event.preventDefault(); 
     handleOpenModal(type);
 };
   
@@ -188,24 +196,26 @@ const handleButtonClick = (type: 'technical' | 'deliverable' | 'annex') => (even
 
   const handleDeleteClick = (id: number, type: string) => {
     setItemToDelete({ id, type });
-    setShowDeleteModal(true); // Muestra el modal de confirmación
+    setShowDeleteModal(true); 
   };
   
   const confirmDelete = async () => {
-    if (itemToDelete) { // Verifica que itemToDelete no sea null
+    if (itemToDelete) { 
       const { id, type } = itemToDelete;
       
       try {
         if (type === 'annex') {
-          await handleDeleteAnnex(id); // Llama a la función para eliminar el anexo
+          await handleDeleteAnnex(id);
         } else if (type === 'deliverable') {
-          await handleDeleteDeliverable(id); // Llama a la función para eliminar el entregable
+          await handleDeleteDeliverable(id);
+        }else if (type === 'report') {
+          await handleDeleteReport(id);
         } else if (type === 'activity') {
-          await handleDeleteTechnicalSummary(id); // Llama a la función para eliminar la actividad
+          await handleDeleteTechnicalSummary(id); 
         }
   
-        setShowDeleteModal(false); // Cierra el modal después de la eliminación
-        setItemToDelete(null); // Resetea el estado
+        setShowDeleteModal(false); 
+        setItemToDelete(null); 
         setAlertMessage(`${type.charAt(0).toUpperCase() + type.slice(1)} eliminado con éxito`);
         setAlertType('success');
         setShowAlert(true);
@@ -224,9 +234,11 @@ const handleCreateReport = async () => {
   const formData = {
     summary: "Resumen del informe",
     project_id: 1,  // ID del proyecto que deseas usar
-    user_id: 1,     // ID del usuario que deseas usar
+    user_id: 1002324366,     // ID del usuario que deseas usar
     status: 0,      // Estado inicial, por ejemplo
   };
+
+  console.log("Form data enviado:", formData);
 
   try {
     
@@ -248,7 +260,7 @@ const handleCreateReport = async () => {
     // Agregar el nuevo informe al estado
     setReports((prevReports) => [...prevReports, data]);
     setFilteredReports((prevReports) => [...prevReports, data]);
-
+    setSelectedReportId(data.id); 
     setSelectedReport(data);
     setSummaryText(data.summary || '');
 
@@ -304,6 +316,8 @@ const handleCreateTechnicalSummary = async (technical: TechnicalSummaryData) => 
       setTechnicalSummary((prevTechnicalSummaries) => [...prevTechnicalSummaries, data]);
       setAlertMessage('Resumen técnico creado con éxito');
     }
+    setRefresh((prev) => prev + 1);
+    setShowModalTechnical(false)
     setAlertType('success');
     setShowAlert(true);
   } catch (error) {
@@ -352,18 +366,19 @@ const handleCreateDeliverable = async (deliverables: DeliverableData) => {
       setDeliverables((prevDeliverables) => [...prevDeliverables, data]);
       setAlertMessage('Entregable creado con éxito');
     }
+    setRefresh((prev) => prev + 1);
+    setShowModalDeliverable(false)
     setAlertType('success');
     setShowAlert(true);
   } catch (error) {
     console.error('Error:', error);
-    setAlertMessage('Error al crear/actualizar el entregableo');
+    setAlertMessage('Error al crear/actualizar el entregable');
     setAlertType('warning');
     setShowAlert(true);
   }
 };  
 
 const handleCreateAnnex = async (annexes: AnnexData) => {
-  debugger;
   console.log('Datos a enviar:', annexes);
   const { report_id, id, description, url } = annexes;
 
@@ -407,8 +422,11 @@ const handleCreateAnnex = async (annexes: AnnexData) => {
       setAnnexes((prevAnnexes) => [...prevAnnexes, data]);
       setAlertMessage('Anexo creado con éxito');
     }
+    setRefresh((prev) => prev + 1);
+    setShowModalAnnex(false)
     setAlertType('success');
     setShowAlert(true);
+    handleRowDeselected(); 
   } catch (error) {
     console.error('Error:', error);
     setAlertMessage('Error al crear/actualizar el anexo');
@@ -458,27 +476,52 @@ const handleDeleteDeliverable = async (id: number) => {
 };
 
 const handleDeleteAnnex = async (id: number) => {
-  console.log('ID del anexo a eliminar:', id);
-
   try {
-    debugger;
-    const response = await fetch(`/api/annexes/${id}`, {
+    const response = await fetch(`/api/annexes?id=${id}`, {
       method: 'DELETE',
     });
-    if (!response.ok) {
-      const errorResponse = await response.json();
-      console.error('Error al eliminar el anexo:', errorResponse);
-      throw new Error('Error al eliminar el anexo');
-    }
 
-    console.log('Anexo eliminado correctamente');
-    // Actualiza el estado para eliminar el anexo en el frontend
-    setAnnexes(prevAnnexes => prevAnnexes.filter(annex => annex.id !== id));
+    if (!response.ok) throw new Error('Error al eliminar el anexo');
+
+    setAnnexes(prev => prev.filter(annexes => annexes.id !== id));
+    setAlertMessage('Anexo eliminado con éxito');
+    setAlertType('success');
+    setShowAlert(true);
   } catch (error) {
-    console.error('Error en la eliminación:', error);
+    console.error('Error:', error);
+    setAlertMessage('Error al eliminar el Anexo');
+    setAlertType('error');
+    setShowAlert(true);
   }
 };
 
+const handleDeleteReport = async (id: number) => {
+  if (!selectedReport) return;
+
+  try {
+    const response = await fetch(`/api/reports?id=${selectedReport.id}`, {
+      method: 'DELETE',
+    });
+
+    if (response.ok) {
+      setReports((prevReports) =>
+        prevReports.filter((report) => report.id !== selectedReport.id)
+      );
+      setAlertMessage('Informe eliminado con éxito');
+      setSelectedReport(null);  // Desseleccionar el informe
+    } else {
+      setAlertMessage('Error al eliminar el informe');
+    }
+
+    setAlertType('success');
+    setShowAlert(true);
+  } catch (error) {
+    console.error('Error al eliminar el informe:', error);
+    setAlertMessage('Hubo un error al eliminar el informe');
+    setAlertType('warning');
+    setShowAlert(true);
+  }
+};
 
 
 const technicalInitialData = selectedReportTechnical || {
@@ -534,94 +577,160 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
   return (
     <div className={styles.report_listContainer}>
       <div className={styles.header}>
-        <div className={`${styles.ReportAction}`}>
-          <div className="flex justify-between items-center mb-4">
-          <select onChange={(e) => handleDropdownSelect(Number(e.target.value))}>
-            <option value="">Seleccionar Informe</option>
-            {reports.map(report => (
-              <option key={report.id} value={report.id}>
-                  {report.id} - {report.project ? report.project.name : ''}
-                  </option>       
-                 ))}
-          </select>
+      <div className={`${styles.ReportAction} flex justify-between items-center mb-4`}>
+        <div className={`dropdown ${isEditing ? 'disabled' : ''}`}>
+          <div 
+            tabIndex={0} 
+            role="button" 
+            className={`btn m-1 ${isEditing ? 'cursor-not-allowed opacity-50' : ''}`}
+            onClick={isEditing ? undefined : undefined} // Agregar lógica aquí si quieres prevenir la acción de clic
+          >
+            {selectedReport ? `Informe: ${selectedReport.id} - ${selectedReport.project ? selectedReport.project.name : ''}` : 'Seleccionar Informe'}
           </div>
-          <div className='mt-4 px-4 py-2 ml-4 bg-green-500 text-white rounded hover:bg-green-700'>
-            <button onClick={handleCreateReport}>Crear nuevo informe</button>
-          </div>
+
+          <ul 
+            tabIndex={0} 
+            className={`dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow ${isEditing ? 'hidden' : ''}`}
+          >
+            {reports.map((report) => (
+            <li key={report.id}>
+              <label className="cursor-pointer flex items-center">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-success w-6 h-6"
+                checked={selectedReportId === report.id}
+                onChange={() => {
+                  if (report.id !== undefined) {
+                    handleCheckboxChange(report.id); 
+                  }
+                }}                
+              />
+              <span className="ml-2">{report.id} - {report.project ? report.project.name : ''}</span>
+              </label>
+            </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className='mt-4'>
+          <button 
+            onClick={() => {
+              if (selectedReport) {
+                setSelectedReport(null);
+              }
+              handleCreateReport();
+            }} 
+            className={`bg-green-500 hover:bg-green-700 px-4 py-2 rounded text-white ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isEditing} // Deshabilitar el botón de crear
+          >
+            Crear nuevo informe
+          </button>
+          {selectedReport && (
+            <>
+            <button
+              onClick={() => handleDeleteClick(selectedReport.id!, 'report')}
+              className={`ml-4 bg-red-500 hover:bg-red-700 px-4 py-2 rounded text-white ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isEditing} 
+            >
+              Eliminar informe
+            </button>
+            <button
+              className={`ml-4 bg-yellow-500 hover:bg-yellow-700 px-4 py-2 rounded text-white ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isEditing}
+              onClick={() => {
+                const url = `http://localhost:3000/informes/reports/components/reports/reports?report=${encodeURIComponent(JSON.stringify(selectedReport))}`;
+                window.open(url, '_blank'); // Abre en una nueva pestaña
+              }}
+            >
+              Generar informe
+            </button>
+            </>
+          )}
         </div>
       </div>
-      {(selectedReport || isCreatingNewReport) && (
-        <div>
-      <div className={styles.summary}>
-        <div className='mb-4'>
-          <label htmlFor="summary"><strong>Resumen</strong></label>
-          <button
-            onClick={handleEditClick}
-            className={`${styles.SummaryButton} mt-4 px-4 py-2 ml-4 bg-blue-500 text-white rounded hover:bg-blue-700`}
-          >
-            {isEditing ? 'Guardar' : 'Editar Resumen'}
-          </button>
-          {isEditing && (
+      </div>
+          {(selectedReport || isCreatingNewReport) && (
+          <div className='body'>
+          <div className={styles.summary}>
+          <div className='mb-4'>
+            <label htmlFor="summary"><strong>Resumen</strong></label>
+            <button
+              onClick={handleEditClick}
+              className="mt-4 px-4 py-2 ml-4 bg-blue-500 text-white rounded hover:bg-blue-700"
+            >
+              {isEditing ? 'Guardar' : 'Editar Resumen'}
+            </button>
+            {isEditing && (
             <button
               onClick={() => {
                 setIsEditing(false); 
                 setSummaryText(selectedReport?.summary || '');
               }}
-              className={`${styles.SummaryButton} mt-4 px-4 py-2 ml-1 bg-red-700 text-white rounded hover:bg-red-800`}
+              className="mt-4 px-4 py-2 ml-1 bg-red-700 text-white rounded hover:bg-red-800"
             >
               Cancelar
             </button>
+            )}
+          </div>
+
+          {isEditing ? (
+            <>
+            <textarea
+              value={summaryText || ''}
+              onChange={(e) => setSummaryText(e.target.value)}
+              className="textarea w-full mt-2 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+            ></textarea>
+            <SummaryAlert 
+              showAlert={showSummaryAlert} 
+              alertMessage={summaryAlertMessage} 
+              onClose={() => setShowSummaryAlert(false)} 
+            />
+            </>
+          ) : (
+            <p className="w-full break-words">{selectedReport?.summary || 'No hay resumen disponible'}</p>
           )}
         </div>
-        {isEditing ? (
-          <textarea
-            value={summaryText || ''}
-            onChange={(e) => setSummaryText(e.target.value)}
-            style={{ width: '800px' }}
-            className="mt-2 px-2 py-1 border rounded"
-          ></textarea>
-        ) : (
-          <p>{selectedReport?.summary !== undefined && selectedReport?.summary !== null ? selectedReport.summary : 'No hay resumen disponible'}</p>
-        )}
-      </div>
-      <div className={styles.table}>
-        <div>
-        <div className={styles.SwitchButton}>
+
+        <div className={styles.table}>
+        <div className='technical'>
+          <div className={styles.SwitchButton}>
             <button
               onClick={handleButtonClick('technical')}
               className={`${styles.createButton} mt-4 px-4 py-2 ml-16 bg-blue-500 text-white rounded hover:bg-blue-700`}
             >
-              {selectedReportTechnical ? 'Editar Actividad' : 'Crear Nueva Actividad'}
+            {selectedReportTechnical ? 'Editar Actividad' : 'Crear Nueva Actividad'}
             </button>
             {selectedReportTechnical && (
             <button
-            onClick={() => handleDeleteClick(selectedReportTechnical.id!, 'activity')}
-            className={`${styles.deleteButton} mt-4 px-4 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700`}
-          >
-            Eliminar Actividad
-          </button>
-        )}
-          <ModalComponent
-            show={showModalTechnical}
-            title={selectedReportTechnical ? 'Editar Actividad Técnica' : 'Crear Actividad Técnica'}
-            closeModal={handleCloseModal}
-          >
-          <TechnicalForm
-            handleCreateTechnicalSummary={handleCreateTechnicalSummary}
-            initialData={technicalInitialData}
-            handleClose={handleCloseModal}
-            selectedReport={reportSelection}
-            />
-          </ModalComponent>
+              onClick={() => handleDeleteClick(selectedReportTechnical.id!, 'activity')}
+              className={`${styles.deleteButton} mt-4 px-4 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700`}
+            >
+              Eliminar Actividad
+            </button>
+            )}
+            <ModalComponent
+              show={showModalTechnical}
+              title={selectedReportTechnical ? 'Editar Actividad Técnica' : 'Crear Actividad Técnica'}
+              closeModal={handleCloseModal}
+            >
+            <TechnicalForm
+              handleCreateTechnicalSummary={handleCreateTechnicalSummary}
+              initialData={selectedReportTechnical || undefined}
+              handleClose={handleCloseModal}
+              selectedReport={reportSelection}
+              />
+            </ModalComponent>
+          </div>
+          <TechnicalSummaryTable
+            technical={technicalSummary.filter(tech => tech.report_id === selectedReport?.id)}
+            onActivityRowSelected={handleTechnicalRowSelected}
+            onRowDeselected={handleRowDeselected}
+            onSearch={handleSearch}
+            key={refresh}
+          />
         </div>
-        <TechnicalSummaryTable
-          technical={technicalSummary.filter(tech => tech.report_id === selectedReport?.id)}
-          onActivityRowSelected={handleTechnicalRowSelected}
-          onRowDeselected={handleRowDeselected}
-          onSearch={handleSearch}
-        />
-        </div>
-        <div>
+
+        <div className='deliverables'>
           <div className={styles.SwitchButton}>
             <button
               onClick={handleButtonClick('deliverable')}
@@ -630,89 +739,94 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
               {selectedReportDeliverable ? 'Editar Entregable' : 'Crear Nuevo Entregable'}
             </button>
             {selectedReportDeliverable && (
-              <button
+            <button
               onClick={() => handleDeleteClick(selectedReportDeliverable.id!, 'deliverable')}
               className={`${styles.deleteButton} mt-4 px-4 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700`}
             >
               Eliminar Entregable
             </button>
-          )}
+            )}
             <ModalComponent
               show={showModalDeliverable}
               title={selectedReportDeliverable ? 'Editar Entregable' : 'Crear Nuevo Entregable'}
               closeModal={handleCloseModal}
             >
-              <DeliverableForm
-                handleCreateDeliverable={handleCreateDeliverable}
-                initialData={deliverableInitialData}
-                handleClose={handleCloseModal}
-                selectedReport={reportSelection}
-              />
+            <DeliverableForm
+              handleCreateDeliverable={handleCreateDeliverable}
+              initialData={selectedReportDeliverable || undefined}
+              handleClose={handleCloseModal}
+              selectedReport={reportSelection}
+            />
             </ModalComponent>
           </div>
-          <DeliverableTable
-            deliverables={deliverables.filter(del => del.report_id === selectedReport?.id)}
-            onRowSelected={handleDeliverableRowSelected}
-            onRowDeselected={handleRowDeselected}
-            onSearch={handleSearch}
-          />
+            <DeliverableTable
+              deliverables={deliverables.filter(del => del.report_id === selectedReport?.id)}
+              onRowSelected={handleDeliverableRowSelected}
+              onRowDeselected={handleRowDeselected}
+              onSearch={handleSearch}
+              key={refresh}
+            />
         </div>
-        <div>
+
+        <div className='annexes'>
           <div className={styles.SwitchButton}>
             <button
               onClick={handleButtonClick('annex')}
               className={`${styles.createButton} mt-4 px-4 py-2 ml-16 bg-blue-500 text-white rounded hover:bg-blue-700`}
             >
-              {selectedReportAnnex ? 'Editar Anexo' : 'Crear Nuevo Anexo'}
-              </button>
-              {selectedReportAnnex && (
-                  <button
-                    onClick={() => handleDeleteClick(selectedReportAnnex.id!, 'annex')}
-                    className={`${styles.deleteButton} mt-4 px-4 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700`}
-                  >
-                    Eliminar Anexo
-                  </button>
-                )}
-                {showDeleteModal && (
-                  <ModalDeleteComponent
-                    show={true}
-                    title="Confirmar eliminación"
-                    closeModal={() => setShowDeleteModal(false)}
-                    onConfirm={confirmDelete}
-                  >
-                    <p>
-                      ¿Estás seguro de que deseas eliminar esta {itemToDelete?.type === 'annex' ? 'anexo' : itemToDelete?.type === 'deliverable' ? 'entregable' : 'actividad'}?
-                    </p>
-                  </ModalDeleteComponent>
-                )}
+            {selectedReportAnnex ? 'Editar Anexo' : 'Crear Nuevo Anexo'}
+            </button>
+            {selectedReportAnnex && (
+            <button
+              onClick={() => handleDeleteClick(selectedReportAnnex.id!, 'annex')}
+              className={`${styles.deleteButton} mt-4 px-4 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700`}
+            >
+              Eliminar Anexo
+            </button>
+            )}
             <ModalComponent
               show={showModalAnnex}
               title={selectedReportAnnex ? 'Editar Anexo' : 'Crear Nuevo Anexo'}
               closeModal={handleCloseModal}
             >
-              <AnnexForm
-                handleCreateAnnex={handleCreateAnnex}
-                initialData={annexInitialData}
-                handleClose={handleCloseModal}
-                selectedReport={reportSelection}
-              />
+            <AnnexForm
+              handleCreateAnnex={handleCreateAnnex}
+              initialData={selectedReportAnnex || undefined}
+              handleClose={handleCloseModal}
+              selectedReport={reportSelection}
+            />
             </ModalComponent>
           </div>
-          <AnnexesTable
-            annexes={annexes.filter(ann => ann.report_id === selectedReport?.id)}
-            onRowSelected={handleAnnexRowSelected}
-            onRowDeselected={handleRowDeselected}
-            onSearch={handleSearch}
-          />
+            <AnnexesTable
+              annexes={annexes.filter(ann => ann.report_id === selectedReport?.id)}
+              onRowSelected={handleAnnexRowSelected}
+              onRowDeselected={handleRowDeselected}
+              onSearch={handleSearch}
+              key={refresh}
+            />
         </div>
+
+        {showDeleteModal && (
+          <ModalDeleteComponent
+            show={true}
+            title="Confirmar eliminación"
+            closeModal={() => setShowDeleteModal(false)}
+            onConfirm={confirmDelete}
+          >
+            <p>
+              ¿Estás seguro de que deseas eliminar {itemToDelete?.type === 'annex' ? 'este anexo' : itemToDelete?.type === 'deliverable' ? 'este entregable': itemToDelete?.type === 'activity' ? 'esta actividad' : 'este informe'}?
+            </p>
+          </ModalDeleteComponent>
+        )}
       </div>
-      </div>)}
-      <AlertComponent
-        show={showAlert}
-        type={alertType}
-        message={alertMessage}
-        onClose={() => setShowAlert(false)}
-        />
+      </div>
+    )}
+    <AlertComponent
+      show={showAlert}
+      type={alertType}
+      message={alertMessage}
+      onClose={() => setShowAlert(false)}
+      />
     </div>
   );
 };

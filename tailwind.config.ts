@@ -9,6 +9,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        primary: '#ff5733', // color en formato hexadecimal o compatible
+        secondary: 'rgb(255, 87, 51)', // color en formato RGB
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":

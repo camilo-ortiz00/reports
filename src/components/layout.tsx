@@ -1,21 +1,17 @@
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/router';
 import Navbar from './Navbar';
-import { useSession } from 'next-auth/react'; // Usando NextAuth.js para autenticación
+import { useSession } from 'next-auth/react'; 
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { data: session, status } = useSession(); // Obtener el estado de la sesión
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login/login'); // Redirigir si el usuario no está autenticado
-    }
-  }, [status, router]);
+  const { data: session, status } = useSession(); 
 
   if (status === 'loading') {
-    return <p>Loading...</p>; // Mostrar mensaje de carga mientras se verifica la sesión
-  }
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <h1>Cargando...</h1>
+        <span className="loading loading-infinity loading-lg"></span>
+      </div>
+    );
+  };
 
   return (
     <div>

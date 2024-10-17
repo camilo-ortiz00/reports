@@ -11,7 +11,7 @@ const Page = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
-      <h1>Redirecting...</h1>
+      <h1>Redirecionando...</h1>
       <span className="loading loading-ring loading-lg"></span>
     </div>
   );

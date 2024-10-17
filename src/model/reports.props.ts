@@ -1,6 +1,7 @@
 // models/reports.props.ts
 
 export interface FormData {
+  status: GLfloat;
   id?: number;
   summary: string;
   technicalSummary: TechnicalSummaryData[]; // Usando la interfaz TechnicalSummary

@@ -1,62 +1,44 @@
-'use client'
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTable, Column, HeaderGroup, Row } from 'react-table';
-import styles from './deliverables.module.css';
+import styles from '../reports.module.css';
 
-interface Data {
-  numero: string;
-  entregable: string;
-  fecha: string;
-  cambios_aprovados: string;
-  plan_contingencia: string
+interface DeliverablesTableData {
+  id?: number;
+  report_id: number;
+  description: string;
+  date: string;
+  approved_changes: string;
+  contingency_plan: string;
 }
 
-const data: Data[] = [
-  {
-    numero: '1',
-    entregable: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    fecha: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    cambios_aprovados: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    plan_contingencia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-  },
-];
+interface DeliverablesTableProps {
+  deliverables: DeliverablesTableData[];
+}
 
-const columns: Column<Data>[] = [
-  {
-    Header: 'N°',
-    accessor: 'numero' as const,
-  },
-  {
-    Header: 'ENTREGABLE',
-    accessor: 'entregable' as const,
-  },
-  {
-    Header: 'FECHA DE EJECUCIÓN',
-    accessor: 'fecha' as const,
-  },
-  {
-    Header: 'CAMBIOS APROVADOS POR SUPERVISOR',
-    accessor: 'cambios_aprovados' as const,
-  },
-  {
-    Header: 'PLAN DE CONTIGENCIA',
-    accessor: 'plan_contingencia' as const,
-  },
-];
 
-const DeriverablesTable: React.FC = () => {
-  const {
+const DeliverableTable: React.FC<DeliverablesTableProps> = ({ deliverables }) => {
+  const columns: Column<DeliverablesTableData>[] = useMemo(() => [
+  {  Header: 'N°', accessor: 'id'},
+  {Header: 'ENTREGABLE', accessor: 'description'},
+  {Header: 'FECHA DE EJECUCIÓN', accessor: 'date'},
+  {Header: 'CAMBIOS APROVADOS POR SUPERVISOR',accessor: 'approved_changes'},
+  {Header: 'PLAN DE CONTIGENCIA', accessor: 'contingency_plan'},
+], []);
+
+const data = useMemo(() => deliverables, [deliverables]);
+
+const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
     rows,
     prepareRow,
-  } = useTable<Data>({ columns, data });
+  } = useTable<DeliverablesTableData>({ columns, data });
 
   return (
     <table {...getTableProps()} className={styles.table}>
       <thead>
-        {headerGroups.map((headerGroup: HeaderGroup<Data>) => (
+        {headerGroups.map((headerGroup: HeaderGroup<DeliverablesTableData>) => (
           <tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id}>
             {headerGroup.headers.map(column => (
               <th {...column.getHeaderProps()} className={styles.th} key={column.id}>
@@ -67,10 +49,10 @@ const DeriverablesTable: React.FC = () => {
         ))}
       </thead>
       <tbody {...getTableBodyProps()}>
-        {rows.map((row: Row<Data>) => {
+        {rows.map((row: Row<DeliverablesTableData>) => {
           prepareRow(row);
           return (
-            <tr {...row.getRowProps()} key={row.id}>
+            <tr {...row.getRowProps()} key={row.original.id || row.index}>
               {row.cells.map(cell => (
                 <td {...cell.getCellProps()} className={styles.td} key={cell.column.id}>
                   {cell.render('Cell')}
@@ -84,4 +66,4 @@ const DeriverablesTable: React.FC = () => {
   );
 };
 
-export default DeriverablesTable;
+export default DeliverableTable;

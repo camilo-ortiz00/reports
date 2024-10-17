@@ -1,6 +1,6 @@
 import React from 'react';
 import DataTable from 'react-data-table-component';
-import { AnnexData } from '../../model/reports.props';
+import { AnnexData } from '../../../../../model/reports.props';
 
 interface AnnexesFormProps {
   annexes: AnnexData[];
@@ -28,20 +28,16 @@ const annexesesTable: React.FC<AnnexesFormProps> = ({ annexes, onRowSelected, on
     },
   ];
 
-  const handleRowSelected = async (report: AnnexData) => {
-    onRowSelected(report);
-        
-    await fetch('/api/annexes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(report),
-      });
+  const handleRowSelected = (state: any) => {
+    if (state.selectedRows.length > 0) {
+      onRowSelected(state.selectedRows[0]);
+    } else {
+      onRowDeselected();
+    }
   };
 
   return (
-    <div>
+    <div className="overflow-x-auto">
       <DataTable
         columns={columns}
         data={annexes}
@@ -50,23 +46,22 @@ const annexesesTable: React.FC<AnnexesFormProps> = ({ annexes, onRowSelected, on
         striped
         responsive
         selectableRows
-        onSelectedRowsChange={({ selectedRows }) => {
-          if (selectedRows.length > 0) {
-            handleRowSelected(selectedRows[0]);
-          } else {
-            onRowDeselected();
-          }
-        }}
+        onSelectedRowsChange={handleRowSelected}
         subHeader
-        subHeaderComponent={
-          <div></div>
-         /* <input
-            type="text"
-            placeholder="Buscar"
-            className="w-full p-2 border border-gray-300 rounded"
-            onChange={(e) => onSearch(e.target.value)}
-          />*/
-        }
+        customStyles={{
+          rows: {
+            style: {
+              backgroundColor: 'white', // Cambia el color de fondo de las filas
+            },
+          },
+          headCells: {
+            style: {
+              backgroundColor: '#f3f4f6', // Cambia el color del encabezado
+              color: '#374151', // Cambia el color del texto del encabezado
+              fontWeight: 'bold', // Negrita
+            },
+          },
+        }}
       />
     </div>
   );

@@ -1,9 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient();
+import  prisma  from '../../../../lib/prisma'; 
 
 export default NextAuth({
   providers: [
@@ -14,48 +11,48 @@ export default NextAuth({
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        console.log('Credenciales recibidas:', credentials); // Log para verificar las credenciales
-        
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Por favor, ingresa tanto el email como la contraseña');
+        }
+
+        // Busca al usuario en la base de datos usando el email
         const user = await prisma.user.findUnique({
-          where: { email: credentials?.email },
+          where: { email: credentials.email },
         });
-      
+
         if (!user) {
           console.error('Usuario no encontrado');
-          return null; // No existe el usuario
+          throw new Error('Usuario no encontrado');
         }
-      
-        // Si la contraseña está en texto claro:
-        if (credentials?.password !== user.password) {
+
+        // Compara la contraseña ingresada con la contraseña almacenada (en texto claro)
+        if (credentials.password !== user.password) {
           console.error('Contraseña incorrecta');
-          return null; // La contraseña no coincide
+          throw new Error('Contraseña incorrecta');
         }
-      
-        // Si las credenciales son correctas
-        console.log('Autenticación exitosa para:', user); // Log para verificar el usuario autenticado
+
+        console.log('Autenticación exitosa para:', user);
         return { id: String(user.id), name: user.name, email: user.email };
       },
-      
     }),
   ],
   pages: {
-    signIn: '/auth/signin',
+    signIn: '/auth/login',
   },
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: 'jwt',
+    maxAge: 24 * 60 * 60,
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        // Asegurarse de que el id sea un string
         token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        // Asegurarse de que session.user no sea undefined
         session.user.id = token.id as string;
       }
       return session;

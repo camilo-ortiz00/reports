@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { AnnexData } from '../../model/reports.props';
+import { AnnexData } from '../../../../../model/reports.props';
 import styles from '../report_list/report_list.module.css';
 
 interface AnnexFormProps {
@@ -43,13 +43,13 @@ const AnnexForm: FC<AnnexFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-      <div className={styles.container}>
+      <div className={styles.containerAnnex}>
 
-          <div className="col-auto">
-            <label htmlFor="description_annex" className="floatingInput">Descripción del anexo</label>
+          <div className={styles.col}>
+            <label htmlFor="description_annex" className="floatingInput font-bold">Descripción del anexo</label>
             <input
               id="description_annex"
-              className="form-control input input-bordered input-sm w-full max-w-xs"
+              className={`${styles.formControl} input input-bordered input-md`}
               type="text"
               {...register('description' as const,
               )}
@@ -58,11 +58,11 @@ const AnnexForm: FC<AnnexFormProps> = ({
             <p className="form_error">{errors.description.message}</p>}
           </div>
 
-          <div className="col-auto">
-            <label htmlFor="url" className="floatingInput">URL del anexo</label>
+          <div className={styles.col}>
+            <label htmlFor="url" className="floatingInput font-bold">URL del anexo</label>
             <input
               id="url"
-              className="form-control input input-bordered input-sm w-full max-w-xs"
+              className={`${styles.formControl} input input-bordered input-md`}
               type="text"
               {...register('url' as const,
               )}

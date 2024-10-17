@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { TechnicalSummaryData } from '../../model/reports.props';
+import { TechnicalSummaryData } from '../../../../../model/reports.props';
 import styles from '../report_list/report_list.module.css';
 
 interface TechnicalFormProps {
@@ -47,38 +47,37 @@ const TechnicalForm: FC<TechnicalFormProps> = ({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <div className={styles.container}>
-        <div className={styles.left}>
-          <div className="col-auto">
-            <label htmlFor="support_annex">Soporte del anexo</label>
+        <div className={styles.col}>
+        <label htmlFor="support_annex" className='font-bold'>Soporte del anexo</label>
             <input
               id="support_annex"
-              className="form-control input input-bordered input-sm w-full max-w-xs"
+              className={`${styles.formControl} input input-bordered input-md`}
               type="text"
-              {...register('support_annex', { required: 'Soporte del anexo es requerido' })}
+              {...register('support_annex', /*{ required: 'Soporte del anexo es requerido' }*/)}
             />
             {errors.support_annex && (
               <p className="form_error">{errors.support_annex.message}</p>
             )}
           </div>
 
-          <div className="col-auto">
-            <label htmlFor="obtained_result">Resultado obtenido</label>
+          <div className={styles.col}>
+            <label htmlFor="obtained_result" className='font-bold'>Resultado obtenido</label>
             <input
               id="obtained_result"
-              className="form-control input input-bordered input-sm w-full max-w-xs"
+              className={`${styles.formControl} input input-bordered input-md`}
               type="text"
-              {...register('obtained_result', { required: 'Resultado obtenido es requerido' })}
+              {...register('obtained_result', /*{ required: 'Resultado obtenido es requerido' }*/)}
             />
             {errors.obtained_result && (
               <p className="form_error">{errors.obtained_result.message}</p>
             )}
           </div>
 
-          <div className="col-auto">
-            <label htmlFor="product_description" className="floatingInput">Producto/Descripción</label>
+          <div className={styles.col}>
+            <label htmlFor="product_description" className="floatingInput font-bold">Producto/Descripción</label>
             <input
               id="product_description"
-              className="form-control input input-bordered input-sm w-full max-w-xs"
+              className={`${styles.formControl} input input-bordered input-md`}
               type="text"
               {...register('product_description')}
             />
@@ -86,15 +85,14 @@ const TechnicalForm: FC<TechnicalFormProps> = ({
             <p className="form_error">{errors.product_description.message}</p>}
           </div>
 
-          <div className="col-auto">
-            <label htmlFor="observations" className="floatingInput" style={{ display: 'block', marginBottom: '10px' }}>Observaciones</label>
+          <div className={styles.col}>
+            <label htmlFor="observations" className="floatingInput font-bold" style={{ display: 'block', marginBottom: '10px' }}>Observaciones</label>
             <textarea
               id="observations"
               className="textarea textarea-bordered textarea-lg text-sm w-full"
               {...register('observations')}
             ></textarea>
           </div>
-        </div>
       </div>
       <div className={styles.actions}>
       <button type="submit" className="action-button btn btn-info">

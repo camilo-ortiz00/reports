@@ -12,6 +12,8 @@
 .num_report{
 	margin-left: 2%;
 	margin-top: 4%;
+	font-size: 1.5em;
+	font-weight: 600;
 }
 
 .logo{
@@ -32,19 +34,20 @@
   .user_name {
 	background-color: #47C5FB;
 	width: 40%;
-	height: 9.5em;
+	height: 8em;
 	color: white;
 	text-align: center;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	font-size: 1.8em;
   }
   
   .project_name {
 	background-color: #00569E;
 	width: 60%;
 	height: 10em;
-	font-size: 1.5em;
+	font-size: 2.2em;
 	color: white;
 	text-align: center;
 	display: flex;
@@ -69,6 +72,10 @@
 	margin-left: 2%;
   }
 
+  .summary h2{
+	font-size: 2em;
+	font-weight: 600;
+  }
   .summary p{
 	font-size: 1.5em;
   }
@@ -92,6 +99,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: center; 
+	font-size: 1.8em;
+	font-weight: 500;
   }
 
   .porcent p{
@@ -102,6 +111,7 @@
 	align-items: center;
 	justify-content: center;
 	margin-top: 0px;
+	font-size: 10em;
   }
 
   .middle{
@@ -110,18 +120,14 @@
     align-items: center;
 	margin: 0 auto;
 	width: 100%;
+	margin-top: 2em;
+	margin-bottom: 2em;
   }
 
-  .table1 h1{
+  .table1 h1, .table2 h1, .table3 h1 {
 	margin-left: 1em;
-  }
-
-  .table2 h1{
-	margin-left: 1em;
-  }
-
-  .table3 h1{
-	margin-left: 1em;
+	margin-bottom: 1em;
+	font-size: 1.8em;
   }
 
   .table2{
@@ -130,3 +136,26 @@
   .table3{
 	margin-top: 2em;
   }
+
+  .table {
+	width: 96%;
+	margin: 0 auto;
+  }
+  .tables{
+	margin-bottom: 4em;
+	margin-top: 3em;
+  }
+
+.th,
+.td {
+  border: 1px solid black;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.th {
+  background: #00569E;
+  color: white;
+  font-weight: bold;
+}

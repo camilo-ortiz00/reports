@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { DeliverableData } from '../../model/reports.props';
+import { DeliverableData } from '../../../../../model/reports.props';
 import styles from '../report_list/report_list.module.css';
 
 interface DeliverableFormProps {
@@ -46,47 +46,46 @@ const DeliverableForm: FC<DeliverableFormProps> = ({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <div className={styles.container}>
-        <div className={styles.left}>
-          <div className="col-auto">
-            <label htmlFor="description" className="floatingInput">Entregable</label>
+        <div className={styles.col}>
+        <label htmlFor="description" className="floatingInput font-bold">Entregable</label>
             <input
               id="description"
-              className="form-control input input-bordered input-sm w-full max-w-xs"
+              className={`${styles.formControl} input input-bordered input-md`}
               type="text"
-              {...register('description', { required: 'Descripción del entregable es requerida' })}
+              {...register('description', /*{ required: 'Descripción del entregable es requerida' }*/)}
             />
             {errors.description && <p className="form_error">{errors.description.message}</p>}
           </div>
 
-          <div className="col-auto">
-            <label htmlFor="date" className="floatingInput">Fecha de ejecución</label>
+          <div className={styles.col}>
+            <label htmlFor="date" className="floatingInput font-bold">Fecha de ejecución</label>
             <input
               id="date"
-              className="form-control input input-bordered input-sm w-full max-w-xs"
+              className={`${styles.formControl} input input-bordered input-md`}
               type="date"
-              {...register('date', { required: 'Fecha de ejecución es requerida' })}
+              {...register('date', /*{ required: 'Fecha de ejecución es requerida' }*/)}
             />
             {errors.date && <p className="form_error">{errors.date.message}</p>}
           </div>
 
-          <div className="col-auto">
-            <label htmlFor="approved_changes" className="floatingInput">Cambios aprobados por supervisor</label>
+          <div className={styles.col}>
+            <label htmlFor="approved_changes" className="floatingInput font-bold">Cambios aprobados por supervisor</label>
             <input
               id="approved_changes"
-              className="form-control input input-bordered input-sm w-full max-w-xs"
+              className={`${styles.formControl} input input-bordered input-md`}
               type="text"
-              {...register('approved_changes', { required: 'Cambios aprobados es requerido' })}
+              {...register('approved_changes', /*{ required: 'Cambios aprobados es requerido' }*/)}
             />
             {errors.approved_changes && <p className="form_error">{errors.approved_changes.message}</p>}
           </div>
 
-          <div className="col-auto">
-            <label htmlFor="contingency_plan" className="floatingInput">Plan de contingencia</label>
+          <div className={styles.col}>
+            <label htmlFor="contingency_plan" className="floatingInput font-bold">Plan de contingencia</label>
             <input
               id="contingency_plan"
-              className="form-control input input-bordered input-sm w-full max-w-xs"
+              className={`${styles.formControl} input input-bordered input-md`}
               type="text"
-              {...register('contingency_plan', { required: 'Plan de contingencia es requerido' })}
+              {...register('contingency_plan', /*{ required: 'Plan de contingencia es requerido' }*/)}
             />
             {errors.contingency_plan && <p className="form_error">{errors.contingency_plan.message}</p>}
           </div>
@@ -95,10 +94,9 @@ const DeliverableForm: FC<DeliverableFormProps> = ({
             <button type="submit" className="action-button btn btn-info">
               {initialData ? 'Editar Entregable' : 'Crear Entregable'}
             </button>
-            <button type="button" className="action-button btn btn-error" onClick={handleClose}>Cancelar</button>
+            <button type="button" className="action-button mr-4 btn btn-error" onClick={handleClose}>Cancelar</button>
           </div>
         </div>
-      </div>
     </form>
   );
 };
