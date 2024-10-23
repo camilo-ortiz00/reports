@@ -63,8 +63,8 @@
 }
 
 .ReportAction{
-	display: flex;
-	align-items: baseline;
+	display: flex !important;
+	align-items: baseline !important;
 	margin-left: 2em;
 }
 

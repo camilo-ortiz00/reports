@@ -14,12 +14,14 @@ const annexesesTable: React.FC<AnnexesFormProps> = ({ annexes, onRowSelected, on
     {
       name: 'N°',
       selector: (row: AnnexData) => row?.id || 'N/A',
+      width: '5em',
       sortable: true,
     },
     {
       name: 'Descripción del anexo',
       selector: (row: AnnexData) => row?.description || 'N/A',
       sortable: true,
+      width: '30em',
     },
     {
       name: 'URL del anexo',

@@ -3,7 +3,7 @@ import NextAuth from 'next-auth';
 declare module 'next-auth' {
   interface Session {
     user: {
-      id: string;  // Agregamos el campo id
+      id: string; 
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -11,7 +11,7 @@ declare module 'next-auth' {
   }
 
   interface User {
-    id: string;  // Especificamos que el id es un string
+    id: string; 
   }
 }
 

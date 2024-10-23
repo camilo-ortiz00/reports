@@ -20,10 +20,10 @@ const Reports = () => {
 
   const fetchData = async () => {
     const fetchPromises = [
-      fetch('/api/reports'),
-      fetch('/api/technical-summary'),
-      fetch('/api/deliverables'),
-      fetch('/api/annexes'),
+      fetch('/api/reports/reports'),
+      fetch('/api/reports/technical-summary'),
+      fetch('/api/reports/deliverables'),
+      fetch('/api/reports/annexes'),
     ];
   
     try {
@@ -70,10 +70,15 @@ const Reports = () => {
         console.error('Element not found');
         return;
       }
-
+    
+      if (!selectedReport) {
+        console.error('No report selected');
+        return; // Sale de la función si no hay informe seleccionado
+      }
+    
       element.style.margin = '0';
       element.style.padding = '0';
-
+    
       try {
         const canvas = await html2canvas(element, {
           useCORS: true,
@@ -85,8 +90,7 @@ const Reports = () => {
             return el.classList.contains('no-print'); 
           },
         });
-        
-        
+    
         const imgData = canvas.toDataURL('image/png');
     
         const pdf = new jsPDF();
@@ -107,14 +111,17 @@ const Reports = () => {
           heightLeft -= pageHeight;
         }
     
-        pdf.save('report.pdf');
+        // Guardamos el PDF utilizando el ID del informe
+        pdf.save(`Informe ${selectedReport.id}.pdf`);
       } catch (error) {
         console.error('Error exporting to PDF:', error);
-      }finally{
+      } finally {
         element.style.margin = '';
         element.style.padding = '';
       }
     };
+    
+    
 
   return (
     <div className={styles.container}>

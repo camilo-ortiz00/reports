@@ -20,7 +20,7 @@
   color: var(--fallback-bc, rgb(0, 0, 0));
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
     --b1: rgb(0, 0, 0); /* Cambia a un color compatible */
     --bc: rgb(255, 255, 255);

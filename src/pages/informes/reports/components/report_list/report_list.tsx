@@ -1,6 +1,6 @@
 // pages/reports/Page.tsx
-import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
+import { getSession, useSession } from 'next-auth/react';
 import TechnicalSummaryTable from '../Tables/TechnicalSummaryTable'
 import DeliverableTable from '../Tables/DeliverablesTable';
 import AnnexesTable from '../Tables/AnnexesTable';
@@ -15,6 +15,7 @@ import SummaryAlert from '@/components/AlertSummary';
 import ModalDeleteComponent from '@/components/ModalEliminacion';
 
 const Page = () => {
+  const { data: session, status } = useSession();
   const [technicalSummary, setTechnicalSummary] = useState<TechnicalSummaryData[]>([]);
   const [deliverables, setDeliverables] = useState<DeliverableData[]>([]);
   const [annexes, setAnnexes] = useState<AnnexData[]>([]);
@@ -42,10 +43,10 @@ const Page = () => {
 
   const fetchData = async () => {
     const fetchPromises = [
-      fetch('/api/reports'),
-      fetch('/api/technical-summary'),
-      fetch('/api/deliverables'),
-      fetch('/api/annexes'),
+      fetch('/api/reports/reports'),
+      fetch('/api/reports/technical-summary'),
+      fetch('/api/reports/deliverables'),
+      fetch('/api/reports/annexes'),
     ];
   
     try {
@@ -107,7 +108,6 @@ const Page = () => {
 
   setIsEditing(!isEditing);
 };
-
 
 const updateReportSummary = async (updatedReport: FormData) => {
   try {
@@ -229,20 +229,22 @@ const handleButtonClick = (type: 'technical' | 'deliverable' | 'annex') => (even
   };
     
 //Crear
-
 const handleCreateReport = async () => {
+
+  if (!session || !session.user) {
+    console.error("Usuario no autenticado");
+    return; // Maneja el caso donde no hay sesión activa
+  }
   const formData = {
     summary: "Resumen del informe",
-    project_id: 1,  // ID del proyecto que deseas usar
-    user_id: 1002324366,     // ID del usuario que deseas usar
-    status: 0,      // Estado inicial, por ejemplo
+    project_id: 1,
+    user_id: parseInt(session?.user.id),
+    status: 0,
   };
 
   console.log("Form data enviado:", formData);
-
   try {
-    
-    const response = await fetch('/api/reports', {
+    const response = await fetch('/api/reports/reports', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -251,28 +253,33 @@ const handleCreateReport = async () => {
     });
 
     if (!response.ok) {
-      throw new Error('Error al crear el nuevo informe');
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al crear el nuevo informe');
     }
 
     const data = await response.json();
     console.log('Informe creado:', data);
 
-    // Agregar el nuevo informe al estado
     setReports((prevReports) => [...prevReports, data]);
     setFilteredReports((prevReports) => [...prevReports, data]);
-    setSelectedReportId(data.id); 
     setSelectedReport(data);
-    setSummaryText(data.summary || '');
 
-    // Muestra un mensaje de éxito
     setAlertMessage('Informe creado con éxito');
     setAlertType('success');
     setShowAlert(true);
     setIsCreatingNewReport(false);
 
-  } catch (error) {
+  } catch (error: unknown) { 
     console.error('Error:', error);
-    setAlertMessage('Error al crear el informe');
+    let errorMessage = 'Error al crear el informe';
+
+    if (error instanceof Error) {
+      errorMessage = error.message; 
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    }
+
+    setAlertMessage('Error al crear el informe: ' + errorMessage);
     setAlertType('error');
     setShowAlert(true);
   }
@@ -284,7 +291,7 @@ const handleCreateTechnicalSummary = async (technical: TechnicalSummaryData) => 
 
   try {
     const method = id ? 'PUT' : 'POST';
-    const response = await fetch('/api/technical-summary', {
+    const response = await fetch('/api/reports/technical-summary', {
     method,
       headers: {
         'Content-Type': 'application/json',
@@ -334,7 +341,7 @@ const handleCreateDeliverable = async (deliverables: DeliverableData) => {
 
   try {
     const method = id ? 'PUT' : 'POST';
-    const response = await fetch('/api/deliverables', {
+    const response = await fetch('/api/reports/deliverables', {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -392,7 +399,7 @@ const handleCreateAnnex = async (annexes: AnnexData) => {
 
   try {
     const method = id ? 'PUT' : 'POST'; // Usar POST para nuevos anexos, PUT para actualizarlos
-    const response = await fetch('/api/annexes', {
+    const response = await fetch('/api/reports/annexes', {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -437,7 +444,7 @@ const handleCreateAnnex = async (annexes: AnnexData) => {
 
 const handleDeleteTechnicalSummary = async (id: number) => {
   try {
-    const response = await fetch(`/api/technical-summary?id=${id}`, {
+    const response = await fetch(`/api/reports/technical-summary?id=${id}`, {
       method: 'DELETE',
     });
 
@@ -457,7 +464,7 @@ const handleDeleteTechnicalSummary = async (id: number) => {
 
 const handleDeleteDeliverable = async (id: number) => {
   try {
-    const response = await fetch(`/api/deliverables?id=${id}`, {
+    const response = await fetch(`/api/reports/deliverables?id=${id}`, {
       method: 'DELETE',
     });
 
@@ -477,7 +484,7 @@ const handleDeleteDeliverable = async (id: number) => {
 
 const handleDeleteAnnex = async (id: number) => {
   try {
-    const response = await fetch(`/api/annexes?id=${id}`, {
+    const response = await fetch(`/api/reports/annexes?id=${id}`, {
       method: 'DELETE',
     });
 
@@ -499,7 +506,7 @@ const handleDeleteReport = async (id: number) => {
   if (!selectedReport) return;
 
   try {
-    const response = await fetch(`/api/reports?id=${selectedReport.id}`, {
+    const response = await fetch(`/api/reports/reports?id=${selectedReport.id}`, {
       method: 'DELETE',
     });
 
@@ -523,26 +530,6 @@ const handleDeleteReport = async (id: number) => {
   }
 };
 
-
-const technicalInitialData = selectedReportTechnical || {
-  report_id: selectedReport?.id || 0,
-  obtained_result: '',
-  product_description: '',
-  support_annex: '',
-  observations: ''
-};
-const deliverableInitialData = selectedReportDeliverable || {
-  report_id: selectedReport?.id || 0, 
-  description: '',
-  date: '',
-  approved_changes: '',
-  contingency_plan: ''
-};
-const annexInitialData = selectedReportAnnex || {
-  report_id: selectedReport?.id || 0,
-  description: '',
-  url: ''
-};
 const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
 
   //Selecionar fila

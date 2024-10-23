@@ -16,25 +16,23 @@ const Login = () => {
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    
     const form = e.currentTarget;
-    const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+    const identifier = (form.elements.namedItem('identifier') as HTMLInputElement).value;
     const password = (form.elements.namedItem('password') as HTMLInputElement).value;
-
+  
     const result = await signIn('credentials', {
       redirect: false,
-      email,
+      identifier,
       password,
     });
-
-    if (result && !result.error) {
-      setErrorMessage(null);
-      router.push('/'); 
-    } else {
-      setErrorMessage(result?.error || 'Ocurrió un error inesperado.'); 
+  
+    if (result && result.error) {
+      console.error('Error en el inicio de sesión:', result.error); // Log del error
+      setErrorMessage(result.error);
     }
   };
-
+  
   return (
     <div className="flex items-center justify-center min-h-screen">
       <form onSubmit={handleLogin} className="w-full max-w-md p-6 bg-white shadow-md">
@@ -47,8 +45,8 @@ const Login = () => {
         )}
 
         <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-          <input id="email" type="email" name="email" className="mt-1 block w-full px-3 py-2 border border-gray-300" required autoComplete="email"/>
+          <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">Correo o documento de identidad</label>
+          <input id="identifier" type="identifier" name="identifier" className="mt-1 block w-full px-3 py-2 border border-gray-300" required autoComplete="identifier"/>
         </div>
         <div className="mb-4">
           <label htmlFor="password" className="block text-sm font-medium text-gray-700">Contraseña</label>

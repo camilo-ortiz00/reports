@@ -7,7 +7,7 @@ const Page = () => {
       <div className="hero-content text-center">
         <div className="max-w-md">          
           <h1 className="text-5xl font-bold">Bienvenido a la página de informes!</h1>
-          <Link href="/components/report/reports">Ir a informes</Link>
+          <Link href="/informes/reports/components/report_list/report_list">Ir a informes</Link>
           </div>
         </div>
       </div>

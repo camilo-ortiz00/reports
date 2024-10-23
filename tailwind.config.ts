@@ -1,6 +1,5 @@
-import type { Config } from "tailwindcss";
-
-const config: Config = {
+const config = {
+  important: true,
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -8,21 +7,15 @@ const config: Config = {
     "./node_modules/flowbite/**/*.js",
   ],
   theme: {
-    extend: {
-      colors: {
-        primary: '#ff5733', // color en formato hexadecimal o compatible
-        secondary: 'rgb(255, 87, 51)', // color en formato RGB
-      },
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
-      },
-    },
+    // Tu configuración personalizada de Tailwind
   },
-  plugins: [require('daisyui'), require('flowbite/plugin')
+  plugins: [
+    require("flowbite/plugin"), // DaisyUI debe ser después si lo incluyes
+    require("daisyui"),
   ],
-
+  daisyui: {
+    themes: [], // Esto debería desactivar los temas de DaisyUI
+  },
 };
-export default config;
 
+export default config;

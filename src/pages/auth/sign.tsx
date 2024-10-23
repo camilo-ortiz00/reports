@@ -8,6 +8,8 @@ const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
 
   // Redirigir si ya está autenticado
   useEffect(() => {
@@ -18,12 +20,14 @@ const SignIn = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true); // Cambia a estado de carga
     const res = await signIn('credentials', {
       redirect: false,
       email,
       password,
     });
-
+    setLoading(false); // Vuelve al estado normal
+  
     if (res?.error) {
       setError('Credenciales incorrectas');
     } else {

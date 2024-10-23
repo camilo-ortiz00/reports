@@ -13,6 +13,7 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
     {
       name: 'N°',
       selector: (row: DeliverableData) => row?.id || 'N/A',
+      width: '5em',
       sortable: true,
     },
     {
@@ -24,6 +25,7 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
       name: 'Fecha de ejecución',
       selector: (row: DeliverableData) => row?.date || 'N/A',
       sortable: true,
+      width: '15em',
     },
     {
       name: 'Cambios aprobados por supervisor',

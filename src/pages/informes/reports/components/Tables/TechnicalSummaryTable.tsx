@@ -20,6 +20,7 @@ const TechnicalSummaryTable: React.FC<TechnicalFormProps> = ({
       name: 'N°',
       selector: (row: TechnicalSummaryData) => row.id || 'N/A',
       sortable: true,
+      width: '5em',
       cell: (row: TechnicalSummaryData, index: number) => (
         <span>{index + 1}</span>
       ),
@@ -66,23 +67,21 @@ const TechnicalSummaryTable: React.FC<TechnicalFormProps> = ({
         selectableRows
         onSelectedRowsChange={handleRowSelected}
         subHeader
-        subHeaderComponent={ <input 
-          type="text" 
-          placeholder="Buscar actividades..." 
-          className="input input-bordered w-full max-w-xs" 
-          onChange={(e) => onSearch(e.target.value)} /> } 
-        customStyles={{ 
-          rows: { 
-            style: { backgroundColor: 'var(--table-bg)', 
-            color: 'var(--table-text-color)', 
-              },
-           }, 
-          headCells: { 
-            style: { backgroundColor: 'var(--header-bg)', 
-              color: 'var(--header-text-color)', 
-                }, 
-            }, 
-          }} /> 
+        customStyles={{
+          rows: {
+            style: {
+              backgroundColor: 'white', // Cambia el color de fondo de las filas
+            },
+          },
+          headCells: {
+            style: {
+              backgroundColor: '#f3f4f6', // Cambia el color del encabezado
+              color: '#374151', // Cambia el color del texto del encabezado
+              fontWeight: 'bold', // Negrita
+            },
+          },
+        }}
+      />
     </div> 
   );
 };
