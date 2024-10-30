@@ -27,6 +27,7 @@ model User {
   contact_person_email   String?
   reports                Report[]
   role                   Role     @relation(fields: [role_id], references: [id])
+  //tipo de sangre, estado civil, status perfil completado
 }
 
 model Role {
@@ -79,7 +80,8 @@ model ReportTracking {
 
 model TechnicalSummary {
   id                  Int    @id @default(autoincrement())
-  report_id           Int    
+  report_id           Int   
+  name                String 
   obtained_result     String
   product_description String
   support_annex       String

@@ -39,8 +39,8 @@ const annexesesTable: React.FC<AnnexesFormProps> = ({ annexes, onRowSelected, on
   };
 
   return (
-    <div className="overflow-x-auto">
-      <h2 className="text-xl font-semibold mb-4">ANEXOS</h2>
+    <div className="overflow-x-auto w-full">
+      <h2 className="text-xl font-semibold mb-4 card p-4 bg-white shadow-lg rounded">ANEXOS</h2>
       <DataTable
         columns={columns}
         data={annexes}

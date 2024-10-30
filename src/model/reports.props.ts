@@ -42,6 +42,7 @@ export interface AnnexData {
 export interface TechnicalSummaryData {
   id?: number;
   report_id: number;
+  name: string;
   obtained_result: string;
   product_description: string;
   support_annex: string;

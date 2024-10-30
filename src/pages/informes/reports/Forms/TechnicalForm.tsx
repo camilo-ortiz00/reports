@@ -18,6 +18,7 @@ const TechnicalForm: FC<TechnicalFormProps> = ({
 }) => {
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<TechnicalSummaryData>({
     defaultValues: initialData || {
+      name: '',
       obtained_result: '', 
       product_description: '', 
       observations: '',
@@ -48,15 +49,15 @@ const TechnicalForm: FC<TechnicalFormProps> = ({
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <div className={styles.container}>
         <div className={styles.col}>
-        <label htmlFor="support_annex" className='font-bold'>Soporte del anexo</label>
+         <label htmlFor="name" className='font-bold'>Nombre de la actividad</label>
             <input
-              id="support_annex"
+              id="name"
               className={`${styles.formControl} input input-bordered input-md`}
               type="text"
-              {...register('support_annex', /*{ required: 'Soporte del anexo es requerido' }*/)}
+              {...register('name', /*{ required: 'Soporte del anexo es requerido' }*/)}
             />
-            {errors.support_annex && (
-              <p className="form_error">{errors.support_annex.message}</p>
+            {errors.name && (
+              <p className="form_error">{errors.name.message}</p>
             )}
           </div>
 
@@ -83,6 +84,19 @@ const TechnicalForm: FC<TechnicalFormProps> = ({
             />
             {errors.product_description && 
             <p className="form_error">{errors.product_description.message}</p>}
+          </div>
+
+          <div className={styles.col}>
+            <label htmlFor="support_annex" className='font-bold'>Soporte del anexo</label>
+              <input
+                id="support_annex"
+                className={`${styles.formControl} input input-bordered input-md`}
+                type="text"
+                {...register('support_annex', /*{ required: 'Soporte del anexo es requerido' }*/)}
+              />
+              {errors.support_annex && (
+                <p className="form_error">{errors.support_annex.message}</p>
+              )}
           </div>
 
           <div className={styles.col}>

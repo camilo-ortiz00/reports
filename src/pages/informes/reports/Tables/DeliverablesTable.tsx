@@ -48,8 +48,8 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
   };
 
   return (
-    <div className="overflow-x-auto">
-      <h2 className="text-xl font-semibold mb-4">CRONOGRAMA EJECUCIÓN ENTREGABLES </h2>
+    <div className="overflow-x-auto w-full">
+      <h2 className="text-xl font-semibold mb-4 card p-4 bg-white shadow-lg rounded">CRONOGRAMA EJECUCIÓN ENTREGABLES </h2>
       <DataTable
         columns={columns}
         data={deliverables}

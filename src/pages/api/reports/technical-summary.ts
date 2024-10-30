@@ -30,7 +30,7 @@ async function getTechnicals(req: NextApiRequest, res: NextApiResponse) {
       const technicalSummary = await prisma.technicalSummary.findUnique({
         where: { id: Number(id) },
       });
-      if (!technicalSummary) return res.status(404).json({ message: 'Actividad no encontrada' });
+      if (!technicalSummary) return res.status(404).json({ message: 'Sinopsis técnica no encontrada' });
       return res.status(200).json(technicalSummary);
     }
 
@@ -38,7 +38,7 @@ async function getTechnicals(req: NextApiRequest, res: NextApiResponse) {
     return res.status(200).json(technicalSummaries);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Error al obtener actividades' });
+    return res.status(500).json({ error: 'Error al obtener las Sinopsis técnicas' });
   }
 }
 
@@ -64,7 +64,7 @@ async function createTechnical(req: NextApiRequest, res: NextApiResponse) {
     return res.status(201).json(newTechnicalSummary);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Error al crear la actividad' });
+    return res.status(500).json({ error: 'Error al crear la Sinopsis técnica' });
   }
 }
 
@@ -90,7 +90,7 @@ async function updateTechnical(req: NextApiRequest, res: NextApiResponse) {
     return res.status(200).json(updatedTechnicalSummary);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Error al actualizar la actividad' });
+    return res.status(500).json({ error: 'Error al actualizar la Sinopsis técnica' });
   }
 }
 
@@ -106,9 +106,9 @@ async function deleteTechnical(req: NextApiRequest, res: NextApiResponse) {
     await prisma.technicalSummary.delete({
       where: { id: Number(id) },
     });
-    return res.status(200).json({ message: 'Actividad eliminada con éxito' });
+    return res.status(200).json({ message: 'Sinopsis técnica eliminada con éxito' });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Error al eliminar la actividad' });
+    return res.status(500).json({ error: 'Error al eliminar la Sinopsis técnica' });
   }
 }
