@@ -1,40 +1,31 @@
 import React from 'react';
 import DataTable from 'react-data-table-component';
-import { DeliverableData } from '../../../../../model/reports.props';
+import { AnnexData } from '@/model/reports.props';
 
-interface DeliverableTableProps {
-   deliverables: DeliverableData[];
-  onRowSelected: (deliverables: DeliverableData) => void;
+interface AnnexesFormProps {
+  annexes: AnnexData[];
+  onRowSelected: (report: AnnexData) => void;
   onRowDeselected: () => void;
   onSearch: (query: string) => void;
 }
-const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRowSelected, onRowDeselected, onSearch }) => {
+
+const annexesesTable: React.FC<AnnexesFormProps> = ({ annexes, onRowSelected, onRowDeselected, onSearch  }) => {
   const columns = [
     {
       name: 'N°',
-      selector: (row: DeliverableData) => row?.id || 'N/A',
+      selector: (row: AnnexData) => row?.id || 'N/A',
       width: '5em',
       sortable: true,
     },
     {
-      name: 'Entregable',
-      selector: (row: DeliverableData) => row?.description || 'N/A',
+      name: 'Descripción del anexo',
+      selector: (row: AnnexData) => row?.description || 'N/A',
       sortable: true,
+      width: '30em',
     },
     {
-      name: 'Fecha de ejecución',
-      selector: (row: DeliverableData) => row?.date || 'N/A',
-      sortable: true,
-      width: '15em',
-    },
-    {
-      name: 'Cambios aprobados por supervisor',
-      selector: (row: DeliverableData) => row?.approved_changes || 'N/A',
-      sortable: true,
-    },
-    {
-      name: 'Plan de contingencia',
-      selector: (row: DeliverableData) => row?.contingency_plan || 'N/A',
+      name: 'URL del anexo',
+      selector: (row: AnnexData) => row?.url || 'N/A',
       sortable: true,
     },
   ];
@@ -49,16 +40,16 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
 
   return (
     <div className="overflow-x-auto">
+      <h2 className="text-xl font-semibold mb-4">ANEXOS</h2>
       <DataTable
         columns={columns}
-        data={deliverables}
+        data={annexes}
         pagination
         highlightOnHover
         striped
         responsive
         selectableRows
         onSelectedRowsChange={handleRowSelected}
-        subHeader
         customStyles={{
           rows: {
             style: {
@@ -78,4 +69,4 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
   );
 };
 
-export default DeliverableTable;
+export default annexesesTable;

@@ -10,7 +10,8 @@
 	display: flex;
 	flex-direction: row;
 	width: 100%;
-	margin: 5em;
+	margin-bottom: 5em;
+	margin-top: 1em;
   }
 
 .table{
@@ -74,11 +75,10 @@
 }
 
 .summary {
-	width: 80%; 
 	word-wrap: break-word;
 	overflow-wrap: break-word;
-	padding: 1rem; /* Añadir algo de padding para separar del borde */
-	overflow-y: auto; /* Permite desplazamiento horizontal si es necesario */
+	padding: 1rem; 
+	overflow-y: auto;
 	max-width: 80em;
   }
   

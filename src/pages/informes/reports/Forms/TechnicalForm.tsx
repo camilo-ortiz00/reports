@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { TechnicalSummaryData } from '../../../../../model/reports.props';
+import { TechnicalSummaryData } from '@/model/reports.props';
 import styles from '../report_list/report_list.module.css';
 
 interface TechnicalFormProps {

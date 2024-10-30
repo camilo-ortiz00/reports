@@ -11,12 +11,14 @@ const ComponentForm: React.FC<ComponentFormProps> = ({ onSave, initialData }) =>
   const [name, setName] = useState(initialData?.name || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [workLines, setWorkLines] = useState(initialData?.work_lines || '');
+  const [projectId, setProject] = useState(initialData?.project_id || 0);
 
   useEffect(() => {
     if (initialData) {
       setName(initialData.name);
       setDescription(initialData.description);
       setWorkLines(initialData.work_lines);
+      setProject(initialData.project_id);
     }
   }, [initialData]);
 
@@ -27,6 +29,11 @@ const ComponentForm: React.FC<ComponentFormProps> = ({ onSave, initialData }) =>
       name,
       description,
       work_lines: workLines,
+      project_id: projectId,
+      project: {
+        id: projectId,
+        name: initialData?.project?.name || 'Default Component',
+      }
     };
     onSave(newComponent);
   };

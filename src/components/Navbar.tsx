@@ -7,10 +7,10 @@ const Navbar = () => {
   const { data: session } = useSession();
 
   return (
-    <div className="navbar bg-base-100">
+    <div className="navbar bg-base-100 border-b border-gray-200">
       <div className="flex-none">
         {/* Botón que abre el sidebar */}
-        <label htmlFor="my-drawer" className="btn btn-primary drawer-button">
+        <label htmlFor="my-drawer" className="btn drawer-button">
           <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M5 7h14M5 12h14M5 17h14"/>
           </svg>

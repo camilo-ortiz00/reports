@@ -12,7 +12,11 @@ const RoleForm: React.FC<RoleFormProps> = ({ onSave, initialData }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newRole = { id: initialData?.id || 0, name, description };
+    const newRole = {
+       id: initialData?.id || 0, 
+       name, 
+       description 
+      };
     onSave(newRole);
   };  
 

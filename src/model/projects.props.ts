@@ -3,6 +3,10 @@ export interface Project {
     component_id: number;
     name: string;
     description: string;
+    component:{
+      id: number;
+      name: string;
+    }
   }
   
   export interface Component {
@@ -11,5 +15,9 @@ export interface Project {
     work_lines: string;
     name: string;
     description: string;
+    project:{
+      id: number;
+      name: string;
+    }
   }
   

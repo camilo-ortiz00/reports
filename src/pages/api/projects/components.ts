@@ -41,7 +41,7 @@ async function getComponents(req: NextApiRequest, res: NextApiResponse) {
 async function createComponent(req: NextApiRequest, res: NextApiResponse) {
   const { name, description, work_lines, project_id } = req.body;
 
-  if (!name || !project_id) {
+  if (!name) {
     return res.status(400).json({ error: 'Los campos name y project_id son obligatorios' });
   }
 

@@ -9,11 +9,7 @@ interface UserFormProps {
   initialData?: User;
 }
 
-const Register: FC<UserFormProps> = ({
-  handleCreate,
-  initialData,
-  handleClose,
-}) => {
+const Register: FC<UserFormProps> = ({initialData,}) => {
   const router = useRouter();
   const { register, handleSubmit, formState: { errors }, setError, getValues } = useForm<User>({
     defaultValues: {
@@ -37,7 +33,7 @@ const Register: FC<UserFormProps> = ({
       email: data.email,
       password: data.password,
       name: data.name,
-      role_id: data.role?.id || 1,
+      role_id: 2,
       identity_document: data.identity_document,
     };
     console.log(userData)

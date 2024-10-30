@@ -16,7 +16,6 @@ const RoleList: React.FC = () => {
   const [alertMessage, setAlertMessage] = useState<string>(''); // Mensaje de alerta
   const [alertType, setAlertType] = useState<'error' | 'success' | 'warning'>('success'); // Tipo de alerta
 
-  // Obtener la lista de roles
   useEffect(() => {
     fetch('/api/user/roles')
       .then((res) => {
@@ -28,80 +27,17 @@ const RoleList: React.FC = () => {
       .then((data) => setRoles(data))
       .catch((error) => {
         console.error(error);
-        setRoles([]); // Establecer array vacío en caso de error
+        setRoles([]); 
       });
   }, []);
 
-  // Definir columnas para el DataTable
-  const columns = [
-    {
-      name: 'ID',
-      selector: (row: Role) => row.id,
-      sortable: true,
-    },
-    {
-      name: 'Nombre',
-      selector: (row: Role) => row.name,
-      sortable: true,
-    },
-    {
-      name: 'Descripción',
-      selector: (row: Role) => row.description,
-    },
-    {
-      name: 'Acciones',
-      cell: (row: Role) => (
-        <div>
-          <button
-            className="bg-blue-500 text-white px-4 py-1 rounded mr-2"
-            onClick={() => handleEditRole(row)}
-          >
-            Editar
-          </button>
-          <button
-            className="bg-red-500 text-white px-4 py-1 rounded"
-            onClick={() => handleShowDeleteModal(row)}
-          >
-            Eliminar
-          </button>
-        </div>
-      ),
-    },
-  ];
-
-  // Función para mostrar el modal de eliminación
-  const handleShowDeleteModal = (role: Role) => {
-    setRoleToDelete(role);
-    setShowDeleteModal(true);
-  };
-
-  // Función para manejar la confirmación de la eliminación
-  const handleConfirmDeleteRole = async () => {
-    if (roleToDelete) {
-      await handleDeleteRole(roleToDelete.id);
-    }
-    setShowDeleteModal(false); // Cerrar el modal tras eliminar
-  };
-
-  // Función para manejar la edición de roles
-  const handleEditRole = (role: Role) => {
-    setSelectedRole(role);
-    setShowModal(true);
-  };
-
-  // Función para manejar la creación de un nuevo rol
-  const handleCreateRole = () => {
-    setSelectedRole(undefined); // Cambiado de null a undefined
-    setShowModal(true);
-  };
-
-  // Función para guardar un rol
   const handleSaveRole = async (role: Role) => {
     try {
       const method = role.id ? 'PUT' : 'POST';
       const response = await fetch('/api/user/roles', {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' 
+        },
         body: JSON.stringify(role),
       });
 
@@ -146,7 +82,7 @@ const RoleList: React.FC = () => {
         throw new Error('Error al eliminar el rol');
       }
 
-      setRoles(roles.filter((role) => role.id !== id)); // Eliminar el rol de la lista
+      setRoles((prev) => prev.filter((role) => role.id !== id));
       setAlertMessage('Rol eliminado exitosamente');
       setAlertType('warning');
       setShowAlert(true);
@@ -158,15 +94,71 @@ const RoleList: React.FC = () => {
     }
   };
 
-  // Cerrar el modal
+ const handleShowDeleteModal = (role: Role) => {
+  setRoleToDelete(role);
+  setShowDeleteModal(true);
+};
+
+const handleConfirmDeleteRole = async () => {
+  if (roleToDelete) {
+    await handleDeleteRole(roleToDelete.id);
+  }
+  setShowDeleteModal(false); 
+};
+
+const handleEditRole = (role: Role) => {
+  setSelectedRole(role);
+  setShowModal(true);
+};
+
+const handleCreateRole = () => {
+  setSelectedRole(undefined); 
+  setShowModal(true);
+};
+
   const handleCloseModal = () => {
     setShowModal(false);
   };
 
-  // Cerrar el modal de eliminación
   const handleCloseDeleteModal = () => {
     setShowDeleteModal(false);
   };
+
+  const columns = [
+    {
+      name: 'ID',
+      selector: (row: Role) => row.id,
+      sortable: true,
+    },
+    {
+      name: 'Nombre',
+      selector: (row: Role) => row.name,
+      sortable: true,
+    },
+    {
+      name: 'Descripción',
+      selector: (row: Role) => row.description,
+    },
+    {
+      name: 'Acciones',
+      cell: (row: Role) => (
+        <div>
+          <button
+            className="bg-blue-500 text-white px-4 py-1 rounded mr-2"
+            onClick={() => handleEditRole(row)}
+          >
+            Editar
+          </button>
+          <button
+            className="bg-red-500 text-white px-4 py-1 rounded"
+            onClick={() => handleShowDeleteModal(row)}
+          >
+            Eliminar
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="container mx-auto p-4">
@@ -198,7 +190,6 @@ const RoleList: React.FC = () => {
         <p>¿Estás seguro de que deseas eliminar el rol {roleToDelete?.name}?</p>
       </ModalDeleteComponent>
 
-      {/* Componente de alerta */}
       <AlertComponent 
         show={showAlert} 
         type={alertType} 

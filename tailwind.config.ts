@@ -7,15 +7,15 @@ const config = {
     "./node_modules/flowbite/**/*.js",
   ],
   theme: {
-    // Tu configuración personalizada de Tailwind
   },
   plugins: [
-    require("flowbite/plugin"), // DaisyUI debe ser después si lo incluyes
     require("daisyui"),
+    require("flowbite/plugin"),
   ],
   daisyui: {
-    themes: [], // Esto debería desactivar los temas de DaisyUI
+    themes: ["light"],
   },
+  
 };
 
 export default config;

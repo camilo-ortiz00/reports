@@ -3,15 +3,19 @@ import DataTable from 'react-data-table-component';
 import ModalComponent from '@/components/Modal';
 import ModalDeleteComponent from '@/components/ModalEliminacion';
 import AlertComponent from '@/components/Alert';
-import { Component } from '@/model/projects.props'; // Asegúrate de tener la interfaz Component
+import { Component } from '@/model/projects.props';
+import ComponentForm from './componentForm';
 
 const ComponentManagement = () => {
   const [components, setComponents] = useState<Component[]>([]);
-  const [selectedComponent, setSelectedComponent] = useState<Component | null>(null);
+  const [selectedComponent, setSelectedComponent] = useState<Component | undefined>(undefined);
+  const [componentToDelete, setComponentToDelete] = useState<Component | undefined>(undefined);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [showAlert, setShowAlert] = useState(false);
+  const [alertType, setAlertType] = useState<'error' | 'success' | 'warning'>('success'); // Tipo de alerta
+
 
   useEffect(() => {
     fetchComponents();
@@ -27,12 +31,11 @@ const ComponentManagement = () => {
     }
   };
 
-  const handleCreateOrUpdateComponent = async (component: Component) => {
-    const method = selectedComponent ? 'PUT' : 'POST';
-    const url = selectedComponent ? `/api/projects/components/${selectedComponent.id}` : `/api/projects/components`;
-
+  const handleSaveComponent = async (component: Component) => {
     try {
-      const response = await fetch(url, {
+      const method = selectedComponent ? 'PUT' : 'POST';
+
+      const response = await fetch('/api/projects/components', {
         method,
         headers: {
           'Content-Type': 'application/json',
@@ -40,26 +43,33 @@ const ComponentManagement = () => {
         body: JSON.stringify(component),
       });
 
-      if (response.ok) {
-        const updatedComponent = await response.json();
-        if (method === 'POST') {
-          setComponents((prev) => [...prev, updatedComponent]);
-        } else {
-          setComponents((prev) =>
-            prev.map((c) => (c.id === updatedComponent.id ? updatedComponent : c))
-          );
-        }
-        setAlertMessage('Componente guardado exitosamente');
-      } else {
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        console.error('Error al guardar el componente:', errorResponse);
         setAlertMessage('Error al guardar el componente');
+        setAlertType('error');
+        setShowAlert(true);
+        return;
       }
-    } catch (error) {
-      console.error('Error saving component:', error);
-      setAlertMessage('Error al guardar el componente');
-    } finally {
-      setShowAlert(true);
+
+      const updatedComponent = await response.json();
+      setComponents((prevComponents) => {
+        if (component.id) {
+          return prevComponents.map((c) => (c.id === updatedComponent.id ? updatedComponent : c));
+        } else {
+          return [...prevComponents, updatedComponent]; 
+        }
+      });
+
       setShowModal(false);
-      setSelectedComponent(null);
+      setAlertMessage('Componente guardado exitosamente');
+      setAlertType('success');
+      setShowAlert(true);
+    } catch (error) {
+      console.error('Error:', error);
+      setAlertMessage('Error en la operación');
+      setAlertType('error');
+      setShowAlert(true);
     }
   };
 
@@ -69,20 +79,50 @@ const ComponentManagement = () => {
         method: 'DELETE',
       });
 
-      if (response.ok) {
-        setComponents((prev) => prev.filter((component) => component.id !== id));
-        setAlertMessage('Componente eliminado exitosamente');
-      } else {
-        setAlertMessage('Error al eliminar el componente');
+      if (!response.ok) {
+        throw new Error('Error al eliminar el rol');
       }
-    } catch (error) {
-      console.error('Error deleting component:', error);
-      setAlertMessage('Error al eliminar el componente');
-    } finally {
+
+      setComponents((prev) => prev.filter((component) => component.id !== id));
+      setAlertMessage('Rol eliminado exitosamente');
+      setAlertType('warning');
       setShowAlert(true);
-      setShowDeleteModal(false);
+    } catch (error) {
+      console.error(error);
+      setAlertMessage('Hubo un error al eliminar el rol');
+      setAlertType('error');
+      setShowAlert(true);
     }
   };
+  const handleShowDeleteModal = (component: Component) => {
+    setComponentToDelete(component);
+    setShowDeleteModal(true);
+  };
+  
+  const handleConfirmDeleteComponent = async () => {
+    if (componentToDelete) {
+      await handleDeleteComponent(componentToDelete.id);
+    }
+    setShowDeleteModal(false); 
+  };
+  
+  const handleEditComponent = (component: Component) => {
+    setSelectedComponent(component);
+    setShowModal(true);
+  };
+  
+  const handleCreateComponent = () => {
+    setSelectedComponent(undefined); 
+    setShowModal(true);
+  };
+  
+    const handleCloseModal = () => {
+      setShowModal(false);
+    };
+  
+    const handleCloseDeleteModal = () => {
+      setShowDeleteModal(false);
+    };
 
   const columns = [
     { name: 'ID', selector: (row: Component) => row.id, sortable: true },
@@ -106,31 +146,50 @@ const ComponentManagement = () => {
   ];
 
   return (
-    <div>
-      <h1>Gestión de Componentes</h1>
-      <button onClick={() => setShowModal(true)}>Agregar Componente</button>
+    <div className="container mx-auto p-4">
+      <h1 className='text-2xl font-bold mb-4'>Gestión de Componentes</h1>
+      <button 
+        onClick={handleCreateComponent}
+        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+        >
+          Agregar Componente
+          </button>
+          <ModalComponent
+        show={showModal}
+        title={selectedComponent ? 'Editar Componente' : 'Crear Nuevo Componente'}
+        closeModal={handleCloseModal}
+      >
+        <ComponentForm
+          onSave={handleSaveComponent}
+          initialData={selectedComponent}
+        />
+      </ModalComponent>
+
+      <ModalDeleteComponent
+        show={showDeleteModal}
+        title="Confirmar Eliminación"
+        closeModal={handleCloseDeleteModal}
+        onConfirm={handleConfirmDeleteComponent}
+      >
+        <p>¿Estás seguro de que deseas eliminar el rol {componentToDelete?.name}?</p>
+      </ModalDeleteComponent>
+
+      <AlertComponent 
+        show={showAlert} 
+        type={alertType} 
+        message={alertMessage} 
+        onClose={setShowAlert} 
+      />
+
       <DataTable
         columns={columns}
-        data={components}
+        data={Array.isArray(components) ? components : []}
         pagination
+        highlightOnHover
+        striped
+        responsive
+        noDataComponent="No hay componentes disponibles"
       />
-      {showModal && (
-        <ModalComponent
-          component={selectedComponent}
-          onClose={() => setShowModal(false)}
-          onSave={handleCreateOrUpdateComponent}
-        />
-      )}
-      {showDeleteModal && (
-        <ModalDeleteComponent
-          item={selectedComponent}
-          onClose={() => setShowDeleteModal(false)}
-          onConfirm={() => selectedComponent && handleDeleteComponent(selectedComponent.id)}
-        />
-      )}
-      {showAlert && (
-        <AlertComponent message={alertMessage} onClose={() => setShowAlert(false)} />
-      )}
     </div>
   );
 };

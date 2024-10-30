@@ -45,6 +45,15 @@ model Project {
   reports      Report[]
 }
 
+model Component {
+  id          Int       @id @default(autoincrement())
+  project_id  Int?
+  work_lines  String
+  name        String
+  description String
+  projects    Project[]
+}
+
 model Report {
   id               Int                @id @default(autoincrement())
   project_id       Int
@@ -66,15 +75,6 @@ model ReportTracking {
   updated_at DateTime
   note       String
   report     Report   @relation(fields: [report_id], references: [id])
-}
-
-model Component {
-  id          Int       @id @default(autoincrement())
-  project_id  Int
-  work_lines  String
-  name        String
-  description String
-  projects    Project[]
 }
 
 model TechnicalSummary {

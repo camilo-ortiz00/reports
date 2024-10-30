@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { AnnexData } from '../../../../../model/reports.props';
+import { AnnexData } from '@/model/reports.props';
 import styles from '../report_list/report_list.module.css';
 
 interface AnnexFormProps {

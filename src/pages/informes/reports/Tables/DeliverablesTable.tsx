@@ -1,55 +1,47 @@
 import React from 'react';
 import DataTable from 'react-data-table-component';
-import { TechnicalSummaryData } from '../../../../../model/reports.props';
+import { DeliverableData } from '@/model/reports.props';
 
-interface TechnicalFormProps {
-  technical: TechnicalSummaryData[];
-  onActivityRowSelected: (technical: TechnicalSummaryData) => void;
+interface DeliverableTableProps {
+   deliverables: DeliverableData[];
+  onRowSelected: (deliverables: DeliverableData) => void;
   onRowDeselected: () => void;
   onSearch: (query: string) => void;
 }
-
-const TechnicalSummaryTable: React.FC<TechnicalFormProps> = ({
-  technical,
-  onActivityRowSelected,
-  onRowDeselected,
-  onSearch,
-}) => {
+const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRowSelected, onRowDeselected, onSearch }) => {
   const columns = [
     {
       name: 'N°',
-      selector: (row: TechnicalSummaryData) => row.id || 'N/A',
-      sortable: true,
+      selector: (row: DeliverableData) => row?.id || 'N/A',
       width: '5em',
-      cell: (row: TechnicalSummaryData, index: number) => (
-        <span>{index + 1}</span>
-      ),
-    },
-    {
-      name: 'Resultado obtenido',
-      selector: (row: TechnicalSummaryData) => row.obtained_result || 'Sin resultado',
       sortable: true,
     },
     {
-      name: 'Descripción/Producto',
-      selector: (row: TechnicalSummaryData) => row.product_description || 'Sin descripción',
+      name: 'Entregable',
+      selector: (row: DeliverableData) => row?.description || 'N/A',
       sortable: true,
     },
     {
-      name: 'Soporte Anexo',
-      selector: (row: TechnicalSummaryData) => row.support_annex || 'Sin Soporte',
+      name: 'Fecha de ejecución',
+      selector: (row: DeliverableData) => row?.date || 'N/A',
+      sortable: true,
+      width: '15em',
+    },
+    {
+      name: 'Cambios aprobados por supervisor',
+      selector: (row: DeliverableData) => row?.approved_changes || 'N/A',
       sortable: true,
     },
     {
-      name: 'Observaciones',
-      selector: (row: TechnicalSummaryData) => row.observations || 'Sin observación',
+      name: 'Plan de contingencia',
+      selector: (row: DeliverableData) => row?.contingency_plan || 'N/A',
       sortable: true,
     },
   ];
 
   const handleRowSelected = (state: any) => {
     if (state.selectedRows.length > 0) {
-      onActivityRowSelected(state.selectedRows[0]);
+      onRowSelected(state.selectedRows[0]);
     } else {
       onRowDeselected();
     }
@@ -57,16 +49,16 @@ const TechnicalSummaryTable: React.FC<TechnicalFormProps> = ({
 
   return (
     <div className="overflow-x-auto">
+      <h2 className="text-xl font-semibold mb-4">CRONOGRAMA EJECUCIÓN ENTREGABLES </h2>
       <DataTable
         columns={columns}
-        data={technical}
+        data={deliverables}
         pagination
         highlightOnHover
         striped
         responsive
         selectableRows
         onSelectedRowsChange={handleRowSelected}
-        subHeader
         customStyles={{
           rows: {
             style: {
@@ -82,8 +74,8 @@ const TechnicalSummaryTable: React.FC<TechnicalFormProps> = ({
           },
         }}
       />
-    </div> 
+    </div>
   );
 };
 
-export default TechnicalSummaryTable;
+export default DeliverableTable;

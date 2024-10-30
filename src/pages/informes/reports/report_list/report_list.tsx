@@ -9,10 +9,11 @@ import DeliverableForm from '../Forms/DeliverableForm';
 import AnnexForm from '../Forms/AnnexForm';
 import ModalComponent from '@/components/Modal';
 import styles from "./report_list.module.css";
-import { AnnexData, DeliverableData, FormData, TechnicalSummaryData } from '../../../../../model/reports.props';
+import { AnnexData, DeliverableData, FormData, TechnicalSummaryData } from '@/model/reports.props';
 import AlertComponent from '@/components/Alert';
 import SummaryAlert from '@/components/AlertSummary';
 import ModalDeleteComponent from '@/components/ModalEliminacion';
+import { Project } from '@/model/projects.props';
 
 const Page = () => {
   const { data: session, status } = useSession();
@@ -21,6 +22,8 @@ const Page = () => {
   const [annexes, setAnnexes] = useState<AnnexData[]>([]);
   const [reports, setReports] = useState<FormData[]>([]);
   const [filteredReports, setFilteredReports] = useState<FormData[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [selectedReport, setSelectedReport] = useState<FormData | null>(null);
   const [selectedReportTechnical, setSelectedReportTechnical] = useState<TechnicalSummaryData | null>(null);
   const [selectedReportDeliverable, setSelectedReportDeliverable] = useState<DeliverableData | null>(null);
@@ -47,6 +50,7 @@ const Page = () => {
       fetch('/api/reports/technical-summary'),
       fetch('/api/reports/deliverables'),
       fetch('/api/reports/annexes'),
+      fetch('/api/projects/projects')
     ];
   
     try {
@@ -60,6 +64,7 @@ const Page = () => {
       setTechnicalSummary(data[1]);
       setDeliverables(data[2]);
       setAnnexes(data[3]);
+      setProjects(data[4])
     } catch (error) {
       console.error('Error al obtener los datos:', error);
       setAlertMessage('Error al obtener los datos');
@@ -111,7 +116,7 @@ const Page = () => {
 
 const updateReportSummary = async (updatedReport: FormData) => {
   try {
-    const response = await fetch(`/api/reports`, {
+    const response = await fetch(`/api/reports/reports`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -233,11 +238,11 @@ const handleCreateReport = async () => {
 
   if (!session || !session.user) {
     console.error("Usuario no autenticado");
-    return; // Maneja el caso donde no hay sesión activa
+    return; 
   }
   const formData = {
-    summary: "Resumen del informe",
-    project_id: 1,
+    summary: "",
+    project_id: selectedProjectId,
     user_id: parseInt(session?.user.id),
     status: 0,
   };
@@ -254,7 +259,7 @@ const handleCreateReport = async () => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || 'Error al crear el nuevo informe');
+      throw new Error(errorData.message);
     }
 
     const data = await response.json();
@@ -270,7 +275,7 @@ const handleCreateReport = async () => {
     setIsCreatingNewReport(false);
 
   } catch (error: unknown) { 
-    console.error('Error:', error);
+    console.error('Error', error);
     let errorMessage = 'Error al crear el informe';
 
     if (error instanceof Error) {
@@ -279,7 +284,7 @@ const handleCreateReport = async () => {
       errorMessage = error;
     }
 
-    setAlertMessage('Error al crear el informe: ' + errorMessage);
+    setAlertMessage('Error al crear el informe ' + errorMessage);
     setAlertType('error');
     setShowAlert(true);
   }
@@ -389,7 +394,6 @@ const handleCreateAnnex = async (annexes: AnnexData) => {
   console.log('Datos a enviar:', annexes);
   const { report_id, id, description, url } = annexes;
 
-  // Asegúrate de que solo se llame a esta función cuando realmente se desee crear un nuevo anexo.
   if (!description || !url) {
     setAlertMessage('La descripción y la URL son necesarias para crear un anexo.');
     setAlertType('error');
@@ -515,7 +519,7 @@ const handleDeleteReport = async (id: number) => {
         prevReports.filter((report) => report.id !== selectedReport.id)
       );
       setAlertMessage('Informe eliminado con éxito');
-      setSelectedReport(null);  // Desseleccionar el informe
+      setSelectedReport(null); 
     } else {
       setAlertMessage('Error al eliminar el informe');
     }
@@ -563,83 +567,107 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
 
   return (
     <div className={styles.report_listContainer}>
-      <div className={styles.header}>
-      <div className={`${styles.ReportAction} flex justify-between items-center mb-4`}>
-        <div className={`dropdown ${isEditing ? 'disabled' : ''}`}>
-          <div 
-            tabIndex={0} 
-            role="button" 
-            className={`btn m-1 ${isEditing ? 'cursor-not-allowed opacity-50' : ''}`}
-            onClick={isEditing ? undefined : undefined} // Agregar lógica aquí si quieres prevenir la acción de clic
+      <div className={`${styles.header} flex justify-center items-center flex-col card bg-gray-100 p-4 shadow-lg rounded mb-4`}>
+      <div className='mt-4'>
+        <div className="mb-4 ml-10 card bg-white p-4 shadow-lg rounded mb-4">
+          <p className='text-xs'>Antes de crear un informe, por favor selecciona el proyecto al que pertenece</p>
+          <label htmlFor="project"><strong>Seleccionar Proyecto</strong></label>
+          <select
+            id="project"
+            value={selectedProjectId || ''}
+            onChange={(e) => setSelectedProjectId(parseInt(e.target.value))}
+            className="select w-full mt-2"
           >
-            {selectedReport ? `Informe: ${selectedReport.id} - ${selectedReport.project ? selectedReport.project.name : ''}` : 'Seleccionar Informe'}
-          </div>
-
-          <ul 
-            tabIndex={0} 
-            className={`dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow ${isEditing ? 'hidden' : ''}`}
-          >
-            {reports.map((report) => (
-            <li key={report.id}>
-              <label className="cursor-pointer flex items-center">
-              <input
-                type="checkbox"
-                className="checkbox checkbox-success w-6 h-6"
-                checked={selectedReportId === report.id}
-                onChange={() => {
-                  if (report.id !== undefined) {
-                    handleCheckboxChange(report.id); 
-                  }
-                }}                
-              />
-              <span className="ml-2">{report.id} - {report.project ? report.project.name : ''}</span>
-              </label>
-            </li>
+            <option value="" disabled>Seleccione un proyecto</option>
+            {projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
             ))}
-          </ul>
+          </select>
         </div>
-
-        <div className='mt-4'>
-          <button 
-            onClick={() => {
-              if (selectedReport) {
-                setSelectedReport(null);
-              }
-              handleCreateReport();
-            }} 
-            className={`bg-green-500 hover:bg-green-700 px-4 py-2 rounded text-white ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={isEditing} // Deshabilitar el botón de crear
-          >
-            Crear nuevo informe
-          </button>
-          {selectedReport && (
-            <>
-            <button
-              onClick={() => handleDeleteClick(selectedReport.id!, 'report')}
-              className={`ml-4 bg-red-500 hover:bg-red-700 px-4 py-2 rounded text-white ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isEditing} 
-            >
-              Eliminar informe
-            </button>
-            <button
-              className={`ml-4 bg-yellow-500 hover:bg-yellow-700 px-4 py-2 rounded text-white ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isEditing}
+        <div className={`${styles.ReportAction} flex flex-row items-center mb-4 card bg-white p-4 shadow-lg rounded`}>
+          <div className={`dropdown ${isEditing ? 'disabled' : ''}`}>
+            <div 
+              tabIndex={0} 
+              role="button" 
+              className={`btn m-1 ${isEditing ? 'cursor-not-allowed opacity-50' : ''}`}
               onClick={() => {
-                const url = `http://localhost:3000/informes/reports/components/reports/reports?report=${encodeURIComponent(JSON.stringify(selectedReport))}`;
-                window.open(url, '_blank'); // Abre en una nueva pestaña
+                if (isEditing) return;
               }}
             >
-              Generar informe
+              {selectedReport ? `Informe: ${selectedReport.id}` : 'Seleccionar Informe'}
+            </div>
+
+            <ul 
+              tabIndex={0} 
+              className={`dropdown-content menu bg-white rounded-box z-[1] w-52 p-2 shadow ${isEditing ? 'hidden' : ''}`}
+            >
+              {reports.map((report) => (
+                <li key={report.id}>
+                <label className="cursor-pointer flex items-center">
+                <input
+                  type="checkbox"
+                  defaultChecked 
+                  className="checkbox checkbox-success checkbox-lg"
+                  checked={selectedReportId === report.id}
+                  onChange={() => {
+                    if (report.id !== undefined) {
+                      handleCheckboxChange(report.id); 
+                    }
+                  }}                
+                />
+                <span className="ml-2">{report.id}</span>
+                </label>
+              </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className='mt-4'>
+            <button 
+              onClick={() => {
+                if (selectedReport) {
+                  setSelectedReport(null);
+                }
+                setIsEditing(true);
+                setSummaryText(''); 
+                handleCreateReport();
+              }} 
+              className={`bg-green-500 hover:bg-green-700 px-4 py-2 rounded text-white ${isEditing || !selectedProjectId ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isEditing || !selectedProjectId} 
+            >
+              Crear nuevo informe
             </button>
-            </>
-          )}
+            {selectedReport && (
+              <>
+                <button
+                  onClick={() => handleDeleteClick(selectedReport.id!, 'report')}
+                  className={`ml-4 bg-red-500 hover:bg-red-700 px-4 py-2 rounded text-white ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={isEditing} 
+                >
+                  Eliminar informe
+                </button>
+                <button
+                  className={`ml-4 bg-yellow-500 hover:bg-yellow-700 px-4 py-2 rounded text-white ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={isEditing}
+                  onClick={() => {
+                    const url = `http://localhost:3000/informes/reports/reports/reports?report=${encodeURIComponent(JSON.stringify(selectedReport))}`;
+                    window.open(url, '_blank'); 
+                  }}
+                >
+                  Generar informe
+                </button>
+              </>
+            )}
+        </div>
         </div>
       </div>
       </div>
           {(selectedReport || isCreatingNewReport) && (
           <div className='body'>
-          <div className={styles.summary}>
-          <div className='mb-4'>
+          <div className={`${styles.summary} flex justify-center items-center flex-col card bg-gray-100 p-4 shadow-lg rounded mb-4`}>
+          <div className='flex flex-row card bg-white p-4 shadow-lg rounded mb-4'>
             <label htmlFor="summary"><strong>Resumen</strong></label>
             <button
               onClick={handleEditClick}
@@ -677,10 +705,11 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
             <p className="w-full break-words">{selectedReport?.summary || 'No hay resumen disponible'}</p>
           )}
         </div>
+        <div className='m-16 border-b border-gray-400'></div>
 
-        <div className={styles.table}>
-        <div className='technical'>
-          <div className={styles.SwitchButton}>
+        <div className={`${styles.table} flex justify-center flex-col card bg-gray-100 p-4 shadow-lg rounded mb-4`}>
+        <div className='technical card bg-gray-100 p-4 shadow-lg rounded mb-4'>
+          <div className={`${styles.SwitchButton} card p-4 bg-white shadow-lg rounded mb-4`}>
             <button
               onClick={handleButtonClick('technical')}
               className={`${styles.createButton} mt-4 px-4 py-2 ml-16 bg-blue-500 text-white rounded hover:bg-blue-700`}
@@ -717,9 +746,10 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
           />
         </div>
 
-        <div className='deliverables'>
-          <div className={styles.SwitchButton}>
-            <button
+        <div className='m-16 border-b border-gray-400'></div>
+        <div className='deliverables card bg-gray-100 p-4 shadow-lg rounded mb-4'>
+        <div className={`${styles.SwitchButton} card bg-white p-4 shadow-lg rounded mb-4`}>
+        <button
               onClick={handleButtonClick('deliverable')}
               className={`${styles.createButton} mt-4 px-4 py-2 ml-16 bg-blue-500 text-white rounded hover:bg-blue-700`}
             >
@@ -754,10 +784,10 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
               key={refresh}
             />
         </div>
-
-        <div className='annexes'>
-          <div className={styles.SwitchButton}>
-            <button
+        <div className='m-16 border-b border-gray-400'></div>
+        <div className='annexes card bg-gray-100 p-4 shadow-lg rounded mb-4'>
+        <div className={`${styles.SwitchButton} card p-4 bg-white shadow-lg rounded mb-4`}>
+        <button
               onClick={handleButtonClick('annex')}
               className={`${styles.createButton} mt-4 px-4 py-2 ml-16 bg-blue-500 text-white rounded hover:bg-blue-700`}
             >

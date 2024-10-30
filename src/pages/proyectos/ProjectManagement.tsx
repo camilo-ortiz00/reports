@@ -3,11 +3,12 @@ import DataTable from 'react-data-table-component';
 import ModalComponent from '@/components/Modal';
 import ModalDeleteComponent from '@/components/ModalEliminacion';
 import AlertComponent from '@/components/Alert';
-import { Project } from '@/model/projects.props'; // Asegúrate de tener la interfaz Project
+import { Project } from '@/model/projects.props'; 
+import ProjectForm from './projectForm';
 
 const ProjectManagement = () => {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | undefined>(undefined);
   const [projectToDelete, setProjectToDelete] = useState<Project | undefined>(undefined);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -35,15 +36,14 @@ const ProjectManagement = () => {
       const response = await fetch('/api/projects/projects', {
         method,
         headers: {
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json',},
         body: JSON.stringify(project),
       });
 
       if (!response.ok) {
         const errorResponse = await response.json();
-        console.error('Error al guardar el rol:', errorResponse);
-        setAlertMessage('Error al guardar el rol');
+        console.error('Error al guardar el proyecto:', errorResponse);
+        setAlertMessage('Error al guardar el proyecto');
         setAlertType('error');
         setShowAlert(true);
         return;
@@ -52,7 +52,7 @@ const ProjectManagement = () => {
       const updatedProject = await response.json();
       setProjects((prevProject) => {
         if (project.id) {
-          return prevProject.map((r) => (r.id === updatedProject.id ? updatedRole : r));
+          return prevProject.map((r) => (r.id === updatedProject.id ? updatedProject : r));
         } else {
           return [...prevProject, updatedProject]; 
         }
@@ -75,10 +75,15 @@ const ProjectManagement = () => {
       const response = await fetch(`/api/projects/projects?id=${id}`, {
         method: 'DELETE',
       });
+      if (!response.ok) {
+        throw new Error('Error al eliminar el rol');
+      }
 
       if (response.ok) {
         setProjects((prev) => prev.filter((project) => project.id !== id));
         setAlertMessage('Proyecto eliminado exitosamente');
+        setAlertType('warning');
+        setShowAlert(true);
       } else {
         setAlertMessage('Error al eliminar el proyecto');
       }
@@ -91,6 +96,36 @@ const ProjectManagement = () => {
     }
   };
 
+  const handleShowDeleteModal = (project: Project) => {
+    setProjectToDelete(project);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDeleteRole = async () => {
+    if (projectToDelete) {
+      await handleDeleteProject(projectToDelete.id);
+    }
+    setShowDeleteModal(false); 
+  };
+
+  const handleEditProject = (project: Project) => {
+    setSelectedProject(project);
+    setShowModal(true);
+  };
+
+  const handleCreateProject = () => {
+    setSelectedProject(undefined); 
+    setShowModal(true);
+  };
+  
+ const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+  };
+  
   const columns = [
     { name: 'ID', selector: (row: Project) => row.id, sortable: true },
     { name: 'Nombre', selector: (row: Project) => row.name, sortable: true },
@@ -116,69 +151,50 @@ const ProjectManagement = () => {
       },
   ];
   
-  const handleShowDeleteModal = (project: Project) => {
-    setProjectToDelete(project);
-    setShowDeleteModal(true);
-  };
-
-  const handleConfirmDeleteRole = async () => {
-    if (projectToDelete) {
-      await handleDeleteProject(projectToDelete.id);
-    }
-    setShowDeleteModal(false); 
-  };
-
-  const handleEditProject = (project: Project) => {
-    setSelectedProject(project);
-    setShowModal(true);
-  };
-
-  // Función para manejar la creación de un nuevo rol
-  const handleCreateProject = () => {
-    setSelectedProject(undefined); // Cambiado de null a undefined
-    setShowModal(true);
-  };
-  
- // Cerrar el modal
- const handleCloseModal = () => {
-    setShowModal(false);
-  };
-
-  // Cerrar el modal de eliminación
-  const handleCloseDeleteModal = () => {
-    setShowDeleteModal(false);
-  };
   return (
-    <div>
-      <h1>Gestión de Proyectos</h1>
-      <button onClick={() => setShowModal(true)}>Agregar Proyecto</button>
-      <DataTable
-        columns={columns}
-        data={projects}
-        pagination
-      />
-      {showModal && (
+    <div className="container mx-auto p-4">
+      <h1 className='text-2xl font-bold mb-4'>Gestión de Proyectos</h1>
+      <button 
+        onClick={handleCreateProject}
+        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+        >
+          Agregar Proyecto
+        </button>
+
         <ModalComponent
           show={showModal}
           title={selectedProject ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
           closeModal={handleCloseModal}
-        />
-      )}
-      {showDeleteModal && (
-        <ModalDeleteComponent
-          show={showDeleteModal}
-          title="Confirmar Eliminación"
-          closeModal={handleCloseDeleteModal}
-          onConfirm={handleConfirmDeleteRole}
+        >
+          <ProjectForm
+            onSave={handleSaveProject}
+            initialData={selectedProject}
           />
-      )}
-      {showAlert && (
+        </ModalComponent>
+
+        <ModalDeleteComponent
+        show={showDeleteModal}
+        title="Confirmar Eliminación"
+        closeModal={handleCloseDeleteModal}
+        onConfirm={handleConfirmDeleteRole}
+      >
+        <p>¿Estás seguro de que deseas eliminar el rol {projectToDelete?.name}?</p>
+      </ModalDeleteComponent>
+
+      <DataTable
+        columns={columns}
+        data={Array.isArray(projects) ? projects : []}
+        pagination
+        highlightOnHover
+        striped
+        responsive
+        noDataComponent="No hay proyectos disponibles"
+      />
         <AlertComponent 
         show={showAlert}
         type={alertType}
         message={alertMessage} 
         onClose={setShowAlert} />
-      )}
     </div>
   );
 };
