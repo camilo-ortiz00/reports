@@ -7,6 +7,7 @@ interface DeliverablesTableData {
   report_id: number;
   description: string;
   date: string;
+  support_annex: string;
   approved_changes: string;
   contingency_plan: string;
 }
@@ -20,6 +21,7 @@ const DeliverableTable: React.FC<DeliverablesTableProps> = ({ deliverables }) =>
   const columns: Column<DeliverablesTableData>[] = useMemo(() => [
   {  Header: 'N°', accessor: 'id'},
   {Header: 'ENTREGABLE', accessor: 'description'},
+  {Header: 'ANEXO DEL ENTREGABLE', accessor: 'support_annex',},
   {Header: 'FECHA DE EJECUCIÓN', accessor: 'date'},
   {Header: 'CAMBIOS APROVADOS POR SUPERVISOR',accessor: 'approved_changes'},
   {Header: 'PLAN DE CONTIGENCIA', accessor: 'contingency_plan'},

@@ -1,23 +1,58 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
+import multer from 'multer';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { method } = req;
+const upload = multer({
+  limits: { fileSize: 2 * 1024 * 1024 }, // Límite de 2MB
+  fileFilter: (req, file, cb) => {
+    const validFileTypes = /pdf|doc|docx|png/;
+    const extname = validFileTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = validFileTypes.test(file.mimetype);
 
-  switch (method) {
-    case 'GET':
-      return getAnnexes(req, res);
-    case 'POST':
-      return createAnnex(req, res);
-    case 'PUT':
-      return updateAnnex(req, res);
-    case 'DELETE':
-      return deleteAnnex(req, res);
-    default:
-      res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
-      return res.status(405).end(`Method ${method} Not Allowed`);
+    if (extname && mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error('Error: El archivo debe ser un PDF, Word o PNG.'));
+  },
+});
+
+// Función auxiliar para utilizar `multer` en Next.js
+const runMiddleware = (req: NextApiRequest, res: NextApiResponse, fn: any) => {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result: any) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+};
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  try {
+    // Usa el middleware de `multer` para manejar la subida de archivos
+    await runMiddleware(req, res, upload.single('file'));
+
+    const { method } = req;
+
+    switch (method) {
+      case 'GET':
+        return getAnnexes(req, res);
+      case 'POST':
+        return createAnnex(req, res);
+      case 'PUT':
+        return updateAnnex(req, res);
+      case 'DELETE':
+        return deleteAnnex(req, res);
+      default:
+        res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+        return res.status(405).end(`Method ${method} Not Allowed`);
+    }
+  } catch (error) {
+    return res.status(400).json({ error: (error as Error).message });
   }
 }
 
@@ -44,16 +79,19 @@ async function getAnnexes(req: NextApiRequest, res: NextApiResponse) {
 
 // Crear un nuevo anexo
 async function createAnnex(req: NextApiRequest, res: NextApiResponse) {
-  const { report_id, description, url } = req.body;
+  const { report_id, description } = req.body;
 
-  if (!description || !url || !report_id) {
+  if (!description || !req.file || !report_id) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 
   try {
+    const fileBuffer = fs.readFileSync(req.file.path); // Convierte el archivo a un buffer
+
     const newAnnex = await prisma.annex.create({
-      data: { description, url, report_id: Number(report_id) },
+      data: { description, file: fileBuffer, report_id: Number(report_id) },
     });
+
     return res.status(201).json(newAnnex);
   } catch (error) {
     console.error(error);
@@ -63,16 +101,16 @@ async function createAnnex(req: NextApiRequest, res: NextApiResponse) {
 
 // Actualizar un anexo existente
 async function updateAnnex(req: NextApiRequest, res: NextApiResponse) {
-  const { id, description, url } = req.body;
+  const { id, description, file } = req.body;
 
-  if (!id || !description || !url) {
+  if (!id || !description || !file) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 
   try {
     const updatedAnnex = await prisma.annex.update({
       where: { id: Number(id) },
-      data: { description, url },
+      data: { description, file },
     });
     return res.status(200).json(updatedAnnex);
   } catch (error) {

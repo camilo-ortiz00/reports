@@ -131,17 +131,23 @@ const ProjectManagement = () => {
     { name: 'Nombre', selector: (row: Project) => row.name, sortable: true },
     { name: 'Descripción', selector: (row: Project) => row.description },
     {
+      name: 'Componente', // Columna para mostrar los usuarios asignados
+      selector: (row: Project) => (
+          row.component ? row.component.name : 'Sin asignar'
+      ),
+    },
+    {
         name: 'Acciones',
         cell: (row: Project) => (
           <div>
             <button
-              className="bg-blue-500 text-white px-4 py-1 rounded mr-2"
+              className="bg-blue-500 text-white font-bold px-4 py-1 rounded mr-2"
               onClick={() => handleEditProject(row)}
             >
               Editar
             </button>
             <button
-              className="bg-red-500 text-white px-4 py-1 rounded"
+              className="bg-red-500 text-white font-bold px-4 py-1 rounded"
               onClick={() => handleShowDeleteModal(row)}
             >
               Eliminar
@@ -156,7 +162,7 @@ const ProjectManagement = () => {
       <h1 className='text-2xl font-bold mb-4'>Gestión de Proyectos</h1>
       <button 
         onClick={handleCreateProject}
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+        className="mt-4 mb-8 px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-700"
         >
           Agregar Proyecto
         </button>
@@ -182,6 +188,7 @@ const ProjectManagement = () => {
       </ModalDeleteComponent>
 
       <DataTable
+      className='card bg-gray-100 p-4 shadow-lg rounded'
         columns={columns}
         data={Array.isArray(projects) ? projects : []}
         pagination

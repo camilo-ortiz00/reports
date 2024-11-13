@@ -1,4 +1,3 @@
-// pages/reports/Page.tsx
 import React, { useState, useEffect } from 'react';
 import { getSession, useSession } from 'next-auth/react';
 import TechnicalSummaryTable from '../Tables/TechnicalSummaryTable'
@@ -14,6 +13,8 @@ import AlertComponent from '@/components/Alert';
 import SummaryAlert from '@/components/AlertSummary';
 import ModalDeleteComponent from '@/components/ModalEliminacion';
 import { Project } from '@/model/projects.props';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBan, faCirclePlus, faFloppyDisk, faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 const Page = () => {
   const { data: session, status } = useSession();
@@ -292,7 +293,7 @@ const handleCreateReport = async () => {
 
 const handleCreateTechnicalSummary = async (technical: TechnicalSummaryData) => {
   console.log('Datos a enviar:', technical); 
-  const { report_id, id, obtained_result, product_description, support_annex, observations } = technical;
+  const { report_id, id, name_technical, obtained_result, product_description, support_annex_id, observations } = technical;
 
   try {
     const method = id ? 'PUT' : 'POST';
@@ -303,10 +304,11 @@ const handleCreateTechnicalSummary = async (technical: TechnicalSummaryData) => 
       },
       body: JSON.stringify({
         id,
-        report_id: report_id, 
+        report_id: report_id,
+        name_technical, 
         obtained_result,
         product_description,
-        support_annex: support_annex || '',
+        support_annex_id: support_annex_id || '',
         observations: observations || '',
       }), 
     });
@@ -392,10 +394,10 @@ const handleCreateDeliverable = async (deliverables: DeliverableData) => {
 
 const handleCreateAnnex = async (annexes: AnnexData) => {
   console.log('Datos a enviar:', annexes);
-  const { report_id, id, description, url } = annexes;
+  const { report_id, id, description, file } = annexes;
 
-  if (!description || !url) {
-    setAlertMessage('La descripción y la URL son necesarias para crear un anexo.');
+  if (!description || !file) {
+    setAlertMessage('La descripción y la archivo son necesarias para crear un anexo.');
     setAlertType('error');
     setShowAlert(true);
     return;
@@ -412,7 +414,7 @@ const handleCreateAnnex = async (annexes: AnnexData) => {
         id,
         report_id: report_id,
         description,
-        url,
+        file,
       }),
     });
 
@@ -607,8 +609,7 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
                 <li key={report.id}>
                 <label className="cursor-pointer flex items-center">
                 <input
-                  type="checkbox"
-                  defaultChecked 
+                  type="checkbox" 
                   className="checkbox checkbox-success checkbox-lg"
                   checked={selectedReportId === report.id}
                   onChange={() => {
@@ -685,53 +686,25 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
               <div className='flex flex-col border-l border-gray-400 m-4'>
               <button
                 onClick={handleEditClick}
-                className="h-20 w-16 mt-4 px-5 py-1 ml-4 text-white rounded transition-transform transform hover:scale-105"
-              >
+                className={`h-12 w-12 mt-4 ml-4 rounded text-black p-2 border border-gray-400 rounded transition-transform transform hover:scale-105 flex items-center justify-center`}
+                >
               {isEditing ? (
-                <svg
-                  className="w-6 h-6 text-gray-800 dark:text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="5"
-                  height="1"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M6 16v-3h.375a.626.626 0 0 1 .625.626v1.749a.626.626 0 0 1-.626.625H6Zm6-2.5a.5.5 0 1 1 1 0v2a.5.5 0 0 1-1 0v-2Z"/>
-                  <path fillRule="evenodd" d="M11 7V2h7a2 2 0 0 1 2 2v5h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-1a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2H3a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h6a2 2 0 0 0 2-2Zm7.683 6.006 1.335-.024-.037-2-1.327.024a2.647 2.647 0 0 0-2.636 2.647v1.706a2.647 2.647 0 0 0 2.647 2.647H20v-2h-1.335a.647.647 0 0 1-.647-.647v-1.706a.647.647 0 0 1 .647-.647h.018ZM5 11a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h1.376A2.626 2.626 0 0 0 9 15.375v-1.75A2.626 2.626 0 0 0 6.375 11H5Zm7.5 0a2.5 2.5 0 0 0-2.5 2.5v2a2.5 2.5 0 0 0 5 0v-2a2.5 2.5 0 0 0-2.5-2.5Z" clipRule="evenodd"/>
-                  <path d="M9 7V2.221a2 2 0 0 0-.5.365L4.586 6.5a2 2 0 0 0-.365.5H9Z"/>
-                </svg>
-                ) : (
-                <svg
-                  className="w-12 h-12 text-gray-800 dark:text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="10"
-                  height="1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-                />
-                </svg>
-                )}              
-                </button>
-                {isEditing && (
-                <button
-                  onClick={() => {
-                    setIsEditing(false); 
-                    setSummaryText(selectedReport?.summary || '');
-                  }}
-                  className="h-16 w-16 items-alight-center mt-4 px-5 py-1 ml-4 bg-red-700 text-white rounded hover:bg-red-800 transition-transform transform hover:scale-105"
-                >
-                  <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18 17.94 6M18 18 6.06 6"/>
-                  </svg>
-                </button>
-                )}
+                <FontAwesomeIcon icon={faFloppyDisk} size="2x"/>
+              ) : (
+                <FontAwesomeIcon icon={faPenToSquare} size="2x"/>
+              )}            
+              </button>
+              {isEditing && (
+              <button
+                onClick={() => {
+                  setIsEditing(false); 
+                  setSummaryText(selectedReport?.summary || '');
+                }}
+                className="h-12 w-12 items-alight-center mt-4 px-2 py-1 ml-4 bg-red-700 text-white rounded hover:bg-red-800 transition-transform transform hover:scale-105"
+              >
+                <FontAwesomeIcon icon={faBan} size='2x'/>           
+              </button>
+              )}
               </div>
             </div>
           </div>
@@ -754,43 +727,23 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
             key={refresh}
           />
           <div className="flex flex-col border-l border-gray-400 m-4 ml-8 mt-16">
-            <button
+          <button
               onClick={handleButtonClick('technical')}
-              className={`${styles.createButton} h-16 w-16 mt-4 ml-4 px-2 py-2 bg-green-500 text-white rounded hover:bg-green-700 shadow-lg transition-transform transform hover:scale-105`}
-              >
-            {selectedReportTechnical ? (
-            
-             <svg
-             className="w-12 h-12 text-gray-800 dark:text-white"
-             xmlns="http://www.w3.org/2000/svg"
-             width="10"
-             height="1"
-             fill="none"
-             viewBox="0 0 24 24"
-           >
-           <path
-             stroke="currentColor"
-             strokeLinecap="round"
-             strokeLinejoin="round"
-             strokeWidth="2"
-             d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-           />
-           </svg>
-            ) : (
-            <svg className="w-12 h-12 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-            </svg>
+              className={`h-12 w-12 mt-4 ml-4 bg-green text-green-400 rounded text-black transition-transform transform hover:scale-105 flex items-center justify-center`}
+            >
+              {selectedReportTechnical ? (
+                <FontAwesomeIcon icon={faPenToSquare} size="2x" className="p-2 border border-gray-400 rounded" />
+              ) : (
+                <FontAwesomeIcon icon={faCirclePlus} size="3x" />
               )}
             </button>
             {selectedReportTechnical && (
             <button
               onClick={() => handleDeleteClick(selectedReportTechnical.id!, 'activity')}
-              className={`${styles.deleteButton} h-16 w-16 mt-4 px-2 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700 transition-transform transform hover:scale-105`}
+              className={`h-12 w-12 mt-4 px-2 py-2 ml-4 bg-red-700 text-white rounded hover:bg-red-700 transition-transform transform hover:scale-105`}
             >
-              <svg className="w-12 h-12 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18 17.94 6M18 18 6.06 6"/>
-              </svg>            
-            </button>
+              <FontAwesomeIcon icon={faTrash} size='2x'/>
+              </button>
             )}
             <ModalComponent
               show={showModalTechnical}
@@ -802,6 +755,7 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
               initialData={selectedReportTechnical || undefined}
               handleClose={handleCloseModal}
               selectedReport={reportSelection}
+              annexes={annexes}
               />
             </ModalComponent>
           </div>
@@ -819,43 +773,23 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
               key={refresh}
             />
           <div className="flex flex-col border-l border-gray-400 m-4 ml-8 mt-16">
-            <button
+          <button
               onClick={handleButtonClick('deliverable')}
-              className={`${styles.createButton} h-16 w-16 mt-4 ml-4 px-2 py-2 bg-green-500 text-white rounded hover:bg-green-700 shadow-lg transition-transform transform hover:scale-105`}
-              >
-            {selectedReportDeliverable ? (
-            
-             <svg
-             className="w-12 h-12 text-gray-800 dark:text-white"
-             xmlns="http://www.w3.org/2000/svg"
-             width="10"
-             height="1"
-             fill="none"
-             viewBox="0 0 24 24"
-           >
-           <path
-             stroke="currentColor"
-             strokeLinecap="round"
-             strokeLinejoin="round"
-             strokeWidth="2"
-             d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-           />
-           </svg>
-            ) : (
-            <svg className="w-12 h-12 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-            </svg>
+              className={`${styles.createButton} h-12 w-12 mt-4 ml-4 bg-green text-green-400 rounded text-black transition-transform transform hover:scale-105 flex items-center justify-center`}
+            >
+              {selectedReportDeliverable ? (
+                <FontAwesomeIcon icon={faPenToSquare} size="2x" className="p-2 border border-gray-400 rounded" />
+              ) : (
+                <FontAwesomeIcon icon={faCirclePlus} size="3x" />
               )}
             </button>
             {selectedReportDeliverable && (
             <button
-              onClick={() => handleDeleteClick(selectedReportDeliverable.id!, 'activity')}
-              className={`${styles.deleteButton} h-16 w-16 mt-4 px-2 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700 transition-transform transform hover:scale-105`}
+              onClick={() => handleDeleteClick(selectedReportDeliverable.id!, 'deliverable')}
+              className={`${styles.deleteButton} h-12 w-12 mt-4 px-2 py-2 ml-4 bg-red-700 text-white rounded hover:bg-red-700 transition-transform transform hover:scale-105`}
             >
-              <svg className="w-12 h-12 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18 17.94 6M18 18 6.06 6"/>
-              </svg>            
-            </button>
+              <FontAwesomeIcon icon={faTrash} size='2x'/>
+              </button>
             )}
           <ModalComponent
               show={showModalDeliverable}
@@ -886,40 +820,20 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
             <div className="flex flex-col border-l border-gray-400 m-4 ml-8 mt-16">
             <button
               onClick={handleButtonClick('annex')}
-              className={`${styles.createButton} h-16 w-16 mt-4 ml-4 px-2 py-2 bg-green-500 text-white rounded hover:bg-green-700 shadow-lg transition-transform transform hover:scale-105`}
-              >
-            {selectedReportAnnex ? (
-            
-             <svg
-             className="w-12 h-12 text-gray-800 dark:text-white"
-             xmlns="http://www.w3.org/2000/svg"
-             width="10"
-             height="1"
-             fill="none"
-             viewBox="0 0 24 24"
-           >
-           <path
-             stroke="currentColor"
-             strokeLinecap="round"
-             strokeLinejoin="round"
-             strokeWidth="2"
-             d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-           />
-           </svg>
-            ) : (
-            <svg className="w-12 h-12 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-            </svg>
+              className={`${styles.createButton} h-12 w-12 mt-4 ml-4 bg-green text-green-400 rounded text-black transition-transform transform hover:scale-105 flex items-center justify-center`}
+            >
+              {selectedReportAnnex ? (
+                <FontAwesomeIcon icon={faPenToSquare} size="2x" className="p-2 border border-gray-400 rounded" />
+              ) : (
+                <FontAwesomeIcon icon={faCirclePlus} size="3x" />
               )}
             </button>
             {selectedReportAnnex && (
             <button
-              onClick={() => handleDeleteClick(selectedReportAnnex.id!, 'activity')}
-              className={`${styles.deleteButton} h-16 w-16 mt-4 px-2 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-700 transition-transform transform hover:scale-105`}
+              onClick={() => handleDeleteClick(selectedReportAnnex.id!, 'annex')}
+              className={`${styles.deleteButton} h-12 w-12 mt-4 px-2 py-2 ml-4 bg-red-700 text-white rounded hover:bg-red-700 transition-transform transform hover:scale-105`}
             >
-              <svg className="w-12 h-12 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18 17.94 6M18 18 6.06 6"/>
-              </svg>            
+              <FontAwesomeIcon icon={faTrash} size='2x'/>
             </button>
             )}
             <ModalComponent
@@ -936,8 +850,6 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
             </ModalComponent>
           </div>
         </div>
-            
-           
         </div>
 
         {showDeleteModal && (
@@ -948,7 +860,7 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
             onConfirm={confirmDelete}
           >
             <p>
-              ¿Estás seguro de que deseas eliminar {itemToDelete?.type === 'annex' ? 'este anexo' : itemToDelete?.type === 'deliverable' ? 'este entregable': itemToDelete?.type === 'activity' ? 'esta actividad' : 'este informe'}?
+              ¿Estás seguro de que deseas eliminar {itemToDelete?.type === 'annex' ? 'este anexo' : itemToDelete?.type === 'deliverable' ? 'este entregable': itemToDelete?.type === 'activity' ? 'esta sinopsis técnica' : 'este informe'}?
             </p>
           </ModalDeleteComponent>
         )}

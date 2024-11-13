@@ -8,6 +8,7 @@ interface TechnicalFormProps {
   handleCreateTechnicalSummary: (data: TechnicalSummaryData) => void;
   handleClose: () => void;
   initialData?: TechnicalSummaryData;
+  annexes: { id: number; description: string }[]; // Cambié 'url' a 'description'
 }
 
 const TechnicalForm: FC<TechnicalFormProps> = ({
@@ -15,14 +16,15 @@ const TechnicalForm: FC<TechnicalFormProps> = ({
   initialData,
   handleClose,
   selectedReport,
+  annexes, // Asegúrate de desestructurar 'annexes' aquí
 }) => {
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<TechnicalSummaryData>({
     defaultValues: initialData || {
-      name: '',
+      name_technical: '',
       obtained_result: '', 
       product_description: '', 
       observations: '',
-      support_annex: ''
+      support_annex_id: ''
     },
   });
 
@@ -33,8 +35,7 @@ const TechnicalForm: FC<TechnicalFormProps> = ({
       });
     }
   }, [initialData, setValue]);
-  console.log('initialData:', initialData);
-
+  
   const onSubmit = (data: TechnicalSummaryData) => {
     const reportId = (initialData?.report_id || selectedReport?.id) ?? 0; 
 
@@ -42,6 +43,8 @@ const TechnicalForm: FC<TechnicalFormProps> = ({
       console.error('No se pudo obtener el report_id.');
       return;
     }
+    console.log('Datos a enviar:', { ...data, report_id: reportId });
+
     handleCreateTechnicalSummary({ ...data, report_id: reportId });
   };
 
@@ -49,69 +52,75 @@ const TechnicalForm: FC<TechnicalFormProps> = ({
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <div className={styles.container}>
         <div className={styles.col}>
-         <label htmlFor="name" className='font-bold'>Nombre de la actividad</label>
-            <input
-              id="name"
-              className={`${styles.formControl} input input-bordered input-md`}
-              type="text"
-              {...register('name', /*{ required: 'Soporte del anexo es requerido' }*/)}
-            />
-            {errors.name && (
-              <p className="form_error">{errors.name.message}</p>
-            )}
-          </div>
+          <label htmlFor="name_technical" className='font-bold'>Nombre de la actividad</label>
+          <input
+            id="name_technical"
+            className={`${styles.formControl} input input-bordered input-md`}
+            type="text"
+            {...register('name_technical')}
+          />
+          {errors.name_technical && (
+            <p className="form_error">{errors.name_technical.message}</p>
+          )}
+        </div>
 
-          <div className={styles.col}>
-            <label htmlFor="obtained_result" className='font-bold'>Resultado obtenido</label>
-            <input
-              id="obtained_result"
-              className={`${styles.formControl} input input-bordered input-md`}
-              type="text"
-              {...register('obtained_result', /*{ required: 'Resultado obtenido es requerido' }*/)}
-            />
-            {errors.obtained_result && (
-              <p className="form_error">{errors.obtained_result.message}</p>
-            )}
-          </div>
+        <div className={styles.col}>
+          <label htmlFor="obtained_result" className='font-bold'>Resultado obtenido</label>
+          <input
+            id="obtained_result"
+            className={`${styles.formControl} input input-bordered input-md`}
+            type="text"
+            {...register('obtained_result')}
+          />
+          {errors.obtained_result && (
+            <p className="form_error">{errors.obtained_result.message}</p>
+          )}
+        </div>
 
-          <div className={styles.col}>
-            <label htmlFor="product_description" className="floatingInput font-bold">Producto/Descripción</label>
-            <input
-              id="product_description"
-              className={`${styles.formControl} input input-bordered input-md`}
-              type="text"
-              {...register('product_description')}
-            />
-            {errors.product_description && 
-            <p className="form_error">{errors.product_description.message}</p>}
-          </div>
+        <div className={styles.col}>
+          <label htmlFor="product_description" className="floatingInput font-bold">Producto/Descripción</label>
+          <input
+            id="product_description"
+            className={`${styles.formControl} input input-bordered input-md`}
+            type="text"
+            {...register('product_description')}
+          />
+          {errors.product_description && 
+          <p className="form_error">{errors.product_description.message}</p>}
+        </div>
 
-          <div className={styles.col}>
-            <label htmlFor="support_annex" className='font-bold'>Soporte del anexo</label>
-              <input
-                id="support_annex"
-                className={`${styles.formControl} input input-bordered input-md`}
-                type="text"
-                {...register('support_annex', /*{ required: 'Soporte del anexo es requerido' }*/)}
-              />
-              {errors.support_annex && (
-                <p className="form_error">{errors.support_annex.message}</p>
-              )}
-          </div>
+        <div className={styles.col}>
+          <label htmlFor="support_annex_id" className='font-bold'>Anexo de la Sinopsis</label>
+          <select
+            id="support_annex_id"
+            className={`${styles.formControl} input input-bordered input-md`}
+            {...register('support_annex_id')}
+          >
+            <option value="">Selecciona un anexo</option>
+            {annexes.map((annex) => (
+              <option key={annex.id} value={annex.id}>
+                {annex.description}
+              </option>
+            ))}
+          </select>
+          {errors.support_annex_id && (
+            <p className="form_error">{errors.support_annex_id.message}</p>
+          )}
+        </div>
 
-          <div className={styles.col}>
-            <label htmlFor="observations" className="floatingInput font-bold" style={{ display: 'block', marginBottom: '10px' }}>Observaciones</label>
-            <textarea
-              id="observations"
-              className="textarea textarea-bordered textarea-lg text-sm w-full"
-              {...register('observations')}
-            ></textarea>
-          </div>
+        <div className={styles.col}>
+          <label htmlFor="observations" className="floatingInput font-bold" style={{ display: 'block', marginBottom: '10px' }}>Observaciones</label>
+          <textarea
+            id="observations"
+            className="textarea textarea-bordered textarea-lg text-sm w-full"
+            {...register('observations')}
+          ></textarea>
+        </div>
       </div>
       <div className={styles.actions}>
-      <button type="submit" className="action-button btn btn-info">
-        {!initialData || !initialData.report_id ? 'Crear Actividad' : 'Editar Actividad'}
-      </button>
+        <button type="submit" className="action-button btn btn-info">
+          {!initialData || !initialData.report_id ? 'Crear Actividad' : 'Editar Actividad'}
+        </button>
         <button type="button" className="action-button btn btn-error" onClick={handleClose}>Cancelar</button>
       </div>
     </form>

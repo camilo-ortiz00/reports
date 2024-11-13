@@ -165,7 +165,7 @@ const handleCreateRole = () => {
       <h2 className="text-2xl font-bold mb-4">Roles</h2>
       <button
         onClick={handleCreateRole}
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+        className="mt-4 mb-8 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
       >
         Crear Nuevo Rol
       </button>
@@ -198,6 +198,7 @@ const handleCreateRole = () => {
       />
 
       <DataTable
+        className='card bg-gray-100 p-4 shadow-lg rounded'
         columns={columns}
         data={Array.isArray(roles) ? roles : []}
         pagination

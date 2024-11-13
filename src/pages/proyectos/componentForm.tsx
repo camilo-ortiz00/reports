@@ -1,75 +1,66 @@
-// components/ComponentForm.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Component } from '@/model/projects.props';
+import { User } from '@/model/user.props';
 
 interface ComponentFormProps {
-  onSave: (component: Component) => void;
+  onSave: (component: Partial<Component> & { userId: number | null }) => void;
   initialData?: Component;
+  users: User[];
 }
 
-const ComponentForm: React.FC<ComponentFormProps> = ({ onSave, initialData }) => {
+const ComponentForm: React.FC<ComponentFormProps> = ({ onSave, initialData, users }) => {
   const [name, setName] = useState(initialData?.name || '');
   const [description, setDescription] = useState(initialData?.description || '');
-  const [workLines, setWorkLines] = useState(initialData?.work_lines || '');
-  const [projectId, setProject] = useState(initialData?.project_id || 0);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(initialData?.user_id || null);
+  
+  const handleUserChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const userId = parseInt(event.target.value, 10);
+    setSelectedUserId(isNaN(userId) ? null : userId);
+  };
 
-  useEffect(() => {
-    if (initialData) {
-      setName(initialData.name);
-      setDescription(initialData.description);
-      setWorkLines(initialData.work_lines);
-      setProject(initialData.project_id);
-    }
-  }, [initialData]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newComponent = {
-      id: initialData?.id || 0,
-      name,
-      description,
-      work_lines: workLines,
-      project_id: projectId,
-      project: {
-        id: projectId,
-        name: initialData?.project?.name || 'Default Component',
-      }
-    };
-    onSave(newComponent);
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    onSave({ id: initialData?.id, name, description, userId: selectedUserId });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 bg-white rounded shadow">
+    <form onSubmit={handleSubmit} className="p-4">
       <div className="mb-4">
-        <label className="block text-sm font-bold">Nombre del Componente</label>
+        <label className="block text-sm font-medium">Nombre</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="input input-bordered input-md w-full"
+          className="border rounded w-full px-2 py-1"
           required
         />
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-bold">Descripción</label>
+        <label className="block text-sm font-medium">Descripción</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="textarea textarea-bordered w-full"
-          required
+          className="border rounded w-full px-2 py-1"
         />
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-bold">Líneas de Trabajo</label>
-        <textarea
-          value={workLines}
-          onChange={(e) => setWorkLines(e.target.value)}
-          className="textarea textarea-bordered w-full"
-          required
-        />
+        <label className="block text-sm font-medium">Asignar Coordinador</label>
+        <select
+          value={selectedUserId || 0}
+          onChange={handleUserChange}
+          className="border rounded w-full px-2 py-1"
+        >
+          <option value="">Sin asignar</option>
+          {users.map((user) => (
+            <option key={user.id} value={user.id}>
+              {user.name}
+            </option>
+          ))}
+        </select>
       </div>
-      <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">
-        {initialData ? 'Editar Componente' : 'Crear Componente'}
+      <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+        Guardar
       </button>
     </form>
   );

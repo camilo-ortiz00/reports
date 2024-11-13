@@ -20,6 +20,7 @@ const DeliverableForm: FC<DeliverableFormProps> = ({
     defaultValues: initialData || {
       description: '',
       date: '',
+      support_annex: '',
       approved_changes: '',
       contingency_plan: '',
     },
@@ -77,6 +78,19 @@ const DeliverableForm: FC<DeliverableFormProps> = ({
               {...register('approved_changes', /*{ required: 'Cambios aprobados es requerido' }*/)}
             />
             {errors.approved_changes && <p className="form_error">{errors.approved_changes.message}</p>}
+          </div>
+
+          <div className={styles.col}>
+            <label htmlFor="support_annex" className='font-bold'>Anexo del entregable</label>
+              <input
+                id="support_annex"
+                className={`${styles.formControl} file-input file-input-bordered input-md`}
+                type="file"
+                {...register('support_annex', /*{ required: 'Soporte del anexo es requerido' }*/)}
+              />
+              {errors.support_annex && (
+                <p className="form_error">{errors.support_annex.message}</p>
+              )}
           </div>
 
           <div className={styles.col}>

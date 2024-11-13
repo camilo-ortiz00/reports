@@ -5,9 +5,10 @@ import styles from '../reports.module.css';
 interface TechnicalSynopsisData {
   id?: number;
   report_id: number;
+  name_technical: string;
   obtained_result: string;
   product_description: string;
-  support_annex: string;
+  support_annex_id: string;
   observations: string;
 }
 
@@ -18,9 +19,10 @@ interface TechnicalSynopsisTableProps {
 const TechnicalSynopsisTable: React.FC<TechnicalSynopsisTableProps> = ({ technical }) => {
   const columns: Column<TechnicalSynopsisData>[] = useMemo(() => [
     { Header: 'N° Actividad', accessor: 'id' },
+    { Header: 'NOMBRE DE LA ACTIVIDAD', accessor: 'name_technical' },
     { Header: 'RESULTADO OBTENIDO', accessor: 'obtained_result' },
     { Header: 'PRODUCTO/DESCRIPCIÓN', accessor: 'product_description' },
-    { Header: 'ANEXO SOPORTE DEL DESARROLLO Y OBTENCIÓN DE RESULTADOS', accessor: 'support_annex' },
+    { Header: 'ANEXO SOPORTE DEL DESARROLLO Y OBTENCIÓN DE RESULTADOS: ACTIVIDAD', accessor: 'support_annex_id' },
     { Header: 'OBSERVACIONES', accessor: 'observations' },
   ], []);
 

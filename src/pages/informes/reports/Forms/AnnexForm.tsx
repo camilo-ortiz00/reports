@@ -19,8 +19,7 @@ const AnnexForm: FC<AnnexFormProps> = ({
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<AnnexData>({
     defaultValues: initialData || {
        description: '',
-        url: '' 
-      },
+       file: '' },
   });
 
   useEffect(() => {
@@ -33,13 +32,25 @@ const AnnexForm: FC<AnnexFormProps> = ({
 
   const onSubmit = (data: AnnexData) => {
     const reportId = (initialData?.report_id || selectedReport?.id) ?? 0; // Asegura un 'report_id' numérico
-
+  
     if (!reportId) {
       console.error('No se pudo obtener el report_id.');
       return;
     }
+  
+    const fileInput = (data.file as unknown as File[])[0]; // Asegura que sea un archivo
+  
+    // Validar el tipo de archivo
+    const validFileTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/png'];
+    if (!validFileTypes.includes(fileInput.type)) {
+      alert('El archivo debe ser un PDF, Word o PNG.');
+      return;
+    }
+  
+    // Subir el archivo y crear el anexo
     handleCreateAnnex({ ...data, report_id: reportId });
   };
+  
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
@@ -59,16 +70,17 @@ const AnnexForm: FC<AnnexFormProps> = ({
           </div>
 
           <div className={styles.col}>
-            <label htmlFor="url" className="floatingInput font-bold">URL del anexo</label>
+            <label htmlFor="file" className="floatingInput font-bold">Archivo del anexo</label>
             <input
-              id="url"
-              className={`${styles.formControl} input input-bordered input-md`}
-              type="text"
-              {...register('url' as const,
+              id="file"
+              className={`${styles.formControl} file-input file-input-bordered input-md`}
+              type="file"
+               accept=".pdf, .doc, .docx, .png"
+              {...register('file' as const,
               )}
             />
-            {errors.url && 
-            <p className="form_error">{errors.url.message}</p>}
+            {errors.file && 
+            <p className="form_error">{errors.file.message}</p>}
           </div>
 
       </div>

@@ -28,25 +28,30 @@ export interface DeliverableData {
   report_id: number;
   description: string;
   date: string;
+  support_annex: string;
   approved_changes: string;
   contingency_plan: string;
 }
 
 export interface AnnexData {
-  id?: number;
+  id: number;
   report_id: number;
   description: string;
-  url: string;
+  file: string;
 }
 
 export interface TechnicalSummaryData {
   id?: number;
   report_id: number;
-  name: string;
+  name_technical: string;
   obtained_result: string;
   product_description: string;
-  support_annex: string;
+  support_annex_id: string;
   observations: string;
+  annex: {
+    id: number;
+    description: string;
+  };
 }
 
 export interface TechnicalFormProps {

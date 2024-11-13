@@ -123,6 +123,7 @@ const AssignRoleForm: React.FC = () => {
     <div className="flex flex-col justify-center items-center mt-10 w-4/5 mx-auto">
       <DataTable
         title="Asignar Roles a Usuarios"
+        className='card bg-gray-100 p-4 shadow-lg rounded'
         columns={columns}
         data={users}
         pagination

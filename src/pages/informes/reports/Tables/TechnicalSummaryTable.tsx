@@ -27,7 +27,7 @@ const TechnicalSummaryTable: React.FC<TechnicalFormProps> = ({
     },
     {
       name: 'Actividad',
-      selector: (row: TechnicalSummaryData) => row.obtained_result || 'Sin resultado',
+      selector: (row: TechnicalSummaryData) => row.name_technical || 'Sin resultado',
       sortable: true,
     },
     {
@@ -41,8 +41,8 @@ const TechnicalSummaryTable: React.FC<TechnicalFormProps> = ({
       sortable: true,
     },
     {
-      name: 'Soporte Anexo',
-      selector: (row: TechnicalSummaryData) => row.support_annex || 'Sin Soporte',
+      name: 'Anexo de la sinopsis',
+      selector: (row: TechnicalSummaryData) => row.annex?.description || 'Sin Soporte', // Acceder a la descripción
       sortable: true,
     },
     {
@@ -72,23 +72,22 @@ const TechnicalSummaryTable: React.FC<TechnicalFormProps> = ({
         responsive
         selectableRows
         onSelectedRowsChange={handleRowSelected}
-        
         customStyles={{
           rows: {
             style: {
-              backgroundColor: 'white', // Cambia el color de fondo de las filas
+              backgroundColor: 'white',
             },
           },
           headCells: {
             style: {
-              backgroundColor: '#f3f4f6', // Cambia el color del encabezado
-              color: '#374151', // Cambia el color del texto del encabezado
-              fontWeight: 'bold', // Negrita
+              backgroundColor: '#f3f4f6',
+              color: '#374151',
+              fontWeight: 'bold',
             },
           },
         }}
       />
-    </div> 
+    </div>
   );
 };
 

@@ -28,6 +28,7 @@ async function getComponents(req: NextApiRequest, res: NextApiResponse) {
     const components = await prisma.component.findMany({
       include: {
         projects: true,
+        user: true,
       },
     });
     return res.status(200).json(components);
@@ -39,9 +40,9 @@ async function getComponents(req: NextApiRequest, res: NextApiResponse) {
 
 // Crear un nuevo componente
 async function createComponent(req: NextApiRequest, res: NextApiResponse) {
-  const { name, description, work_lines, project_id } = req.body;
+  const { name, description, project_id, userId } = req.body;
 
-  if (!name) {
+  if (!name || !userId) {
     return res.status(400).json({ error: 'Los campos name y project_id son obligatorios' });
   }
 
@@ -50,8 +51,8 @@ async function createComponent(req: NextApiRequest, res: NextApiResponse) {
       data: {
         name,
         description: description || null,
-        work_lines: work_lines || null,
         project_id,
+        user_id: userId || null,  // Asignación de user_id opcional
       },
     });
     return res.status(201).json(newComponent);
@@ -61,12 +62,14 @@ async function createComponent(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-// Actualizar un componente existente
-async function updateComponent(req: NextApiRequest, res: NextApiResponse) {
-  const { id, name, description, work_lines } = req.body;
 
-  if (!id) {
-    return res.status(400).json({ error: 'ID es obligatorio' });
+// Actualizar un componente existente y asignar un usuario
+async function updateComponent(req: NextApiRequest, res: NextApiResponse) {
+  const { id, name, description, userId } = req.body;
+  console.log("Request Data:", req.body);
+
+  if (!id || !userId) {
+    return res.status(400).json({ error: 'ID y usuario es obligatorio' });
   }
 
   try {
@@ -75,7 +78,7 @@ async function updateComponent(req: NextApiRequest, res: NextApiResponse) {
       data: {
         name,
         description,
-        work_lines,
+        user_id: userId,
       },
     });
     res.status(200).json(updatedComponent);
@@ -84,6 +87,7 @@ async function updateComponent(req: NextApiRequest, res: NextApiResponse) {
     return res.status(500).json({ error: 'Error al actualizar el componente' });
   }
 }
+
 
 // Eliminar un componente
 async function deleteComponent(req: NextApiRequest, res: NextApiResponse) {

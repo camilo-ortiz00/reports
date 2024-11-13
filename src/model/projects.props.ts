@@ -9,15 +9,20 @@ export interface Project {
     }
   }
   
-  export interface Component {
+export interface Component {
+  id: number;
+  project_id: number;
+  user_id: number;
+  name: string;
+  description: string;
+  project: {
     id: number;
-    project_id: number;
-    work_lines: string;
     name: string;
-    description: string;
-    project:{
-      id: number;
-      name: string;
-    }
-  }
-  
+  };
+  user: {
+    id: number;
+    name: string;
+    role_id: string;
+  };
+}
+

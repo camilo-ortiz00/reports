@@ -44,7 +44,7 @@ async function getTechnicals(req: NextApiRequest, res: NextApiResponse) {
 
 // Crear
 async function createTechnical(req: NextApiRequest, res: NextApiResponse) {
-  const { report_id, obtained_result, product_description, support_annex, observations } = req.body;
+  const { report_id, name_technical, obtained_result, product_description, support_annex_id, observations } = req.body;
 
   if (!report_id || !obtained_result || !product_description) {
     return res.status(400).json({ error: 'Campos obligatorios faltantes' });
@@ -54,9 +54,10 @@ async function createTechnical(req: NextApiRequest, res: NextApiResponse) {
     const newTechnicalSummary = await prisma.technicalSummary.create({
       data: {
         report_id: Number(report_id),
+        name_technical,
         obtained_result,
         product_description,
-        support_annex: support_annex || '', 
+        support_annex_id: support_annex_id ? Number(support_annex_id) : null,
         observations: observations || '', 
       },
     });
@@ -70,7 +71,7 @@ async function createTechnical(req: NextApiRequest, res: NextApiResponse) {
 
 // Actualizar un anexo existente
 async function updateTechnical(req: NextApiRequest, res: NextApiResponse) {
-  const { id, report_id, obtained_result, product_description, support_annex, observations } = req.body;
+  const { id, report_id, name_technical, obtained_result, product_description, support_annex_id, observations } = req.body;
 
   if (!id || !report_id || !obtained_result || !product_description) {
     return res.status(400).json({ error: 'Campos obligatorios faltantes' });
@@ -81,9 +82,10 @@ async function updateTechnical(req: NextApiRequest, res: NextApiResponse) {
       where: { id: Number(id) },
       data: {
         report_id: Number(report_id),
+        name_technical,
         obtained_result,
         product_description,
-        support_annex: support_annex || '',
+        support_annex_id: support_annex_id ? Number(support_annex_id) : null,
         observations: observations || '',
       },
     });

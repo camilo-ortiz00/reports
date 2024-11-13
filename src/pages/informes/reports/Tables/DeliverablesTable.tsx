@@ -28,6 +28,11 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
       width: '15em',
     },
     {
+      name: 'Anexo del entregable',
+      selector: (row: DeliverableData) => row.support_annex || 'Sin Soporte',
+      sortable: true,
+    },
+    {
       name: 'Cambios aprobados por supervisor',
       selector: (row: DeliverableData) => row?.approved_changes || 'N/A',
       sortable: true,
