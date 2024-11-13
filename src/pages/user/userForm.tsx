@@ -41,7 +41,8 @@ const UserForm: FC<{ user: User | null; onSave: (user: User) => void; onDelete?:
       password,
       identity_document: identityDocument, // Agregar documento de identidad
       role_id: roleId, // Incluir role_id
-      role: user?.role || { id: 1, description: '', name: '' }
+      role: user?.role || { id: 1, description: '', name: '' },
+      profile_status: 0
     };
   
     onSave(updatedUser);

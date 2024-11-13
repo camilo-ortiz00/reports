@@ -63,7 +63,7 @@ async function createProject(req: NextApiRequest, res: NextApiResponse) {
 
 // Actualizar un proyecto existente
 async function updateProject(req: NextApiRequest, res: NextApiResponse) {
-  const { id, name, description } = req.body;
+  const { id, name, description, component_id } = req.body;
 
   if (!id) {
     return res.status(400).json({ error: 'ID es obligatorio' });
@@ -75,6 +75,7 @@ async function updateProject(req: NextApiRequest, res: NextApiResponse) {
       data: {
         name,
         description,
+        component_id
       },
     });
     res.status(200).json(updatedProject);

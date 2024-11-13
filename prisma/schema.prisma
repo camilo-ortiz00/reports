@@ -8,9 +8,9 @@ datasource db {
 }
 
 model User {
-  id                     Int      @id @default(autoincrement())
+  id                     Int         @id @default(autoincrement())
   name                   String
-  email                  String   @unique
+  email                  String      @unique
   date                   String?
   phone                  String?
   password               String
@@ -25,12 +25,12 @@ model User {
   contact_person_phone   String?
   contact_person_email   String?
   blood_type             String?
-  identity_document      String   @unique
+  identity_document      String      @unique
   marital_status         String?
   profile_status         Float?
-  reports                Report[]
-  role                   Role     @relation(fields: [role_id], references: [id])
   component              Component[]
+  reports                Report[]
+  role                   Role        @relation(fields: [role_id], references: [id])
 }
 
 model Role {
@@ -51,25 +51,23 @@ model Project {
 
 model Component {
   id          Int       @id @default(autoincrement())
-  user_id     Int       // Llave foránea para el usuario asignado
-  project_id  Int?
   name        String
   description String
+  user_id     Int
+  user        User      @relation(fields: [user_id], references: [id])
   projects    Project[]
-  user        User      @relation(fields: [user_id], references: [id]) 
 }
 
-
 model Report {
-  id               Int               @id @default(autoincrement())
+  id               Int                @id @default(autoincrement())
   project_id       Int
   user_id          Int
   status           Float?
   summary          String?
   annexes          Annex[]
   deliverables     Deliverable[]
-  project          Project           @relation(fields: [project_id], references: [id])
-  user             User              @relation(fields: [user_id], references: [id])
+  project          Project            @relation(fields: [project_id], references: [id])
+  user             User               @relation(fields: [user_id], references: [id])
   trackings        ReportTracking[]
   technicalSummary TechnicalSummary[]
 }
@@ -84,33 +82,33 @@ model ReportTracking {
 }
 
 model TechnicalSummary {
-  id                  Int                @id @default(autoincrement())
+  id                  Int    @id @default(autoincrement())
   report_id           Int
-  name_technical      String            
   obtained_result     String
   product_description String
   observations        String
-  support_annex_id    Int?               // Este campo puede ser opcional
-  report              Report              @relation(fields: [report_id], references: [id], onDelete: Cascade)
-  support_annex       Annex?             @relation(fields: [support_annex_id], references: [id]) // Relación opcional
+  name_technical      String
+  support_annex_id    Int?
+  report              Report @relation(fields: [report_id], references: [id], onDelete: Cascade)
+  support_annex       Annex? @relation(fields: [support_annex_id], references: [id])
 }
 
 model Deliverable {
-  id                  Int                @id @default(autoincrement())
-  report_id           Int
-  description         String
-  date                String
-  approved_changes    String
-  contingency_plan    String
-  support_annex       String              @default("Sin soporte")
-  report              Report              @relation(fields: [report_id], references: [id], onDelete: Cascade)
+  id               Int    @id @default(autoincrement())
+  report_id        Int
+  description      String
+  date             String
+  approved_changes String
+  contingency_plan String
+  support_annex    String @default("Sin soporte")
+  report           Report @relation(fields: [report_id], references: [id], onDelete: Cascade)
 }
 
 model Annex {
-  id                  Int                @id @default(autoincrement())
-  report_id           Int
-  description         String
-  file                Bytes
-  report              Report              @relation(fields: [report_id], references: [id], onDelete: Cascade)
-  technicalSummaries  TechnicalSummary[] 
+  id                 Int                @id @default(autoincrement())
+  report_id          Int
+  description        String
+  file               Bytes
+  report             Report             @relation(fields: [report_id], references: [id], onDelete: Cascade)
+  technicalSummaries TechnicalSummary[]
 }

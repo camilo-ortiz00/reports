@@ -57,6 +57,10 @@ const ProjectManagement = () => {
           return [...prevProject, updatedProject]; 
         }
       });
+      fetch('/api/projects/projects')
+      .then((res) => res.json())
+      .then((data) => setProjects(data))
+      .catch((error) => console.error('Error fetching updated components:', error));
 
       setShowModal(false);
       setAlertMessage('Proyecto guardado exitosamente');

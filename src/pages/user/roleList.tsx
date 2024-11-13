@@ -144,13 +144,13 @@ const handleCreateRole = () => {
       cell: (row: Role) => (
         <div>
           <button
-            className="bg-blue-500 text-white px-4 py-1 rounded mr-2"
+            className="bg-blue-500 text-white font-bold px-4 py-1 rounded mr-2"
             onClick={() => handleEditRole(row)}
           >
             Editar
           </button>
           <button
-            className="bg-red-500 text-white px-4 py-1 rounded"
+            className="bg-red-500 text-white font-bold px-4 py-1 rounded"
             onClick={() => handleShowDeleteModal(row)}
           >
             Eliminar
@@ -165,7 +165,7 @@ const handleCreateRole = () => {
       <h2 className="text-2xl font-bold mb-4">Roles</h2>
       <button
         onClick={handleCreateRole}
-        className="mt-4 mb-8 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+        className="mt-4 mb-8 px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-700"
       >
         Crear Nuevo Rol
       </button>

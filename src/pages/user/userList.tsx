@@ -89,13 +89,13 @@ const UserList: FC = () => {
       cell: (row: User) => (
         <div className="flex space-x-2 w-full"> {/* Asegura que el contenedor sea suficientemente ancho */}
           <button
-            className="bg-blue-500 text-white px-4 py-1 rounded whitespace-nowrap" // Asegura que el texto no se envuelva
+            className="bg-blue-500 text-white font-bold px-4 py-1 rounded whitespace-nowrap" // Asegura que el texto no se envuelva
             onClick={() => handleEditUser(row)}
           >
             Editar
           </button>
           <button
-            className="bg-green-500 text-white px-4 py-1 rounded" // Asegura que el texto no se envuelva
+            className="bg-green-500 text-white font-bold px-4 py-1 rounded" // Asegura que el texto no se envuelva
             onClick={() => {
               if (row.id !== undefined) {
                 handleViewUser(row.id);

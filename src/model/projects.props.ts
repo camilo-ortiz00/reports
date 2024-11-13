@@ -11,7 +11,6 @@ export interface Project {
   
 export interface Component {
   id: number;
-  project_id: number;
   user_id: number;
   name: string;
   description: string;

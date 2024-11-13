@@ -78,7 +78,7 @@ async function updateUser(req: NextApiRequest, res: NextApiResponse) {
     }
 
     let profile_picture: string | undefined;
-    const profilePictureFile = files.profile_picture as formidable.File | undefined;
+    const profilePictureFile = files.profile_picture as unknown as formidable.File | undefined;
 
     if (profilePictureFile && typeof profilePictureFile === 'object') {
       profile_picture = `/uploads/profile_pictures/${profilePictureFile.newFilename}`;

@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 
 const prisma = new PrismaClient();
 
@@ -19,6 +20,11 @@ const upload = multer({
   },
 });
 
+// Extiende la interfaz de NextApiRequest para incluir el archivo
+interface NextApiRequestWithFile extends NextApiRequest {
+  file?: Express.Multer.File;
+}
+
 // Función auxiliar para utilizar `multer` en Next.js
 const runMiddleware = (req: NextApiRequest, res: NextApiResponse, fn: any) => {
   return new Promise((resolve, reject) => {
@@ -31,11 +37,9 @@ const runMiddleware = (req: NextApiRequest, res: NextApiResponse, fn: any) => {
   });
 };
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequestWithFile, res: NextApiResponse) {
   try {
-    // Usa el middleware de `multer` para manejar la subida de archivos
     await runMiddleware(req, res, upload.single('file'));
-
     const { method } = req;
 
     switch (method) {
@@ -78,7 +82,7 @@ async function getAnnexes(req: NextApiRequest, res: NextApiResponse) {
 }
 
 // Crear un nuevo anexo
-async function createAnnex(req: NextApiRequest, res: NextApiResponse) {
+async function createAnnex(req: NextApiRequestWithFile, res: NextApiResponse) {
   const { report_id, description } = req.body;
 
   if (!description || !req.file || !report_id) {
@@ -86,7 +90,7 @@ async function createAnnex(req: NextApiRequest, res: NextApiResponse) {
   }
 
   try {
-    const fileBuffer = fs.readFileSync(req.file.path); // Convierte el archivo a un buffer
+    const fileBuffer = fs.readFileSync(req.file.path);
 
     const newAnnex = await prisma.annex.create({
       data: { description, file: fileBuffer, report_id: Number(report_id) },
@@ -100,17 +104,22 @@ async function createAnnex(req: NextApiRequest, res: NextApiResponse) {
 }
 
 // Actualizar un anexo existente
-async function updateAnnex(req: NextApiRequest, res: NextApiResponse) {
-  const { id, description, file } = req.body;
+async function updateAnnex(req: NextApiRequestWithFile, res: NextApiResponse) {
+  const { id, description } = req.body;
 
-  if (!id || !description || !file) {
+  if (!id || !description) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 
   try {
+    const data: any = { description };
+    if (req.file) {
+      data.file = fs.readFileSync(req.file.path);
+    }
+
     const updatedAnnex = await prisma.annex.update({
       where: { id: Number(id) },
-      data: { description, file },
+      data,
     });
     return res.status(200).json(updatedAnnex);
   } catch (error) {

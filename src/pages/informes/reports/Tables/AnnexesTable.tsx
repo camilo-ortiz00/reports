@@ -25,7 +25,7 @@ const annexesesTable: React.FC<AnnexesFormProps> = ({ annexes, onRowSelected, on
     },
     {
       name: 'URL del anexo',
-      selector: (row: AnnexData) => row?.url || 'N/A',
+      selector: (row: AnnexData) => row?.file || 'N/A',
       sortable: true,
     },
   ];

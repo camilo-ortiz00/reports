@@ -16,7 +16,7 @@ const ComponentManagement = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [showAlert, setShowAlert] = useState(false);
-  const [alertType, setAlertType] = useState<'error' | 'success' | 'warning'>('success'); // Tipo de alerta
+  const [alertType, setAlertType] = useState<'error' | 'success' | 'warning'>('success'); 
 
 
   useEffect(() => {
@@ -41,16 +41,16 @@ const ComponentManagement = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          id: component.id,
-          name: component.name,
-          description: component.description,
-          userId: component.userId,
-        }),
+        body: JSON.stringify(component),
       });
   
       if (!response.ok) {
-        throw new Error('Error al guardar el componente');
+        const errorResponse = await response.json();
+        console.error('Error al guardar el componente:', errorResponse);
+        setAlertMessage('Error al guardar el componente');
+        setAlertType('error');
+        setShowAlert(true);
+        return;
       }
   
       const updatedComponent = await response.json();
@@ -62,7 +62,6 @@ const ComponentManagement = () => {
         }
       });
   
-      // Refrescar los componentes desde la API para garantizar que se reflejan todos los cambios
       fetch('/api/projects/components')
         .then((res) => res.json())
         .then((data) => setComponents(data))
@@ -91,23 +90,19 @@ const ComponentManagement = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Error al eliminar el rol');
+        throw new Error('Error al eliminar el componente');
       }
 
       setComponents((prev) => prev.filter((component) => component.id !== id));
-      setAlertMessage('Rol eliminado exitosamente');
+      setAlertMessage('Componente eliminado exitosamente');
       setAlertType('warning');
       setShowAlert(true);
     } catch (error) {
       console.error(error);
-      setAlertMessage('Hubo un error al eliminar el rol');
+      setAlertMessage('Hubo un error al eliminar el Componente');
       setAlertType('error');
       setShowAlert(true);
     }
-  };
-  const handleShowDeleteModal = (component: Component) => {
-    setComponentToDelete(component);
-    setShowDeleteModal(true);
   };
   
   const handleConfirmDeleteComponent = async () => {
@@ -115,11 +110,6 @@ const ComponentManagement = () => {
       await handleDeleteComponent(componentToDelete.id);
     }
     setShowDeleteModal(false); 
-  };
-  
-  const handleEditComponent = (component: Component) => {
-    setSelectedComponent(component);
-    setShowModal(true);
   };
   
   const handleCreateComponent = () => {
@@ -140,7 +130,7 @@ const ComponentManagement = () => {
       { name: 'Nombre', selector: (row: Component) => row.name, sortable: true },
       { name: 'Descripción', selector: (row: Component) => row.description },
       {
-        name: 'Coordinador(es)', // Columna para mostrar los usuarios asignados
+        name: 'Coordinador(es)',
         selector: (row: Component) => (
             row.user ? row.user.name : 'Sin asignar'
         ),
@@ -160,7 +150,7 @@ const ComponentManagement = () => {
             </button>
             <button
               onClick={() => {
-                setSelectedComponent(row);
+                setComponentToDelete(row);
                 setShowDeleteModal(true);
               }}
               className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded"

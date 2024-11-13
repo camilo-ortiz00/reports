@@ -51,7 +51,6 @@ async function createComponent(req: NextApiRequest, res: NextApiResponse) {
       data: {
         name,
         description: description || null,
-        project_id,
         user_id: userId || null,  // Asignación de user_id opcional
       },
     });
