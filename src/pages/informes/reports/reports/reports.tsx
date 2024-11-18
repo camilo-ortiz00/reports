@@ -5,7 +5,7 @@ import styles from "./reports.module.css";
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react'; // Importa useSession de NextAuth
-import { AnnexData, DeliverableData, TechnicalSummaryData, FormData } from '@/model/reports.props';
+import { AnnexData, DeliverableData, TechnicalSummaryData, ReportData } from '@/model/reports.props';
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -14,7 +14,7 @@ const Reports = () => {
   const router = useRouter();
   const { report } = router.query;
 
-  const [selectedReport, setSelectedReport] = useState<FormData | null>(null);
+  const [selectedReport, setSelectedReport] = useState<ReportData | null>(null);
   const [technicalSummary, setTechnicalSummary] = useState<TechnicalSummaryData[]>([]);
   const [deliverables, setDeliverables] = useState<DeliverableData[]>([]);
   const [annexes, setAnnexes] = useState<AnnexData[]>([]);
@@ -79,7 +79,7 @@ const Reports = () => {
     try {
       const canvas = await html2canvas(element, {
         useCORS: true,
-        scale: 2,
+        scale: 1,
         backgroundColor: '#ffffff',
         scrollX: 0,
         scrollY: -window.scrollY,

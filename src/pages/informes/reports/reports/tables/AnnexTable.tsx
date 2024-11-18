@@ -6,7 +6,7 @@ interface AnnexTableData {
   id?: number;
   report_id: number;
   description: string;
-  file: string;
+  file: File;
 }
 
 interface AnnexTableProps {

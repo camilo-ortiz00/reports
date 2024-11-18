@@ -16,10 +16,18 @@ model User {
   password               String
   role_id                Int
   address                String?
-  cv_file                String?
-  academic_support_files String?
-  id_file                String?
-  profile_picture        String?
+  cv_file                Bytes?
+  cv_file_name           String?
+  cv_file_type           String?
+  academic_support_files Bytes?
+  academic_support_name  String?
+  academic_support_type  String?
+  id_file                Bytes?
+  id_file_name           String?
+  id_file_type           String?
+  profile_picture        Bytes?
+  profile_picture_name   String?
+  profile_picture_type   String?
   work_lines             String?
   contact_person_name    String?
   contact_person_phone   String?
@@ -27,7 +35,7 @@ model User {
   blood_type             String?
   identity_document      String      @unique
   marital_status         String?
-  profile_status         Float?
+  profile_status         Decimal?
   component              Component[]
   reports                Report[]
   role                   Role        @relation(fields: [role_id], references: [id])
@@ -100,7 +108,9 @@ model Deliverable {
   date             String
   approved_changes String
   contingency_plan String
-  support_annex    String @default("Sin soporte")
+  support_annex    Bytes
+  support_name     String?
+  support_type     String
   report           Report @relation(fields: [report_id], references: [id], onDelete: Cascade)
 }
 
@@ -109,6 +119,8 @@ model Annex {
   report_id          Int
   description        String
   file               Bytes
+  file_name          String?
+  file_type          String?
   report             Report             @relation(fields: [report_id], references: [id], onDelete: Cascade)
   technicalSummaries TechnicalSummary[]
 }

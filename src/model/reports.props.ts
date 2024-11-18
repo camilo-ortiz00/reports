@@ -1,6 +1,6 @@
 // models/reports.props.ts
 
-export interface FormData {
+export interface ReportData {
   status: GLfloat;
   id?: number;
   summary: string;
@@ -18,8 +18,8 @@ export interface FormData {
 }
 
 export interface ReportFormProps {
-  onSubmit: (formData: FormData) => void;
-  initialData?: FormData;
+  onSubmit: (formData: ReportData) => void;
+  initialData?: ReportData;
   handleClose: () => void;
 }
 
@@ -37,7 +37,7 @@ export interface AnnexData {
   id: number;
   report_id: number;
   description: string;
-  file: string;
+  file: File | null;
 }
 
 export interface TechnicalSummaryData {

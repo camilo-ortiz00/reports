@@ -8,7 +8,7 @@ import DeliverableForm from '../Forms/DeliverableForm';
 import AnnexForm from '../Forms/AnnexForm';
 import ModalComponent from '@/components/Modal';
 import styles from "./report_list.module.css";
-import { AnnexData, DeliverableData, FormData, TechnicalSummaryData } from '@/model/reports.props';
+import { AnnexData, DeliverableData, ReportData, TechnicalSummaryData } from '@/model/reports.props';
 import AlertComponent from '@/components/Alert';
 import SummaryAlert from '@/components/AlertSummary';
 import ModalDeleteComponent from '@/components/ModalEliminacion';
@@ -21,11 +21,11 @@ const Page = () => {
   const [technicalSummary, setTechnicalSummary] = useState<TechnicalSummaryData[]>([]);
   const [deliverables, setDeliverables] = useState<DeliverableData[]>([]);
   const [annexes, setAnnexes] = useState<AnnexData[]>([]);
-  const [reports, setReports] = useState<FormData[]>([]);
-  const [filteredReports, setFilteredReports] = useState<FormData[]>([]);
+  const [reports, setReports] = useState<ReportData[]>([]);
+  const [filteredReports, setFilteredReports] = useState<ReportData[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
-  const [selectedReport, setSelectedReport] = useState<FormData | null>(null);
+  const [selectedReport, setSelectedReport] = useState<ReportData | null>(null);
   const [selectedReportTechnical, setSelectedReportTechnical] = useState<TechnicalSummaryData | null>(null);
   const [selectedReportDeliverable, setSelectedReportDeliverable] = useState<DeliverableData | null>(null);
   const [selectedReportAnnex, setSelectedReportAnnex] = useState<AnnexData | null>(null);
@@ -115,7 +115,7 @@ const Page = () => {
   setIsEditing(!isEditing);
 };
 
-const updateReportSummary = async (updatedReport: FormData) => {
+const updateReportSummary = async (updatedReport: ReportData) => {
   try {
     const response = await fetch(`/api/reports/reports`, {
       method: 'PUT',
@@ -392,30 +392,13 @@ const handleCreateDeliverable = async (deliverables: DeliverableData) => {
   }
 };  
 
-const handleCreateAnnex = async (annexes: AnnexData) => {
-  console.log('Datos a enviar:', annexes);
-  const { report_id, id, description, file } = annexes;
-
-  if (!description || !file) {
-    setAlertMessage('La descripción y la archivo son necesarias para crear un anexo.');
-    setAlertType('error');
-    setShowAlert(true);
-    return;
-  }
-
+const handleCreateAnnex = async (formData: FormData) => {
   try {
-    const method = id ? 'PUT' : 'POST'; // Usar POST para nuevos anexos, PUT para actualizarlos
+    const method = formData.has('id') ? 'PUT' : 'POST';
+
     const response = await fetch('/api/reports/annexes', {
       method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id,
-        report_id: report_id,
-        description,
-        file,
-      }),
+      body: formData,
     });
 
     if (!response.ok) {
@@ -426,9 +409,9 @@ const handleCreateAnnex = async (annexes: AnnexData) => {
 
     const data = await response.json();
     console.log('Anexo creado:', data);
-    if (id) {
+    if (formData.has('id')) {
       setAnnexes((prevAnnexes) =>
-        prevAnnexes.map((annex) => (annex.id === id ? data : annex))
+        prevAnnexes.map((annex) => (annex.id === data.id ? data : annex))
       );
       setAlertMessage('Anexo actualizado con éxito');
     } else {
@@ -436,10 +419,10 @@ const handleCreateAnnex = async (annexes: AnnexData) => {
       setAlertMessage('Anexo creado con éxito');
     }
     setRefresh((prev) => prev + 1);
-    setShowModalAnnex(false)
+    setShowModalAnnex(false);
     setAlertType('success');
     setShowAlert(true);
-    handleRowDeselected(); 
+    handleRowDeselected();
   } catch (error) {
     console.error('Error:', error);
     setAlertMessage('Error al crear/actualizar el anexo');

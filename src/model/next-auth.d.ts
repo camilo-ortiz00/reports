@@ -4,6 +4,7 @@ import NextAuth from 'next-auth';
 declare module 'next-auth' {
   interface Session {
     user: {
+      image: string;
       id: string;
       name?: string | null;
       email?: string | null;
@@ -33,5 +34,6 @@ declare module 'next-auth/jwt' {
       name: string;
       description: string;
     };
+    image: string;
   }
 }

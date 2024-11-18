@@ -28,25 +28,23 @@ export default NextAuth({
             role: true, // Incluir los datos del rol del usuario
           },
         });
-        console.log('Usuario encontrado:', user); // Verifica si role está presente
-
+      
         if (!user) {
-          console.error('Usuario no encontrado');
           throw new Error('Usuario no encontrado');
         }
       
         // Compara la contraseña ingresada con la contraseña almacenada (hash)
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
-        console.log('¿Contraseña válida?', isPasswordValid);
-              
         if (!isPasswordValid) {
-          console.error('Contraseña incorrecta');
           throw new Error('Contraseña incorrecta');
         }
       
-        console.log('Autenticación exitosa para:', user);
-        
-        // Retorna el usuario con los datos del rol
+        // Convierte la imagen `Buffer` a un `string` en formato base64
+        const imageBase64 = user.profile_picture
+          ? `data:image/png;base64,${user.profile_picture.toString('base64')}`
+          : null;
+      
+        // Retorna el usuario con los datos del rol, usando la imagen como base64
         return {
           id: String(user.id),
           name: user.name,
@@ -58,6 +56,7 @@ export default NextAuth({
           },
         };
       },
+      
     })
   ],
   pages: { signIn: '/auth/login' },
@@ -66,18 +65,21 @@ export default NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id; // Asigna el ID al token
-        token.role = user.role; // Asigna el role al token
+        token.id = user.id;
+        token.role = user.role;
+        // No almacenar la imagen binaria en el token
+        token.image = user.image; // Solo guarda la URL
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id as string; // Asigna el ID de usuario a la sesión
-        session.user.role = token.role; // Asigna el role a la sesión
+        session.user.id = token.id as string;
+        session.user.role = token.role;
+        // Solo pasar la URL de la imagen, no el contenido completo
+        session.user.image = token.image;
       }
       return session;
     },
   }
-  
 });

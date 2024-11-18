@@ -6,8 +6,11 @@ import fs from 'fs';
 
 const prisma = new PrismaClient();
 
+// Configuración de multer para manejar archivos en memoria
+const storage = multer.memoryStorage();
 const upload = multer({
-  limits: { fileSize: 2 * 1024 * 1024 }, // Límite de 2MB
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // Límite de 5MB
   fileFilter: (req, file, cb) => {
     const validFileTypes = /pdf|doc|docx|png/;
     const extname = validFileTypes.test(path.extname(file.originalname).toLowerCase());
@@ -20,26 +23,27 @@ const upload = multer({
   },
 });
 
-// Extiende la interfaz de NextApiRequest para incluir el archivo
-interface NextApiRequestWithFile extends NextApiRequest {
-  file?: Express.Multer.File;
-}
-
-// Función auxiliar para utilizar `multer` en Next.js
+// Convertir multer a una promesa para usar en Next.js
 const runMiddleware = (req: NextApiRequest, res: NextApiResponse, fn: any) => {
   return new Promise((resolve, reject) => {
     fn(req, res, (result: any) => {
       if (result instanceof Error) {
         return reject(result);
       }
-      return resolve(result);
+      resolve(result);
     });
   });
 };
 
+// Definir tipo personalizado para anexar archivo en la solicitud
+interface NextApiRequestWithFile extends NextApiRequest {
+  file?: Express.Multer.File;
+}
+
+// Handler principal para manejar las solicitudes
 export default async function handler(req: NextApiRequestWithFile, res: NextApiResponse) {
   try {
-    await runMiddleware(req, res, upload.single('file'));
+    await runMiddleware(req, res, upload.single('file')); // Procesar archivo
     const { method } = req;
 
     switch (method) {
@@ -60,7 +64,7 @@ export default async function handler(req: NextApiRequestWithFile, res: NextApiR
   }
 }
 
-// Obtener todos los anexos o por ID
+// Obtener todos los anexos o un anexo específico por ID
 async function getAnnexes(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
 
@@ -90,10 +94,12 @@ async function createAnnex(req: NextApiRequestWithFile, res: NextApiResponse) {
   }
 
   try {
-    const fileBuffer = fs.readFileSync(req.file.path);
-
     const newAnnex = await prisma.annex.create({
-      data: { description, file: fileBuffer, report_id: Number(report_id) },
+      data: {
+        description,
+        report_id: Number(report_id),
+        file: req.file.buffer, // Guardar archivo como blob en base de datos
+      },
     });
 
     return res.status(201).json(newAnnex);
@@ -114,7 +120,7 @@ async function updateAnnex(req: NextApiRequestWithFile, res: NextApiResponse) {
   try {
     const data: any = { description };
     if (req.file) {
-      data.file = fs.readFileSync(req.file.path);
+      data.file = req.file.buffer; // Actualizar archivo como blob
     }
 
     const updatedAnnex = await prisma.annex.update({
