@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import formidable from 'formidable';
 import fs from 'fs';
-import path from 'path';
 
 const prisma = new PrismaClient();
 
@@ -61,15 +60,9 @@ async function updateUser(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: 'Invalid ID' });
   }
 
-  const uploadDir = path.join(process.cwd(), 'public/uploads');
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
-
   const form = formidable({
-    uploadDir,
     keepExtensions: true,
-    maxFileSize: 5 * 1024 * 1024, // 2 MB
+    maxFileSize: 5 * 1024 * 1024, // 5 MB
   });
 
   form.parse(req, async (err, fields, files) => {
@@ -80,7 +73,7 @@ async function updateUser(req: NextApiRequest, res: NextApiResponse) {
     const getFileDetails = (file: formidable.File | undefined) => {
       if (file) {
         return {
-          filePath: file.filepath,
+          fileBuffer: fs.readFileSync(file.filepath), // Leer el archivo en formato binario
           originalName: file.originalFilename || '',
           mimeType: file.mimetype,
         };
@@ -94,6 +87,8 @@ async function updateUser(req: NextApiRequest, res: NextApiResponse) {
     const idFileDetails = getFileDetails(files.id_file?.[0]);
 
     try {
+      const profileStatus = Array.isArray(fields.profile_status) ? fields.profile_status[0] : fields.profile_status;
+
       const updatedUser = await prisma.user.update({
         where: { id: userId },
         data: {
@@ -108,23 +103,23 @@ async function updateUser(req: NextApiRequest, res: NextApiResponse) {
           contact_person_name: fields.contact_person_name ? String(fields.contact_person_name) : undefined,
           contact_person_phone: fields.contact_person_phone ? String(fields.contact_person_phone) : undefined,
           contact_person_email: fields.contact_person_email ? String(fields.contact_person_email) : undefined,
-          profile_picture: profilePictureDetails ? fs.readFileSync(profilePictureDetails.filePath) : undefined,
-          cv_file: cvFileDetails ? fs.readFileSync(cvFileDetails.filePath) : undefined,
+          profile_picture: profilePictureDetails ? profilePictureDetails.fileBuffer : undefined,
+          cv_file: cvFileDetails ? cvFileDetails.fileBuffer : undefined,
           cv_file_name: cvFileDetails?.originalName,
           cv_file_type: cvFileDetails?.mimeType,
-          academic_support_files: academicSupportFileDetails ? fs.readFileSync(academicSupportFileDetails.filePath) : undefined,
+          academic_support_files: academicSupportFileDetails ? academicSupportFileDetails.fileBuffer : undefined,
           academic_support_name: academicSupportFileDetails?.originalName,
           academic_support_type: academicSupportFileDetails?.mimeType,
-          id_file: idFileDetails ? fs.readFileSync(idFileDetails.filePath) : undefined,
+          id_file: idFileDetails ? idFileDetails.fileBuffer : undefined,
           id_file_name: idFileDetails?.originalName,
           id_file_type: idFileDetails?.mimeType,
-          profile_status: Number(fields.profile_status),
+          profile_status: profileStatus ? parseFloat(profileStatus) : null,
         },
       });
 
       return res.status(200).json(updatedUser);
     } catch (error) {
-      console.error(error);
+      console.error('Error updating user:', error);
       return res.status(500).json({ error: 'Error updating user' });
     }
   });

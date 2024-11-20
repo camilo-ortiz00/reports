@@ -35,7 +35,7 @@ model User {
   blood_type             String?
   identity_document      String      @unique
   marital_status         String?
-  profile_status         Decimal?
+  profile_status         Float?
   component              Component[]
   reports                Report[]
   role                   Role        @relation(fields: [role_id], references: [id])

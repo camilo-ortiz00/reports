@@ -6,6 +6,9 @@ import AlertComponent from '@/components/Alert';
 import { Component } from '@/model/projects.props';
 import ComponentForm from './componentForm';
 import { User } from '@/model/user.props';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Link from 'next/link';
+import { faCircleArrowLeft, faDiagramProject, faFolderOpen } from '@fortawesome/free-solid-svg-icons';
 
 const ComponentManagement = () => {
   const [components, setComponents] = useState<Component[]>([]);
@@ -126,9 +129,17 @@ const ComponentManagement = () => {
     };
 
     const columns = [
-      { name: 'ID', selector: (row: Component) => row.id, sortable: true },
-      { name: 'Nombre', selector: (row: Component) => row.name, sortable: true },
-      { name: 'Descripción', selector: (row: Component) => row.description },
+      { name: 'ID', selector: (row: Component) => row.id, sortable: true, width: '8em',},
+      { name: 'Nombre', selector: (row: Component) => row.name, sortable: true,},
+      {
+        name: 'Descripción',
+        selector: (row: Component) => row.description,
+        cell: (row: Component) => (
+        <div className="truncate max-w-xs" title={row.description}>
+          {row.description}
+        </div>        
+        ),
+      },      
       {
         name: 'Coordinador(es)',
         selector: (row: Component) => (
@@ -164,7 +175,15 @@ const ComponentManagement = () => {
 
   return (
     <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center">
       <h1 className='text-2xl font-bold mb-4'>Gestión de Componentes</h1>
+        <Link href="/proyectos/ProjectManagement">
+            <button className="btn btn-outline text-black mt-8 mr-8 px-4 py-2 rounded">
+            <FontAwesomeIcon icon={faFolderOpen} size='2x'/>
+              Ir a Proyectos
+            </button>
+        </Link>
+      </div>
       <button 
         onClick={handleCreateComponent}
         className="mt-4 mb-8 px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-700"

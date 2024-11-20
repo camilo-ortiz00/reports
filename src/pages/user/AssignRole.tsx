@@ -80,7 +80,7 @@ const AssignRoleForm: React.FC = () => {
       name: 'Nombre',
       selector: (row: User) => row.name,
       sortable: true,
-      width: '15em',
+      width: '20em',
       cell: (row: User) => (
         <div className="text-center">{row.name}</div>
       ),
@@ -89,7 +89,7 @@ const AssignRoleForm: React.FC = () => {
       name: 'Rol',
       selector: (row: User) => row.role?.name || 'Sin rol asignado',
       sortable: true,
-      width: '8em',
+      width: '10em',
       cell: (row: User) => (
         <div className="text-center">{row.role?.name || 'Sin rol asignado'}</div>
       ),

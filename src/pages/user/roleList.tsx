@@ -129,6 +129,7 @@ const handleCreateRole = () => {
       name: 'ID',
       selector: (row: Role) => row.id,
       sortable: true,
+      width: '8em',
     },
     {
       name: 'Nombre',

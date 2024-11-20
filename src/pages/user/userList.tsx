@@ -59,6 +59,7 @@ const UserList: FC = () => {
       name: 'ID',
       selector: (row: User) => row.id ?? 0,
       sortable: true,
+      width: '5em',
     },
     {
       name: 'Nombre',
@@ -73,17 +74,17 @@ const UserList: FC = () => {
       name: 'Documento de Identidad',
       selector: (row: User) => row.identity_document,
     },
-    {/*
-      name: 'Progreso',
+    {
+      name: 'Perfil completado',
       cell: (row: User) => (
         <div className="flex items-center space-x-2">
           <div
             className={`w-6 h-6 rounded-full ${getStatusColor(row.profile_status)}`}
           />
-          <span>{row.profile_status}%</span>
-        </div>
+            <span>{Math.round(row.profile_status)}%</span>
+          </div>
       ),
-    */},
+    },
     {
       name: 'Acciones',
       cell: (row: User) => (

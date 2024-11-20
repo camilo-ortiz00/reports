@@ -342,26 +342,18 @@ const handleCreateTechnicalSummary = async (technical: TechnicalSummaryData) => 
   }
 };
   
-const handleCreateDeliverable = async (deliverables: DeliverableData) => {
-  console.log('Datos a enviar:', deliverables); 
-  const { report_id, id, description, date, approved_changes, contingency_plan } = deliverables;
-
+const handleCreateDeliverable = async (formData: FormData) => {
   try {
-    const method = id ? 'PUT' : 'POST';
+    const method = formData.has('id') ? 'PUT' : 'POST';
+    console.log('Datos enviados:');
+    formData.forEach((value, key) => {
+      console.log(`${key}:`, value);
+    });
+
     const response = await fetch('/api/reports/deliverables', {
       method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id,
-        report_id: report_id,
-        description,
-        date,
-        approved_changes,
-        contingency_plan,
-      }),
-    });
+      body: formData,
+      });
 
     if (!response.ok) {
       const errorResponse = await response.json();
@@ -371,9 +363,9 @@ const handleCreateDeliverable = async (deliverables: DeliverableData) => {
 
     const data = await response.json();
     console.log('Entregable creado:', data);
-    if (id) {
+    if (formData.has('id')) {
       setDeliverables((prevDeliverables) =>
-        prevDeliverables.map((deliverable) => (deliverable.id === id ? data : deliverable))
+        prevDeliverables.map((deliverable) => (deliverable.id === data.id ? data : deliverable))
       );
       setAlertMessage('Entregable actualizado con éxito');
     } else {
@@ -395,8 +387,10 @@ const handleCreateDeliverable = async (deliverables: DeliverableData) => {
 const handleCreateAnnex = async (formData: FormData) => {
   try {
     const method = formData.has('id') ? 'PUT' : 'POST';
-
-    const response = await fetch('/api/reports/annexes', {
+    console.log('Datos enviados:');
+    formData.forEach((value, key) => {
+      console.log(`${key}:`, value);
+    });    const response = await fetch('/api/reports/annexes', {
       method,
       body: formData,
     });
@@ -540,16 +534,6 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
     setSelectedReportAnnex(null);
   };
 
-  const handleSearch = (query: string) => {
-    const lowerCaseQuery = query.toLowerCase();
-    const filteredData = reports.filter(
-      (item) =>
-        item.project.name.toLowerCase().includes(lowerCaseQuery) ||
-        item.user.name.toLowerCase().includes(lowerCaseQuery)
-    );
-    setFilteredReports(filteredData);
-  };
-
   return (
     <div className={styles.report_listContainer}>
       <div className={`${styles.header} flex justify-center items-center flex-col card bg-gray-100 p-4 shadow-lg rounded mb-4`}>
@@ -636,9 +620,10 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
                   className={`ml-4 bg-yellow-500 hover:bg-yellow-700 px-4 py-2 rounded text-white ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={isEditing}
                   onClick={() => {
-                    const url = `http://localhost:3000/informes/reports/reports/reports?report=${encodeURIComponent(JSON.stringify(selectedReport))}`;
-                    window.open(url, '_blank'); 
+                    sessionStorage.setItem('selectedReport', JSON.stringify(selectedReport));
+                    window.open('/informes/reports/reports/reports', '_blank');
                   }}
+                  
                 >
                   Generar informe
                 </button>
@@ -706,7 +691,6 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
             technical={technicalSummary.filter(tech => tech.report_id === selectedReport?.id)}
             onActivityRowSelected={handleTechnicalRowSelected}
             onRowDeselected={handleRowDeselected}
-            onSearch={handleSearch}
             key={refresh}
           />
           <div className="flex flex-col border-l border-gray-400 m-4 ml-8 mt-16">
@@ -752,7 +736,6 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
               deliverables={deliverables.filter(del => del.report_id === selectedReport?.id)}
               onRowSelected={handleDeliverableRowSelected}
               onRowDeselected={handleRowDeselected}
-              onSearch={handleSearch}
               key={refresh}
             />
           <div className="flex flex-col border-l border-gray-400 m-4 ml-8 mt-16">
@@ -797,7 +780,6 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
               annexes={annexes.filter(ann => ann.report_id === selectedReport?.id)}
               onRowSelected={handleAnnexRowSelected}
               onRowDeselected={handleRowDeselected}
-              onSearch={handleSearch}
               key={refresh}
             />
             <div className="flex flex-col border-l border-gray-400 m-4 ml-8 mt-16">

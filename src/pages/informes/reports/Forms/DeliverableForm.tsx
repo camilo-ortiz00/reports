@@ -5,7 +5,7 @@ import styles from '../report_list/report_list.module.css';
 
 interface DeliverableFormProps {
   selectedReport: { id: number } | null; 
-  handleCreateDeliverable: (data: DeliverableData) => void;
+  handleCreateDeliverable: (data: FormData) => void;
   handleClose: () => void;
   initialData?: DeliverableData;
 }
@@ -20,11 +20,13 @@ const DeliverableForm: FC<DeliverableFormProps> = ({
     defaultValues: initialData || {
       description: '',
       date: '',
-      support_annex: '',
       approved_changes: '',
       contingency_plan: '',
     },
   });
+
+  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+  const [selectedFileName, setSelectedFileName] = React.useState<string>('');
 
   useEffect(() => {
     if (initialData) {
@@ -34,6 +36,25 @@ const DeliverableForm: FC<DeliverableFormProps> = ({
     }
   }, [initialData, setValue]);
 
+  const validateFileType = (file: File) => {
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/png'];
+    return allowedTypes.includes(file.type);
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, files } = e.target;
+    if (files && files.length > 0) {
+      const file = files[0];
+  
+      if (!validateFileType(file)) {
+        return;
+      }
+  
+      setSelectedFile(file); // Guardar archivo seleccionado
+      setSelectedFileName(file.name); // Guardar nombre del archivo
+    }
+  };
+
   const onSubmit = (data: DeliverableData) => {
     const reportId = (initialData?.report_id || selectedReport?.id) ?? 0; // Asegura un 'report_id' numérico
 
@@ -41,7 +62,21 @@ const DeliverableForm: FC<DeliverableFormProps> = ({
       console.error('No se pudo obtener el report_id.');
       return;
     }
-    handleCreateDeliverable({ ...data, report_id: reportId });
+
+    if (!selectedFile) {
+      alert('Debe seleccionar un archivo');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('description', data.description);
+    formData.append('date', data.date);
+    formData.append('approved_changes', data.approved_changes);
+    formData.append('contingency_plan', data.contingency_plan);
+    formData.append('report_id', reportId.toString());
+
+    handleCreateDeliverable(formData);
   };
 
   return (
@@ -86,8 +121,9 @@ const DeliverableForm: FC<DeliverableFormProps> = ({
                 id="support_annex"
                 className={`${styles.formControl} file-input file-input-bordered input-md`}
                 type="file"
-                {...register('support_annex', /*{ required: 'Soporte del anexo es requerido' }*/)}
-              />
+                accept=".pdf, .doc, .docx, .png"
+                onChange={handleFileChange}
+                />
               {errors.support_annex && (
                 <p className="form_error">{errors.support_annex.message}</p>
               )}

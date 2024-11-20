@@ -1,15 +1,16 @@
 import React from 'react';
 import DataTable from 'react-data-table-component';
 import { AnnexData } from '@/model/reports.props';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
 
 interface AnnexesFormProps {
   annexes: AnnexData[];
   onRowSelected: (report: AnnexData) => void;
   onRowDeselected: () => void;
-  onSearch: (query: string) => void;
 }
 
-const annexesesTable: React.FC<AnnexesFormProps> = ({ annexes, onRowSelected, onRowDeselected, onSearch  }) => {
+const AnnexesTable: React.FC<AnnexesFormProps> = ({ annexes, onRowSelected, onRowDeselected }) => {
   const columns = [
     {
       name: 'N°',
@@ -25,10 +26,55 @@ const annexesesTable: React.FC<AnnexesFormProps> = ({ annexes, onRowSelected, on
     },
     {
       name: 'URL del anexo',
-      selector: (row: AnnexData) => row?.file || 'N/A',
+      cell: (row: AnnexData) => (
+        <div className="flex items-center space-x-2">
+          <span
+            className="text-gray-600 cursor-pointer hover:underline"
+            onClick={() => handleDownload(row.id)} 
+          >
+            {row?.file_name || 'N/A'}
+          </span>
+          <FontAwesomeIcon
+            icon={faDownload}
+            className="text-blue-600 cursor-pointer hover:text-blue-800"
+            onClick={() => handleDownload(row.id)} // Pasa el ID del anexo para descargar el archivo
+          />
+        </div>
+      ),
       sortable: true,
-    },
+      width: '20em', // Puedes ajustar el ancho si lo deseas
+    }
   ];
+
+  const handleDownload = async (annexId: number) => {
+    try {
+      const response = await fetch(`/api/reports/downloadFile?annexId=${annexId}`);
+      if (!response.ok) {
+        throw new Error('Error al descargar el archivo');
+      }
+
+      const fileBlob = await response.blob();
+      const fileUrl = URL.createObjectURL(fileBlob);
+
+      // Obtener el nombre original del archivo desde los encabezados (si se aplica)
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let fileName = 'archivo';
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+)"/);
+        if (match && match[1]) {
+          fileName = match[1];
+        }
+      }
+
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = fileName;
+      link.click();
+      URL.revokeObjectURL(fileUrl);
+    } catch (error) {
+      console.error('Error al intentar descargar el archivo:', error);
+    }
+  };
 
   const handleRowSelected = (state: any) => {
     if (state.selectedRows.length > 0) {
@@ -50,23 +96,9 @@ const annexesesTable: React.FC<AnnexesFormProps> = ({ annexes, onRowSelected, on
         responsive
         selectableRows
         onSelectedRowsChange={handleRowSelected}
-        customStyles={{
-          rows: {
-            style: {
-              backgroundColor: 'white', // Cambia el color de fondo de las filas
-            },
-          },
-          headCells: {
-            style: {
-              backgroundColor: '#f3f4f6', // Cambia el color del encabezado
-              color: '#374151', // Cambia el color del texto del encabezado
-              fontWeight: 'bold', // Negrita
-            },
-          },
-        }}
       />
     </div>
   );
 };
 
-export default annexesesTable;
+export default AnnexesTable;

@@ -28,7 +28,8 @@ export interface DeliverableData {
   report_id: number;
   description: string;
   date: string;
-  support_annex: string;
+  support_annex: Buffer;
+  support_name: string;
   approved_changes: string;
   contingency_plan: string;
 }
@@ -37,7 +38,8 @@ export interface AnnexData {
   id: number;
   report_id: number;
   description: string;
-  file: File | null;
+  file: Buffer;
+  file_name: string;
 }
 
 export interface TechnicalSummaryData {

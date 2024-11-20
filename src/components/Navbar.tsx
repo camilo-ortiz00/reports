@@ -21,7 +21,9 @@ const Navbar = () => {
         })
         .then((data) => {
           if (data.profile_picture) {
-            const blob = new Blob([new Uint8Array(data.profile_picture)], { type: 'image/jpeg' });
+            const imageBuffer = new Uint8Array(data.profile_picture.data);
+            const imageType = data.profile_picture.mimeType; // Asegúrate de que tienes el tipo MIME adecuado (por ejemplo, 'image/jpeg', 'image/png', etc.)
+            const blob = new Blob([imageBuffer], { type: imageType });
             setProfilePicture(URL.createObjectURL(blob));
           }
         })
@@ -40,13 +42,53 @@ const Navbar = () => {
           </svg>
         </label>
       </div>
-      <div className="flex-1">
+      <div className="flex items-center space-x-2">
         <Link href="/informes/">
           <h1 className="btn btn-ghost text-xl font-bold">Inicio</h1>
         </Link>
+        <Image
+          src="/logos/Logo_ARC.jfif"
+          alt="Logo"
+          width={60}
+          height={60}
+          priority
+          className="rounded-full" 
+        />
+        <Image
+          src="/logos/Logo_DIMAR.png"
+          alt="Logo"
+          width={40}
+          height={40}
+          priority
+          className="rounded-full" 
+        />
+        <Image
+          src="/logos/Logo_ENAP.jfif"
+          alt="Logo"
+          width={40}
+          height={40}
+          priority
+          className="rounded-full" 
+        />
+        <Image
+          src="/logos/Logo_ICANH.png"
+          alt="Logo"
+          width={40}
+          height={40}
+          priority
+          className="rounded-full" 
+        />
+        <Image
+          src="/logos/Logo_MINCULTURA.jfif"
+          alt="Logo"
+          width={80}
+          height={80}
+          priority
+          className="rounded-full" 
+        />
       </div>
 
-      <div className="flex-none">
+      <div className="flex-none ml-auto flex items-center space-x-2">
         {session ? (
           <>
             <h1 className="mr-2 font-bold">{session.user?.name || 'Usuario'}</h1> 
@@ -75,11 +117,14 @@ const Navbar = () => {
                 </li>
                 <div className="border-b border-gray-400 m-1"></div>
                 <li className="flex justify-start hover:bg-gray-100 rounded-md">
-                  <div className="flex items-center space-x-2 p-2">
-                    <FontAwesomeIcon icon={faRightToBracket} className="text-2xl" />
-                    <h1 onClick={() => signOut()} className="text-md font-bold cursor-pointer">Cerrar sesión</h1>
-                  </div>
-                </li>
+                <div 
+                  className="flex items-center space-x-2 p-2 cursor-pointer"
+                  onClick={() => signOut()}
+                >
+                  <FontAwesomeIcon icon={faRightToBracket} className="text-2xl" />
+                  <h1 className="text-md font-bold">Cerrar sesión</h1>
+                </div>
+              </li>
               </ul>
             </div>
           </>

@@ -19,9 +19,11 @@ const AnnexForm: FC<AnnexFormProps> = ({
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<AnnexData>({
     defaultValues: initialData || {
       description: '',
-      file: null,
     },
   });
+
+  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+  const [selectedFileName, setSelectedFileName] = React.useState<string>('');
 
   useEffect(() => {
     if (initialData) {
@@ -31,47 +33,49 @@ const AnnexForm: FC<AnnexFormProps> = ({
     }
   }, [initialData, setValue]);
 
-  const onSubmit = (data: AnnexData, event: React.FormEvent<HTMLFormElement>) => {
-    const reportId = (initialData?.report_id || selectedReport?.id) ?? 0;
+  const validateFileType = (file: File) => {
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/png'];
+    return allowedTypes.includes(file.type);
+  };
   
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, files } = e.target;
+    if (files && files.length > 0) {
+      const file = files[0];
+  
+      if (!validateFileType(file)) {
+        return;
+      }
+  
+      setSelectedFile(file); // Guardar archivo seleccionado
+      setSelectedFileName(file.name); // Guardar nombre del archivo
+    }
+  };
+  
+  const onSubmit = (data: AnnexData) => {
+    const reportId = initialData?.report_id || selectedReport?.id || 0;
     if (!reportId) {
       console.error('No se pudo obtener el report_id.');
       return;
     }
-  
-    const fileInput = (event.target as HTMLFormElement).elements.namedItem('file') as HTMLInputElement;
-    const file = fileInput?.files?.[0];
-  
-    if (!file) {
+
+    if (!selectedFile) {
       alert('Debe seleccionar un archivo');
       return;
     }
-  
-    const validFileTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'image/png'
-    ];
-    if (!validFileTypes.includes(file.type)) {
-      alert('El archivo debe ser un PDF, Word o PNG.');
-      return;
-    }
-  
+
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', selectedFile);
     formData.append('description', data.description);
     formData.append('report_id', reportId.toString());
-  
-    console.log('FormData:', Array.from(formData.entries())); // Revisa el contenido de FormData
-    handleCreateAnnex(formData); // Llama a handleCreateAnnex con formData directamente
+
+    handleCreateAnnex(formData);
   };
   
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <div className={styles.containerAnnex}>
-
         <div className={styles.col}>
           <label htmlFor="description_annex" className="floatingInput font-bold">Descripción del anexo</label>
           <input
@@ -86,11 +90,13 @@ const AnnexForm: FC<AnnexFormProps> = ({
 
         <div className={styles.col}>
           <label htmlFor="file" className="floatingInput font-bold">Archivo del anexo</label>
-          <input
+           <input
             id="file"
-            className={`${styles.formControl} file-input file-input-bordered input-md`}
+            name="file"
             type="file"
             accept=".pdf, .doc, .docx, .png"
+            onChange={handleFileChange}
+            className={`${styles.formControl} file-input file-input-bordered input-md`}
           />
           {errors.file && 
             <p className="form_error">{errors.file.message}</p>}
@@ -106,5 +112,6 @@ const AnnexForm: FC<AnnexFormProps> = ({
     </form>
   );
 };
+
 
 export default AnnexForm;

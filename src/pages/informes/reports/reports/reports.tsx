@@ -41,7 +41,13 @@ const Reports = () => {
       console.error('Error al obtener los datos:', error);
     }
   };
-
+  useEffect(() => {
+    const storedReport = sessionStorage.getItem('selectedReport');
+    if (storedReport) {
+      setSelectedReport(JSON.parse(storedReport));
+    }
+  }, []);
+  
   useEffect(() => {
     if (report) {
       const newReport = JSON.parse(report as string);

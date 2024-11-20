@@ -6,14 +6,12 @@ interface TechnicalFormProps {
   technical: TechnicalSummaryData[];
   onActivityRowSelected: (technical: TechnicalSummaryData) => void;
   onRowDeselected: () => void;
-  onSearch: (query: string) => void;
 }
 
 const TechnicalSummaryTable: React.FC<TechnicalFormProps> = ({
   technical,
   onActivityRowSelected,
   onRowDeselected,
-  onSearch,
 }) => {
   const columns = [
     {

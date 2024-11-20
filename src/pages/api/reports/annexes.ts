@@ -1,70 +1,36 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
-import multer from 'multer';
-import path from 'path';
+import formidable from 'formidable';
 import fs from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
-// Configuración de multer para manejar archivos en memoria
-const storage = multer.memoryStorage();
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // Límite de 5MB
-  fileFilter: (req, file, cb) => {
-    const validFileTypes = /pdf|doc|docx|png/;
-    const extname = validFileTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = validFileTypes.test(file.mimetype);
-
-    if (extname && mimetype) {
-      return cb(null, true);
-    }
-    cb(new Error('Error: El archivo debe ser un PDF, Word o PNG.'));
+export const config = {
+  api: {
+    bodyParser: false, // Importante para manejar archivos con formidable
   },
-});
-
-// Convertir multer a una promesa para usar en Next.js
-const runMiddleware = (req: NextApiRequest, res: NextApiResponse, fn: any) => {
-  return new Promise((resolve, reject) => {
-    fn(req, res, (result: any) => {
-      if (result instanceof Error) {
-        return reject(result);
-      }
-      resolve(result);
-    });
-  });
 };
 
-// Definir tipo personalizado para anexar archivo en la solicitud
-interface NextApiRequestWithFile extends NextApiRequest {
-  file?: Express.Multer.File;
-}
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { method } = req;
 
-// Handler principal para manejar las solicitudes
-export default async function handler(req: NextApiRequestWithFile, res: NextApiResponse) {
-  try {
-    await runMiddleware(req, res, upload.single('file')); // Procesar archivo
-    const { method } = req;
-
-    switch (method) {
-      case 'GET':
-        return getAnnexes(req, res);
-      case 'POST':
-        return createAnnex(req, res);
-      case 'PUT':
-        return updateAnnex(req, res);
-      case 'DELETE':
-        return deleteAnnex(req, res);
-      default:
-        res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
-        return res.status(405).end(`Method ${method} Not Allowed`);
-    }
-  } catch (error) {
-    return res.status(400).json({ error: (error as Error).message });
+  switch (method) {
+    case 'GET':
+      return getAnnexes(req, res);
+    case 'POST':
+      return createAnnex(req, res);
+    case 'PUT':
+      return updateAnnex(req, res);
+    case 'DELETE':
+      return deleteAnnex(req, res);
+    default:
+      res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+      return res.status(405).end(`Method ${method} Not Allowed`);
   }
 }
 
-// Obtener todos los anexos o un anexo específico por ID
+// Obtener los anexos
 async function getAnnexes(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
 
@@ -86,53 +52,105 @@ async function getAnnexes(req: NextApiRequest, res: NextApiResponse) {
 }
 
 // Crear un nuevo anexo
-async function createAnnex(req: NextApiRequestWithFile, res: NextApiResponse) {
-  const { report_id, description } = req.body;
+export async function createAnnex(req: NextApiRequest, res: NextApiResponse) {
 
-  if (!description || !req.file || !report_id) {
-    return res.status(400).json({ error: 'Faltan datos requeridos' });
-  }
+  const form = formidable({
+     keepExtensions: true,
+      maxFileSize: 10 * 1024 * 1024 }); // 5 MB
 
-  try {
-    const newAnnex = await prisma.annex.create({
-      data: {
-        description,
-        report_id: Number(report_id),
-        file: req.file.buffer, // Guardar archivo como blob en base de datos
-      },
-    });
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error('Error parsing files:', err);
+      return res.status(500).json({ error: 'Error al procesar los archivos' });
+    }
+    console.log('Campos recibidos:', fields);
+    console.log('Archivos recibidos:', files);
+    const { description, report_id } = fields;
+    if (!description || !report_id || !files.file) {
+      return res.status(400).json({ error: 'Faltan datos requeridos' });
+    }
 
-    return res.status(201).json(newAnnex);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Error al crear el anexo' });
-  }
+    const getFileDetails = (file: formidable.File | undefined) => {
+      if (file) {
+        return {
+          fileBuffer: fs.readFileSync(file.filepath), // Leer el archivo en formato binario
+          originalName: file.originalFilename || '',
+          mimeType: file.mimetype,
+        };
+      }
+      return null;
+    };
+
+    const fileDetails = getFileDetails(files.file?.[0]);
+
+    try {
+
+      const newAnnex = await prisma.annex.create({
+        data: {
+          description: fields.description ? String(fields.description) : undefined,
+          report_id: Number(fields.report_id),
+          file: fileDetails ? fileDetails.fileBuffer: undefined,
+          file_name: fileDetails.originalName,
+          file_type: fileDetails.mimeType,
+        },
+      });
+
+      res.status(201).json(newAnnex);
+    } catch (dbError) {
+      console.error('Error al guardar el anexo:', dbError);
+      res.status(500).json({ error: 'Error al guardar el anexo' });
+    }
+  });
 }
 
 // Actualizar un anexo existente
-async function updateAnnex(req: NextApiRequestWithFile, res: NextApiResponse) {
-  const { id, description } = req.body;
+async function updateAnnex(req: NextApiRequest, res: NextApiResponse) {
 
-  if (!id || !description) {
-    return res.status(400).json({ error: 'Faltan datos requeridos' });
-  }
+  const form = formidable({
+    keepExtensions: true,
+    maxFileSize: 10 * 1024 * 1024, // 10 MB
+  });
 
-  try {
-    const data: any = { description };
-    if (req.file) {
-      data.file = req.file.buffer; // Actualizar archivo como blob
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error('Error parsing files:', err);
+      return res.status(500).json({ error: 'Error al procesar los archivos' });
+    }
+    console.log('Campos recibidos:', fields);
+    console.log('Archivos recibidos:', files);
+    const { id, description, report_id } = fields;
+    if (!id || !description || !report_id || !files.file) {
+      return res.status(400).json({ error: 'Faltan datos requeridos' });
     }
 
-    const updatedAnnex = await prisma.annex.update({
+    const getFileDetails = (file: formidable.File | undefined) => {
+      if (file) {
+        return {
+          fileBuffer: fs.readFileSync(file.filepath), // Leer el archivo en formato binario
+          originalName: file.originalFilename || '',
+          mimeType: file.mimetype,
+        };
+      }
+      return null;
+    };
+
+    const fileDetails = getFileDetails(files.file?.[0]);
+
+    const updatedDeriverable = await prisma.annex.update({
       where: { id: Number(id) },
-      data,
+      data: {
+        description: fields.description ? String(fields.description) : undefined,
+        report_id: Number(fields.report_id),
+        file: fileDetails ? fileDetails.fileBuffer: undefined,
+        file_name: fileDetails.originalName,
+        file_type: fileDetails.mimeType,
+      },
     });
-    return res.status(200).json(updatedAnnex);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Error al actualizar el anexo' });
-  }
+
+    return res.status(200).json(updatedDeriverable);
+  });
 }
+
 
 // Eliminar un anexo
 async function deleteAnnex(req: NextApiRequest, res: NextApiResponse) {

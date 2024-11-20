@@ -65,7 +65,9 @@ const Profile: FC<UserFormProps> = ({ userData, onSubmit }) => {
           calculateProfileStatus(data);
 
           if (data.profile_picture && data.profile_picture.data) {
-            const blob = new Blob([new Uint8Array(data.profile_picture.data)], { type: 'image/jpeg' });
+            const imageBuffer = new Uint8Array(data.profile_picture.data);
+            const imageType = data.profile_picture.mimeType; // Asegúrate de que tienes el tipo MIME adecuado (por ejemplo, 'image/jpeg', 'image/png', etc.)
+            const blob = new Blob([imageBuffer], { type: imageType });
             setProfilePicture(URL.createObjectURL(blob));
           }
         })
@@ -92,11 +94,11 @@ const Profile: FC<UserFormProps> = ({ userData, onSubmit }) => {
 
   const calculateProfileStatus = (user: User) => {
     let completedFields = 0;
-    const totalFields = 15; 
+    const totalFields = 17; 
 
     const fields = [
       'name', 'email', 'date', 'phone', 'address', 'profile_picture', 'identity_document',
-      'contact_person_name', 'contact_person_phone', 'contact_person_email', 
+      'contact_person_name', 'work_lines','contact_person_phone', 'contact_person_email', 
       'blood_type', 'marital_status', 'id_file', 'cv_file', 'academic_support_files'
     ];
 
@@ -111,7 +113,6 @@ const Profile: FC<UserFormProps> = ({ userData, onSubmit }) => {
     }
 
     const profileStatus = (completedFields / totalFields) * 100;
-    console.log("Profile Status Calculado:", profileStatus);
 
     setUsers(prevUsers => ({
       ...prevUsers,
@@ -151,8 +152,6 @@ const Profile: FC<UserFormProps> = ({ userData, onSubmit }) => {
     }
   };
   
-  
-  
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -179,9 +178,20 @@ const Profile: FC<UserFormProps> = ({ userData, onSubmit }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
+    calculateProfileStatus(Users);
+    console.log('Datos de users',Users)
     const formData = new FormData();
-    console.log(formData)
+    console.log('Antes de agregar a FormData:', Users.profile_status);
+
+    if (Users.profile_status !== undefined && Users.profile_status !== null) {
+      formData.append('profile_status', String(Number(Users.profile_status || 0)));
+    } else {
+      console.error('profile_status está indefinido o es nulo.');
+    }
+    
+    console.log('FormData después de agregar profile_status:', formData.get('profile_status'));
+    
     for (const key in Users) {
       const value = Users[key as keyof typeof Users];
       if (key === 'password') continue;
@@ -581,7 +591,7 @@ const Profile: FC<UserFormProps> = ({ userData, onSubmit }) => {
       onClose={setShowAlert}
     />
   </form>
-  <div className="fixed bottom-5 right-5 mt-4 flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-lg z-50">
+  <div className="fixed bottom-24 right-5 mt-4 flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-lg z-50">
     <CircularProgress percentage={Math.round(Users.profile_status)} />
   </div>
   </>

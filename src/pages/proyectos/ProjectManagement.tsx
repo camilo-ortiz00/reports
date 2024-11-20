@@ -5,6 +5,9 @@ import ModalDeleteComponent from '@/components/ModalEliminacion';
 import AlertComponent from '@/components/Alert';
 import { Project } from '@/model/projects.props'; 
 import ProjectForm from './projectForm';
+import Link from 'next/link';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCircleArrowLeft, faDiagramProject, faFolderTree } from '@fortawesome/free-solid-svg-icons';
 
 const ProjectManagement = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -131,11 +134,18 @@ const ProjectManagement = () => {
   };
   
   const columns = [
-    { name: 'ID', selector: (row: Project) => row.id, sortable: true },
-    { name: 'Nombre', selector: (row: Project) => row.name, sortable: true },
-    { name: 'Descripción', selector: (row: Project) => row.description },
+    { name: 'ID', selector: (row: Project) => row.id, sortable: true, width: '8em',},
+    { name: 'Nombre', selector: (row: Project) => row.name, sortable: true,  },
     {
-      name: 'Componente', // Columna para mostrar los usuarios asignados
+      name: 'Descripción',
+      selector: (row: Project) => row.description,
+      cell: (row: Project) => (
+        <div className="truncate max-w-xs" title={row.description}>
+          {row.description}
+        </div>  
+      ),
+    },      {
+      name: 'Componente', 
       selector: (row: Project) => (
           row.component ? row.component.name : 'Sin asignar'
       ),
@@ -163,7 +173,15 @@ const ProjectManagement = () => {
   
   return (
     <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center">
       <h1 className='text-2xl font-bold mb-4'>Gestión de Proyectos</h1>
+        <Link href="/proyectos/ComponentManagement">
+            <button className="btn btn-outline text-black mt-8 mr-8 px-4 py-2 rounded">
+            <FontAwesomeIcon icon={faFolderTree} size='2x'/>
+              Ir a Componentes
+            </button>
+        </Link>
+      </div>
       <button 
         onClick={handleCreateProject}
         className="mt-4 mb-8 px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-700"
