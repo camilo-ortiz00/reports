@@ -102,7 +102,7 @@ const ViewProfile: FC<UserFormProps> = ({ userData }) => {
       };
 
 return (
-  <div className="space-y-6">
+  <div className="space-y-6 max-w-[80%] mx-auto">
     <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Perfil de Usuario</h1>
         <Link href="/user/userList">

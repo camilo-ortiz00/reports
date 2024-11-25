@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import formidable from 'formidable';
 import fs from 'fs';
-import path from 'path';
+import { calculateStatus } from './reports';
 
 const prisma = new PrismaClient();
 
@@ -94,7 +94,11 @@ export async function createAnnex(req: NextApiRequest, res: NextApiResponse) {
           file_type: fileDetails.mimeType,
         },
       });
-
+      const newStatus = await calculateStatus(Number(report_id));
+    await prisma.report.update({
+      where: { id: Number(report_id) },
+      data: { status: newStatus },
+    });
       res.status(201).json(newAnnex);
     } catch (dbError) {
       console.error('Error al guardar el anexo:', dbError);
@@ -146,7 +150,11 @@ async function updateAnnex(req: NextApiRequest, res: NextApiResponse) {
         file_type: fileDetails.mimeType,
       },
     });
-
+    const newStatus = await calculateStatus(Number(report_id));
+    await prisma.report.update({
+      where: { id: Number(report_id) },
+      data: { status: newStatus },
+    });
     return res.status(200).json(updatedDeriverable);
   });
 }

@@ -34,7 +34,7 @@ const Navbar = () => {
   }, [userId]);
 
   return (
-    <div className="navbar bg-base-100 border-b border-gray-200">
+    <div className="navbar bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="flex-none">
         <label htmlFor="my-drawer" className="btn bg-white text-black border border-gray-800 drawer-button">
           <svg className="w-6 h-6 text-black-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -42,52 +42,69 @@ const Navbar = () => {
           </svg>
         </label>
       </div>
-      <div className="flex items-center space-x-2">
+      <div className="flex">
         <Link href="/informes/">
           <h1 className="btn btn-ghost text-xl font-bold">Inicio</h1>
         </Link>
+        
+      </div>
+      <div className="flex flex-row justify-center items-center bg-gray-100 pr-4 pl-4 space-x-4 rounded-lg w-max mx-auto">
         <Image
-          src="/logos/Logo_ARC.jfif"
-          alt="Logo"
-          width={60}
-          height={60}
-          priority
-          className="rounded-full" 
-        />
-        <Image
-          src="/logos/Logo_DIMAR.png"
-          alt="Logo"
-          width={40}
-          height={40}
-          priority
-          className="rounded-full" 
-        />
-        <Image
-          src="/logos/Logo_ENAP.jfif"
-          alt="Logo"
-          width={40}
-          height={40}
-          priority
-          className="rounded-full" 
-        />
-        <Image
-          src="/logos/Logo_ICANH.png"
-          alt="Logo"
-          width={40}
-          height={40}
-          priority
-          className="rounded-full" 
-        />
-        <Image
-          src="/logos/Logo_MINCULTURA.jfif"
-          alt="Logo"
+          src="/logos/colombiapv.png"
+          alt="Logo colombiapv"
           width={80}
           height={80}
           priority
-          className="rounded-full" 
+        />
+        <div className="h-8 border-l border-gray-300"></div>
+        <Image
+          src="/logos/mindefensa.png"
+          alt="Logo mindefensa"
+          width={80}
+          height={80}
+          priority
+        />
+        <div className="h-8 border-l border-gray-300"></div>
+        <Image
+          src="/logos/mincultura.png"
+          alt="Logo mincultura"
+          width={80}
+          height={80}
+          priority
+        />
+        <div className="h-8 border-l border-gray-300"></div>
+        <Image
+          src="/logos/armada.png"
+          alt="Logo armada"
+          width={80}
+          height={80}
+          priority
+        />
+        <div className="h-8 border-l border-gray-300"></div>
+        <Image
+          src="/logos/dimar.png"
+          alt="Logo dimar"
+          width={140}
+          height={140}
+          priority
+        />
+        <div className="h-8 border-l border-gray-300"></div>
+        <Image
+          src="/logos/escuelanaval.png"
+          alt="Logo escuela naval"
+          width={40}
+          height={40}
+          priority
+        />
+        <div className="h-8 border-l border-gray-300"></div>
+        <Image
+          src="/logos/icanh.png"
+          alt="Logo icanh"
+          width={80}
+          height={80}
+          priority
         />
       </div>
-
       <div className="flex-none ml-auto flex items-center space-x-2">
         {session ? (
           <>
@@ -99,8 +116,8 @@ const Navbar = () => {
                      <Image
                      src={profilePicture || '/default-image.jpg'}
                      alt="Profile Picture"
-                     width={24}
-                     height={24}
+                     width={40}
+                     height={40}
                      style={{ objectFit: 'cover' }}
                    />
                   ) : (

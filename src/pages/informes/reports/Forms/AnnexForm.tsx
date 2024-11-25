@@ -65,6 +65,9 @@ const AnnexForm: FC<AnnexFormProps> = ({
     }
 
     const formData = new FormData();
+    if (initialData?.id) {
+      formData.append('id', initialData.id.toString()); // Incluye el ID si existe
+    }
     formData.append('file', selectedFile);
     formData.append('description', data.description);
     formData.append('report_id', reportId.toString());

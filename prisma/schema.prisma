@@ -78,13 +78,13 @@ model Report {
   user             User               @relation(fields: [user_id], references: [id])
   trackings        ReportTracking[]
   technicalSummary TechnicalSummary[]
+  created_at       DateTime           @default(now()) 
+  updated_at       DateTime           @updatedAt 
 }
 
 model ReportTracking {
   id         Int      @id @default(autoincrement())
   report_id  Int
-  status     Int
-  updated_at DateTime
   note       String
   report     Report   @relation(fields: [report_id], references: [id])
 }
@@ -94,7 +94,7 @@ model TechnicalSummary {
   report_id           Int
   obtained_result     String
   product_description String
-  observations        String
+  observations        String?
   name_technical      String
   support_annex_id    Int?
   report              Report @relation(fields: [report_id], references: [id], onDelete: Cascade)
@@ -106,8 +106,10 @@ model Deliverable {
   report_id        Int
   description      String
   date             String
-  approved_changes String
-  contingency_plan String
+  approved_changes String?
+  contingency_plan String?
+  percent_month    Float?
+  percent_cumulative Float?  
   support_annex    Bytes
   support_name     String?
   support_type     String

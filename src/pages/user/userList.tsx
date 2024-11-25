@@ -50,8 +50,12 @@ const UserList: FC = () => {
   }, [searchTerm, users]);
 
   // Función para determinar el color del círculo según el progreso
-  const getStatusColor = (profileStatus: number) => {
-    return profileStatus === 100 ? 'bg-green-500' : 'bg-yellow-500';
+  const getStatusColor = (status: number) => {
+    if (status < 30) return 'bg-red-500'; // Menor que 50, rojo
+    if (status < 50) return 'bg-orange-500'; // Igual a 50, naranja
+    if (status < 80) return 'bg-yellow-500'; // Menor que 80, amarillo
+    if (status === 100) return 'bg-green-500'; // Igual a 100, verde
+    return 'bg-gray-400'; // Por defecto, gris
   };
 
   const columns = [

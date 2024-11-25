@@ -15,9 +15,9 @@ interface AnnexTableProps {
 
 const AnnexTable: React.FC<AnnexTableProps> = ({ annexes }) => {
   const columns: Column<AnnexTableData>[] = useMemo(() => [
-    { Header: 'N° Actividad', accessor: 'id' },
+    { Header: 'N°', accessor: 'id' },
     {Header: 'DESCRIPCIÓN', accessor: 'description'},
-    {Header: 'URL', accessor: 'file_name'},
+    {Header: 'ANEXOS', accessor: 'file_name'},
   ], []);
 
   const data = useMemo(() => annexes, [annexes]);

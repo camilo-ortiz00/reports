@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import formidable from 'formidable';
 import fs from 'fs';
-import path from 'path';
+import { calculateStatus } from './reports';
 
 const prisma = new PrismaClient();
 
@@ -56,7 +56,7 @@ async function createDeliverable(req: NextApiRequest, res: NextApiResponse) {
   
   const form = formidable({
     keepExtensions: true,
-    maxFileSize: 10 * 1024 * 1024, // Limitar el tamaño a 5 MB
+    maxFileSize: 10 * 1024 * 1024,
   });
 
   form.parse(req, async (err, fields, files) => {
@@ -94,10 +94,17 @@ async function createDeliverable(req: NextApiRequest, res: NextApiResponse) {
           date: fields.date ? String(fields.date) : undefined,
           approved_changes: fields.approved_changes ? String(fields.approved_changes) : undefined,
           contingency_plan: fields.contingency_plan ? String(fields.contingency_plan) : undefined,
+          percent_month: fields.percent_month ? Number(fields.percent_month) : undefined,
+          percent_cumulative: fields.percent_cumulative ? Number(fields.percent_cumulative) : undefined,
           support_annex: supportDetails ? supportDetails.fileBuffer : undefined,
           support_name: supportDetails?.originalName,
           support_type: supportDetails?.mimeType,
         },
+      });
+      const newStatus = await calculateStatus(Number(report_id));
+      await prisma.report.update({
+        where: { id: Number(report_id) },
+        data: { status: newStatus },
       });
       return res.status(201).json(newDeliverable);
     } catch (error) {
@@ -147,12 +154,18 @@ async function updateDeliverable(req: NextApiRequest, res: NextApiResponse) {
           date: fields.date ? String(fields.date) : undefined,
           approved_changes: fields.approved_changes ? String(fields.approved_changes) : undefined,
           contingency_plan: fields.contingency_plan ? String(fields.contingency_plan) : undefined,
+          percent_month: fields.percent_month ? Number(fields.percent_month) : undefined,
+          percent_cumulative: fields.percent_cumulative ? Number(fields.percent_cumulative) : undefined,
           support_annex: supportDetails ? supportDetails.fileBuffer : undefined,
           support_name: supportDetails?.originalName,
           support_type: supportDetails?.mimeType,
       },
     });
-
+    const newStatus = await calculateStatus(Number(report_id));
+    await prisma.report.update({
+      where: { id: Number(report_id) },
+      data: { status: newStatus },
+    });
     return res.status(200).json(updatedDeliverable);
   });
 }

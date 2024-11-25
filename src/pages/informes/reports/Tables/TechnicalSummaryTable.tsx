@@ -27,26 +27,36 @@ const TechnicalSummaryTable: React.FC<TechnicalFormProps> = ({
       name: 'Actividad',
       selector: (row: TechnicalSummaryData) => row.name_technical || 'Sin resultado',
       sortable: true,
+      width: '15em',
     },
     {
       name: 'Resultado obtenido',
       selector: (row: TechnicalSummaryData) => row.obtained_result || 'Sin resultado',
       sortable: true,
+      width: '15em',
     },
     {
       name: 'Descripción/Producto',
       selector: (row: TechnicalSummaryData) => row.product_description || 'Sin descripción',
       sortable: true,
+      width: '15em',
     },
     {
       name: 'Anexo de la sinopsis',
-      selector: (row: TechnicalSummaryData) => row.annex?.description || 'Sin Soporte', // Acceder a la descripción
+      selector: (row: TechnicalSummaryData) => {
+        if (row.support_annex && row.support_annex.description) {
+          return row.support_annex.description;
+        }
+        return 'Sin Soporte';
+      },
       sortable: true,
+      width: '15em',
     },
     {
       name: 'Observaciones',
       selector: (row: TechnicalSummaryData) => row.observations || 'Sin observación',
       sortable: true,
+      width: '15em',
     },
   ];
 
@@ -81,6 +91,11 @@ const TechnicalSummaryTable: React.FC<TechnicalFormProps> = ({
               backgroundColor: '#f3f4f6',
               color: '#374151',
               fontWeight: 'bold',
+            },
+          },
+          header: {
+            style: {
+              display: 'none', // Oculta el checkbox global
             },
           },
         }}

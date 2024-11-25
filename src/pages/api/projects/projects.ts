@@ -2,6 +2,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '5mb', // Cambia a un límite mayor, por ejemplo, 5mb
+    },
+  },
+};
+
 const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

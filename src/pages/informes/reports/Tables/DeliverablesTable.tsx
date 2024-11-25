@@ -26,7 +26,6 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
       name: 'Fecha de ejecución',
       selector: (row: DeliverableData) => row?.date || 'N/A',
       sortable: true,
-      width: '15em',
     },
     {
       name: 'URL del anexo',
@@ -41,12 +40,11 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
           <FontAwesomeIcon
             icon={faDownload}
             className="text-blue-600 cursor-pointer hover:text-blue-800"
-            onClick={() => handleDownload(row.id)} // Pasa el ID del anexo para descargar el archivo
+            onClick={() => handleDownload(row.id)} 
           />
         </div>
       ),
       sortable: true,
-      width: '20em', // Puedes ajustar el ancho si lo deseas
     },
     {
       name: 'Cambios aprobados por supervisor',
@@ -56,6 +54,16 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
     {
       name: 'Plan de contingencia',
       selector: (row: DeliverableData) => row?.contingency_plan || 'N/A',
+      sortable: true,
+    },
+    {
+      name: '% Avance Mes',
+      selector: (row: DeliverableData) => row?.percent_month || 'N/A',
+      sortable: true,
+    },
+    {
+      name: '% Avance Acumulado',
+      selector: (row: DeliverableData) => row?.percent_cumulative || 'N/A',
       sortable: true,
     },
   ];
@@ -70,7 +78,6 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
       const fileBlob = await response.blob();
       const fileUrl = URL.createObjectURL(fileBlob);
 
-      // Obtener el nombre original del archivo desde los encabezados (si se aplica)
       const contentDisposition = response.headers.get('Content-Disposition');
       let fileName = 'archivo';
       if (contentDisposition) {
@@ -119,8 +126,8 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
           headCells: {
             style: {
               backgroundColor: '#f3f4f6', // Cambia el color del encabezado
-              color: '#374151', // Cambia el color del texto del encabezado
-              fontWeight: 'bold', // Negrita
+              color: '#374151',
+              fontWeight: 'bold',
             },
           },
         }}

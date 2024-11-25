@@ -15,14 +15,12 @@ const SideBar = () => {
     <div className="drawer">
       <input id="my-drawer" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content">
-        {/* Aquí podrías agregar el contenido principal */}
       </div>
 
       <div className="drawer-side fixed top-[64px] left-0 z-50">
         <label htmlFor="my-drawer" className="drawer-overlay"></label>
         <ul className="menu w-[15%] bg-white text-base-content min-h-[calc(100vh-64px)] p-4 shadow-lg">
           
-          {/* Solo muestra esta sección si el usuario tiene role_id = 1 (admin) */}
           {isAdmin && (
             <div className="collapse collapse-arrow bg-base-100">
               <input type="radio" name="accordion" id="accordion1" className="peer" defaultChecked />
@@ -49,10 +47,9 @@ const SideBar = () => {
             </div>
           )}
 
-          {/* Solo muestra esta sección si el usuario tiene role_id = 1 (admin) */}
           {isAdmin && (
             <div className="collapse collapse-arrow bg-base-100">
-              <input type="radio" name="accordion" id="accordion2" className="peer" defaultChecked />
+              <input type="radio" name="accordion" id="accordion2" className="peer" />
               <label htmlFor="accordion2" className="collapse-title text-xl font-medium cursor-pointer">
                 Proyectos
               </label>
@@ -65,6 +62,26 @@ const SideBar = () => {
                 <Link href="/proyectos/ComponentManagement">
                   <p className="m-1 p-2 w-full border-b border-gray-400 hover:bg-gray-200 hover:text-black transition-colors duration-300 rounded">
                     Componentes
+                  </p>
+                </Link>
+              </div>
+            </div>
+          )}
+           {isAdmin && (
+            <div className="collapse collapse-arrow bg-base-100">
+              <input type="radio" name="accordion" id="accordion2" className="peer" />
+              <label htmlFor="accordion2" className="collapse-title text-xl font-medium cursor-pointer">
+                Informes
+              </label>
+              <div className="collapse-content pl-0">
+              <Link href="/informes/reports/report_list/report_list">
+              <p className="m-1 p-2 w-full border-b border-gray-400 hover:bg-gray-200 hover:text-black transition-colors duration-300 rounded">
+                    Creación de Informes
+                  </p>
+                </Link>
+                <Link href="/informes/tracking/reportTracking">
+                  <p className="m-1 p-2 w-full border-b border-gray-400 hover:bg-gray-200 hover:text-black transition-colors duration-300 rounded">
+                    Seguimiento de Informes
                   </p>
                 </Link>
               </div>

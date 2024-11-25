@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react'; // Importa useSession de NextAuth
 import { AnnexData, DeliverableData, TechnicalSummaryData, ReportData } from '@/model/reports.props';
+import Image from 'next/image';
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -131,7 +132,22 @@ const Reports = () => {
           <div className={styles.num_report}>
             <h2>Número del informe: {selectedReport ? selectedReport.id : 'Sin informe seleccionado'}</h2>
           </div>
-          <div className={styles.logo}></div>
+          <div className={styles.logo}>
+          <Image
+            src="/logos/escuelanaval.png"
+            alt="Logo escuela naval"
+            width={200}
+            height={200}
+            priority
+          />
+          <Image
+            src="/logos/gio.png"
+            alt="Logo escuela naval"
+            width={200}
+            height={200}
+            priority
+          />
+          </div>
         </div>
         <div className={styles.names}>
           <div className={styles.project_name}>

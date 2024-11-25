@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
+import { calculateStatus } from './reports';
 
 const prisma = new PrismaClient();
 
@@ -29,18 +30,31 @@ async function getTechnicals(req: NextApiRequest, res: NextApiResponse) {
     if (id) {
       const technicalSummary = await prisma.technicalSummary.findUnique({
         where: { id: Number(id) },
+        include: {
+          support_annex: true, // Cambiar a "support_annex" como se define en el modelo
+        },
       });
-      if (!technicalSummary) return res.status(404).json({ message: 'Sinopsis técnica no encontrada' });
+
+      if (!technicalSummary) {
+        return res.status(404).json({ message: 'Sinopsis técnica no encontrada' });
+      }
+
       return res.status(200).json(technicalSummary);
     }
 
-    const technicalSummaries = await prisma.technicalSummary.findMany();
+    const technicalSummaries = await prisma.technicalSummary.findMany({
+      include: {
+        support_annex: true, // Incluir la relación en el caso de múltiples registros
+      },
+    });
+
     return res.status(200).json(technicalSummaries);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Error al obtener las Sinopsis técnicas' });
   }
 }
+
 
 // Crear
 async function createTechnical(req: NextApiRequest, res: NextApiResponse) {
@@ -61,7 +75,11 @@ async function createTechnical(req: NextApiRequest, res: NextApiResponse) {
         observations: observations || '', 
       },
     });
-
+    const newStatus = await calculateStatus(Number(report_id));
+    await prisma.report.update({
+      where: { id: Number(report_id) },
+      data: { status: newStatus },
+    });
     return res.status(201).json(newTechnicalSummary);
   } catch (error) {
     console.error(error);
@@ -88,6 +106,11 @@ async function updateTechnical(req: NextApiRequest, res: NextApiResponse) {
         support_annex_id: support_annex_id ? Number(support_annex_id) : null,
         observations: observations || '',
       },
+    });
+    const newStatus = await calculateStatus(Number(report_id));
+    await prisma.report.update({
+      where: { id: Number(report_id) },
+      data: { status: newStatus },
     });
     return res.status(200).json(updatedTechnicalSummary);
   } catch (error) {

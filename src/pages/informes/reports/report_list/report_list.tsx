@@ -31,12 +31,10 @@ const Page = () => {
   const [selectedReportAnnex, setSelectedReportAnnex] = useState<AnnexData | null>(null);
   const [alertType, setAlertType] = useState<'error' | 'success' | 'info' | 'warning'>('success');
   const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
   const [showSummaryAlert, setShowSummaryAlert] = useState(false);
   const [summaryAlertMessage, setSummaryAlertMessage] = useState(''); 
-  const [alertMessage, setAlertMessage] = useState('');
-  const [showModalTechnical, setShowModalTechnical] = useState(false);
-  const [showModalDeliverable, setShowModalDeliverable] = useState(false);
-  const [showModalAnnex, setShowModalAnnex] = useState(false);
+  const [activeModal, setActiveModal] = useState<'technical' | 'deliverable' | 'annex' | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [summaryText, setSummaryText] = useState<string | null>(selectedReport?.summary || '');
   const [isCreatingNewReport, setIsCreatingNewReport] = useState(false);
@@ -66,9 +64,10 @@ const Page = () => {
       setDeliverables(data[2]);
       setAnnexes(data[3]);
       setProjects(data[4])
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      setAlertMessage(`Error al obtener los datos: ${errorMessage}`);
       console.error('Error al obtener los datos:', error);
-      setAlertMessage('Error al obtener los datos');
       setAlertType('error');
       setShowAlert(true);
     }
@@ -76,7 +75,7 @@ const Page = () => {
   
   useEffect(() => {
     fetchData();
-  }, []);  
+  }, [refresh]);  
 
   useEffect(() => {
     if (selectedReport) {
@@ -87,7 +86,7 @@ const Page = () => {
       setSelectedReportAnnex(null);
       setSummaryText('');
     }
-  }, [selectedReport, technicalSummary, deliverables, annexes]);
+  }, [selectedReport]);
   
  //resumen
  const handleEditClick = () => {
@@ -99,7 +98,7 @@ const Page = () => {
     }
 
     const updatedReport = { ...selectedReport, summary: summaryText };
-    updateReportSummary(updatedReport);
+    updateReportSummary(updatedReport); // Llamada con argumento
     const updatedReports = reports.map(report =>
       report.id === selectedReport.id ? updatedReport : report
     );
@@ -116,27 +115,42 @@ const Page = () => {
 };
 
 const updateReportSummary = async (updatedReport: ReportData) => {
+  if (!updatedReport || !updatedReport.summary) {
+    setAlertMessage('El resumen no puede estar vacío.');
+    setAlertType('error');
+    setShowAlert(true);
+    return;
+  }
+
+  const data = {
+    id: updatedReport.id,
+    summary: updatedReport.summary,
+    updated_at: new Date().toISOString(),
+  };
+
   try {
     const response = await fetch(`/api/reports/reports`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id: updatedReport.id,
-        summary: updatedReport.summary,
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data), // Solo enviar id, summary y updated_at
     });
 
     if (!response.ok) {
+      const errorDetails = await response.json();
+      console.error('Detalles del error:', errorDetails);
       throw new Error('Error al actualizar el resumen del informe');
     }
 
-    const data = await response.json();
-    console.log('Resumen actualizado:', data);
+    // Actualiza el estado con los datos actualizados (solo el resumen)
+    const updatedReports = reports.map(report =>
+      report.id === updatedReport.id ? { ...report, summary: updatedReport.summary, updated_at: data.updated_at } : report
+    );
 
-    // Muestra un mensaje de éxito
-    setAlertMessage('El resumen ha sido actualizado con éxito');
+    setReports(updatedReports);
+    setSelectedReport(updatedReport);
+    setFilteredReports(updatedReports);
+
+    setAlertMessage('Resumen actualizado con éxito');
     setAlertType('success');
     setShowAlert(true);
   } catch (error) {
@@ -149,43 +163,21 @@ const updateReportSummary = async (updatedReport: ReportData) => {
 
 //select
 const handleCheckboxChange = (reportId: number) => {
-  if (selectedReportId === reportId) {
-    setSelectedReportId(null); 
+  if (selectedReport?.id === reportId) {
     setSelectedReport(null);
   } else {
-    setSelectedReportId(reportId); 
     const report = reports.find(report => report.id === reportId);
     setSelectedReport(report || null);
   }
 };
 
-  // Modales
-  const handleOpenModal = (type: 'technical' | 'deliverable' | 'annex') => {
-    switch (type) {
-      case 'technical':
-        if (selectedReport?.id) {
-        setShowModalTechnical(true);
-      } else {
-        console.error('No se puede abrir el formulario: No se ha seleccionado un reporte válido.');
-      }
-        break;
-      case 'deliverable':
-        if (selectedReport?.id) {
-          setShowModalDeliverable(true);
-        } else {
-          console.error('No se puede abrir el formulario: No se ha seleccionado un reporte válido.');
-        }
-        break;
-      case 'annex':
-        if (selectedReport?.id) {
-        setShowModalAnnex(true);
-      } else {
-        console.error('No se puede abrir el formulario: No se ha seleccionado un reporte válido.');
-      }
-        break;
-      default:
-        break;
-    }
+// Modales
+const handleOpenModal = (type: 'technical' | 'deliverable' | 'annex') => {
+  if (!selectedReport?.id) {
+    console.error('No se ha seleccionado un reporte válido.');
+    return;
+  }
+  setActiveModal(type);
 };
 
 const handleButtonClick = (type: 'technical' | 'deliverable' | 'annex') => (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -193,12 +185,7 @@ const handleButtonClick = (type: 'technical' | 'deliverable' | 'annex') => (even
     handleOpenModal(type);
 };
   
-  const handleCloseModal = () => {
-    setShowModalTechnical(false);
-    setShowModalDeliverable(false);
-    setShowModalAnnex(false);
-    setSelectedReportAnnex(null);
-  };
+const handleCloseModal = () => setActiveModal(null);
 
   const handleDeleteClick = (id: number, type: string) => {
     setItemToDelete({ id, type });
@@ -206,46 +193,44 @@ const handleButtonClick = (type: 'technical' | 'deliverable' | 'annex') => (even
   };
   
   const confirmDelete = async () => {
-    if (itemToDelete) { 
-      const { id, type } = itemToDelete;
-      
-      try {
-        if (type === 'annex') {
-          await handleDeleteAnnex(id);
-        } else if (type === 'deliverable') {
-          await handleDeleteDeliverable(id);
-        }else if (type === 'report') {
-          await handleDeleteReport(id);
-        } else if (type === 'activity') {
-          await handleDeleteTechnicalSummary(id); 
-        }
+    if (!itemToDelete) return;
   
-        setShowDeleteModal(false); 
-        setItemToDelete(null); 
-        setAlertMessage(`${type.charAt(0).toUpperCase() + type.slice(1)} eliminado con éxito`);
-        setAlertType('success');
-        setShowAlert(true);
-      } catch (error) {
-        console.error('Error:', error);
-        setAlertMessage(`Error al eliminar ${type}`);
-        setAlertType('error');
-        setShowAlert(true);
-      }
+    const deleteHandlers = {
+      annex: handleDeleteAnnex,
+      deliverable: handleDeleteDeliverable,
+      report: handleDeleteReport,
+      activity: handleDeleteTechnicalSummary,
+    };
+  
+    try {
+      await deleteHandlers[itemToDelete.type](itemToDelete.id);
+      setAlertMessage(`${itemToDelete.type} eliminado con éxito`);
+      setAlertType('success');
+    } catch (error) {
+      console.error('Error:', error);
+      setAlertMessage(`Error al eliminar ${itemToDelete.type}`);
+      setAlertType('error');
+    } finally {
+      setShowDeleteModal(false);
+      setItemToDelete(null);
+      setShowAlert(true);
     }
   };
-    
+  
 //Crear
 const handleCreateReport = async () => {
-
   if (!session || !session.user) {
     console.error("Usuario no autenticado");
-    return; 
+    return;
   }
+  
   const formData = {
-    summary: "",
+    summary: "", // Resumen inicial
     project_id: selectedProjectId,
     user_id: parseInt(session?.user.id),
     status: 0,
+    created_at: new Date().toISOString(),  // Fecha de creación
+    updated_at: new Date().toISOString(),  // Fecha de última modificación
   };
 
   console.log("Form data enviado:", formData);
@@ -266,6 +251,7 @@ const handleCreateReport = async () => {
     const data = await response.json();
     console.log('Informe creado:', data);
 
+    // Agregar el informe creado a los estados
     setReports((prevReports) => [...prevReports, data]);
     setFilteredReports((prevReports) => [...prevReports, data]);
     setSelectedReport(data);
@@ -274,7 +260,6 @@ const handleCreateReport = async () => {
     setAlertType('success');
     setShowAlert(true);
     setIsCreatingNewReport(false);
-
   } catch (error: unknown) { 
     console.error('Error', error);
     let errorMessage = 'Error al crear el informe';
@@ -288,6 +273,27 @@ const handleCreateReport = async () => {
     setAlertMessage('Error al crear el informe ' + errorMessage);
     setAlertType('error');
     setShowAlert(true);
+  }
+};
+
+const updateReportModifiedDate = async (reportId: number) => {
+  try {
+    const response = await fetch(`/api/reports/reports`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: reportId }), // Agrega el report_id en el cuerpo
+    });
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      console.error('Error al actualizar la fecha de modificación del reporte:', errorResponse);
+      throw new Error('Error al actualizar la fecha de modificación');
+    }
+    console.log('Fecha de modificación del reporte actualizada');
+  } catch (error) {
+    console.error('Error al actualizar la fecha:', error);
   }
 };
 
@@ -322,16 +328,26 @@ const handleCreateTechnicalSummary = async (technical: TechnicalSummaryData) => 
     const data = await response.json();
     console.log('Sinopsis técnica creado:', data);
     if (id) {
-      setTechnicalSummary((prevTechnicalSummaries) =>
-        prevTechnicalSummaries.map((summary) => (summary.id === id ? data : summary))
-      );
+      setTechnicalSummary((prevTechnicalSummaries) => {
+        const updatedSummaries = prevTechnicalSummaries.map((summary) =>
+          summary.id === id ? { ...summary, ...data, support_annex: data.support_annex } : summary
+        );
+        return updatedSummaries;
+      });
+      await fetchData();
       setAlertMessage('Sinopsis técnica actualizado con éxito');
     } else {
       setTechnicalSummary((prevTechnicalSummaries) => [...prevTechnicalSummaries, data]);
       setAlertMessage('Sinopsis técnica creado con éxito');
+      await fetchData();
     }
+    if (isNaN(report_id)) {
+      console.error('El report_id no es válido');
+      throw new Error('El report_id no es válido');
+    }
+    await updateReportModifiedDate(report_id);
     setRefresh((prev) => prev + 1);
-    setShowModalTechnical(false)
+    handleCloseModal()
     setAlertType('success');
     setShowAlert(true);
   } catch (error) {
@@ -344,7 +360,7 @@ const handleCreateTechnicalSummary = async (technical: TechnicalSummaryData) => 
   
 const handleCreateDeliverable = async (formData: FormData) => {
   try {
-    const method = formData.has('id') ? 'PUT' : 'POST';
+    const method = formData.get('id') ? 'PUT' : 'POST';
     console.log('Datos enviados:');
     formData.forEach((value, key) => {
       console.log(`${key}:`, value);
@@ -372,8 +388,15 @@ const handleCreateDeliverable = async (formData: FormData) => {
       setDeliverables((prevDeliverables) => [...prevDeliverables, data]);
       setAlertMessage('Entregable creado con éxito');
     }
+    const reportId = Number(formData.get('report_id'));
+    if (isNaN(reportId)) {
+      console.error('El report_id no es válido');
+      throw new Error('El report_id no es válido');
+    }
+    await updateReportModifiedDate(reportId);
+    
     setRefresh((prev) => prev + 1);
-    setShowModalDeliverable(false)
+    handleCloseModal()
     setAlertType('success');
     setShowAlert(true);
   } catch (error) {
@@ -386,11 +409,13 @@ const handleCreateDeliverable = async (formData: FormData) => {
 
 const handleCreateAnnex = async (formData: FormData) => {
   try {
-    const method = formData.has('id') ? 'PUT' : 'POST';
+    const method = formData.get('id') ? 'PUT' : 'POST';
     console.log('Datos enviados:');
     formData.forEach((value, key) => {
       console.log(`${key}:`, value);
-    });    const response = await fetch('/api/reports/annexes', {
+      console.log('Usando método:', method);
+    });    
+    const response = await fetch('/api/reports/annexes', {
       method,
       body: formData,
     });
@@ -412,8 +437,14 @@ const handleCreateAnnex = async (formData: FormData) => {
       setAnnexes((prevAnnexes) => [...prevAnnexes, data]);
       setAlertMessage('Anexo creado con éxito');
     }
+    const reportId = Number(formData.get('report_id'));
+    if (isNaN(reportId)) {
+      console.error('El report_id no es válido');
+      throw new Error('El report_id no es válido');
+    }
+    await updateReportModifiedDate(reportId);
     setRefresh((prev) => prev + 1);
-    setShowModalAnnex(false);
+    handleCloseModal()
     setAlertType('success');
     setShowAlert(true);
     handleRowDeselected();
@@ -425,6 +456,7 @@ const handleCreateAnnex = async (formData: FormData) => {
   }
 };
 
+//Eliminar
 const handleDeleteTechnicalSummary = async (id: number) => {
   try {
     const response = await fetch(`/api/reports/technical-summary?id=${id}`, {
@@ -437,6 +469,7 @@ const handleDeleteTechnicalSummary = async (id: number) => {
     setAlertMessage('Sinopsis técnica eliminada con éxito');
     setAlertType('success');
     setShowAlert(true);
+    handleRowDeselected();
   } catch (error) {
     console.error('Error:', error);
     setAlertMessage('Error al eliminar la sinopsis técnica');
@@ -457,6 +490,7 @@ const handleDeleteDeliverable = async (id: number) => {
     setAlertMessage('Entregable eliminado con éxito');
     setAlertType('success');
     setShowAlert(true);
+    handleRowDeselected();
   } catch (error) {
     console.error('Error:', error);
     setAlertMessage('Error al eliminar el entregable');
@@ -477,6 +511,7 @@ const handleDeleteAnnex = async (id: number) => {
     setAlertMessage('Anexo eliminado con éxito');
     setAlertType('success');
     setShowAlert(true);
+    handleRowDeselected();
   } catch (error) {
     console.error('Error:', error);
     setAlertMessage('Error al eliminar el Anexo');
@@ -713,10 +748,11 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
               </button>
             )}
             <ModalComponent
-              show={showModalTechnical}
+              show={activeModal === 'technical'}
               title={selectedReportTechnical ? 'Editar Actividad Técnica' : 'Crear Actividad Técnica'}
               closeModal={handleCloseModal}
             >
+              
             <TechnicalForm
               handleCreateTechnicalSummary={handleCreateTechnicalSummary}
               initialData={selectedReportTechnical || undefined}
@@ -758,7 +794,7 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
               </button>
             )}
           <ModalComponent
-              show={showModalDeliverable}
+              show={activeModal === 'deliverable'}
               title={selectedReportDeliverable ? 'Editar Entregable' : 'Crear Nuevo Entregable'}
               closeModal={handleCloseModal}
             >
@@ -802,7 +838,7 @@ const reportSelection = selectedReport?.id ? { id: selectedReport.id } : null;
             </button>
             )}
             <ModalComponent
-              show={showModalAnnex}
+              show={activeModal === 'annex'}
               title={selectedReportAnnex ? 'Editar Anexo' : 'Crear Nuevo Anexo'}
               closeModal={handleCloseModal}
             >

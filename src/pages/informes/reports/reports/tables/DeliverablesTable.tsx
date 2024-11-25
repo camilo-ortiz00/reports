@@ -10,6 +10,8 @@ interface DeliverablesTableData {
   support_name: string;
   approved_changes: string;
   contingency_plan: string;
+  percent_month: number;
+  percent_cumulative: number;
 }
 
 interface DeliverablesTableProps {
@@ -25,6 +27,8 @@ const DeliverableTable: React.FC<DeliverablesTableProps> = ({ deliverables }) =>
   {Header: 'FECHA DE EJECUCIÓN', accessor: 'date'},
   {Header: 'CAMBIOS APROVADOS POR SUPERVISOR',accessor: 'approved_changes'},
   {Header: 'PLAN DE CONTIGENCIA', accessor: 'contingency_plan'},
+  {Header: '% AVANCE MES', accessor: 'percent_month'},
+  {Header: '% AVANCE ACUMULADO', accessor: 'percent_cumulative'},
 ], []);
 
 const data = useMemo(() => deliverables, [deliverables]);
