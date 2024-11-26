@@ -14,7 +14,7 @@ const ModalDeleteComponent: FC<{
       <div className="modal-box bg-white rounded-lg shadow-lg max-w-md w-auto p-4">
         <div className="flex justify-between items-center border-b mb-4">
           <h2 className="text-xl font-semibold">{title}</h2>
-          <button onClick={closeModal} className="btn btn-sm btn-circle btn-ghost absolute h-16 w-16 right-2 top-2">✕</button>
+          <button onClick={closeModal} className="btn btn-sm btn-circle btn-ghost absolute h-16 w-16 right-2 top-0">✕</button>
         </div>
         <div>{children}</div>
         <div className="flex justify-end mt-4">

@@ -43,6 +43,7 @@ const UserList: FC = () => {
         (user) =>
           user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.work_lines.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.identity_document.includes(searchTerm)
       );
       setFilteredUsers(filtered);
@@ -79,6 +80,10 @@ const UserList: FC = () => {
       selector: (row: User) => row.identity_document,
     },
     {
+      name: 'Línea de trabajo',
+      selector: (row: User) => row.work_lines,
+    },
+    {
       name: 'Perfil completado',
       cell: (row: User) => (
         <div className="flex items-center space-x-2">
@@ -92,15 +97,15 @@ const UserList: FC = () => {
     {
       name: 'Acciones',
       cell: (row: User) => (
-        <div className="flex space-x-2 w-full"> {/* Asegura que el contenedor sea suficientemente ancho */}
+        <div className="flex  w-full"> 
           <button
-            className="bg-blue-500 text-white font-bold px-4 py-1 rounded whitespace-nowrap" // Asegura que el texto no se envuelva
+            className="bg-blue-500 text-white font-bold px-4 py-1 rounded whitespace-nowrap" 
             onClick={() => handleEditUser(row)}
           >
             Editar
           </button>
           <button
-            className="bg-green-500 text-white font-bold px-4 py-1 rounded" // Asegura que el texto no se envuelva
+            className="bg-green-500 text-white font-bold px-4 py-1 rounded" 
             onClick={() => {
               if (row.id !== undefined) {
                 handleViewUser(row.id);
@@ -113,7 +118,6 @@ const UserList: FC = () => {
       ),
     }
     
-    
   ];
 
   const handleEditUser = (user: User) => {
@@ -125,18 +129,14 @@ const UserList: FC = () => {
     router.push(`/user/viewProfile?id=${id}`);
   };
 
-  const handleCreateUser = () => {
-    setSelectedUser(null);
-    setShowModal(true);
-  };
-
   const handleSaveUser = async (user: User) => {
     try {
-      const url = `/api/user/users/${user.id}`;
+      const { password, ...userWithoutPassword } = user;
+      const url = `/api/user/users?id=${user.id}`;
       const response = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(user),
+        body: JSON.stringify(userWithoutPassword),
       });
 
       if (!response.ok) {
@@ -184,7 +184,7 @@ const UserList: FC = () => {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Buscar usuario por nombre, email o documento"
+          placeholder="Buscar usuario por nombre, email, línea de trabajo o documento"
           className="w-full px-3 py-2 border border-gray-300 rounded"
         />
       </div>

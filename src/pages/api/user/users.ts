@@ -48,7 +48,7 @@ async function updateUser(req: NextApiRequest, res: NextApiResponse) {
     const updatedData: any = {
       name,
       email,
-      identity_document, // Incluir documento de identidad
+      identity_document,
     };
 
     if (password) {
