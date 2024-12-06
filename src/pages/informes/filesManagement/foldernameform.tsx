@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
-import ModalComponent from "@/components/Modal";
+import ModalComponent from "@/components/Modal"; // Asegúrate de que este componente esté correctamente importado
 
-interface RenameFormProps {
+interface FolderNameFormProps {
   show: boolean;
   currentName: string;
   onRename: (newName: string) => void;
   closeModal: () => void;
 }
 
-const RenameForm: React.FC<RenameFormProps> = ({
+const FolderNameForm: React.FC<FolderNameFormProps> = ({
   show,
   currentName,
   onRename,
@@ -31,11 +31,11 @@ const RenameForm: React.FC<RenameFormProps> = ({
   };
 
   return (
-    <ModalComponent show={show} title="Renombrar Archivo/Carpeta" closeModal={closeModal}>
+    <ModalComponent show={show} title="Crear Nueva Carpeta" closeModal={closeModal}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="newName" className="block text-sm font-medium text-gray-700">
-            Nuevo Nombre
+            Nombre de la Carpeta
           </label>
           <input
             type="text"
@@ -58,7 +58,7 @@ const RenameForm: React.FC<RenameFormProps> = ({
             type="submit"
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            Renombrar
+            Crear Carpeta
           </button>
         </div>
       </form>
@@ -66,4 +66,4 @@ const RenameForm: React.FC<RenameFormProps> = ({
   );
 };
 
-export default RenameForm;
+export default FolderNameForm;

@@ -5,6 +5,7 @@ import JSZip from "jszip";
 import path from 'path';
 
 import { faFolderPlus, faFileCirclePlus, faFolderOpen, faEllipsisVertical, faTurnUp } from "@fortawesome/free-solid-svg-icons";
+import FolderNameForm from "./foldernameform";
 
 interface UploadedFile {
   path: string; // Ruta relativa del archivo dentro de la carpeta
@@ -17,6 +18,7 @@ const FileManager = () => {
   const [currentContents, setCurrentContents] = useState<any[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [folderName, setFolderName] = useState<string>("");
+  const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [selectedNode, setSelectedNode] = useState<any>(null);
 
@@ -48,7 +50,6 @@ const FileManager = () => {
   
     fetchFileSystem();
   }, [currentFolder]); 
-  
   
 const handleCreateFolder = async (folderName: string) => {
     const folderNameOnly = currentFolder ? path.basename(currentFolder) : '';
@@ -103,6 +104,15 @@ const handleCreateFolder = async (folderName: string) => {
       console.error('Error al crear la carpeta');
   }}
     
+  const handleCreateFolderClick = () => {
+    setShowCreateFolderModal(true);  // Mostrar el modal
+  };
+
+  const handleCreateFolderSubmit = (newName: string) => {
+    handleCreateFolder(newName);  // Llamar a la función de creación de carpeta
+    setShowCreateFolderModal(false);  // Cerrar el modal
+  };
+  
 const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
   const files = event.target.files;
 
@@ -410,6 +420,14 @@ const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
         onRename={handleRenameSubmit}
         closeModal={() => setShowRenameModal(false)}
       />
+      {showCreateFolderModal && (
+        <FolderNameForm
+          show={showCreateFolderModal}
+          currentName={folderName}
+          onRename={handleCreateFolderSubmit}  
+          closeModal={() => setShowCreateFolderModal(false)}  
+        />
+      )}
 
       <h1 className="text-xl font-bold mb-4">Gestor de Archivos</h1>
 
@@ -448,14 +466,46 @@ const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
               <FontAwesomeIcon icon={faTurnUp} />
             </button>
           )}
+          <div className="dropdown dropdown-start relative">
           <button
-            onClick={() =>
-              handleCreateFolder(prompt("Nombre de la carpeta") || "Nueva carpeta")
-            }
+            onClick={() => handleCreateFolderClick} // Alterna la visibilidad del menú
             className="bg-blue-500 text-white px-4 py-2 rounded"
           >
             <FontAwesomeIcon icon={faFolderPlus} />
           </button>
+          <ul
+            tabIndex={0}
+            className="menu menu-sm dropdown-content bg-white py-2 z-10 mt-2 rounded shadow w-56"  
+          >
+            <li>
+              <button
+                onClick={handleCreateFolderClick}
+                className="w-full text-left py-2 px-4 hover:bg-gray-100"
+              >
+                <FontAwesomeIcon icon={faFolderPlus} />
+                Crear Carpeta
+              </button>
+            </li>
+            <li>
+              <input
+                type="file"
+                className="hidden"
+                id="folderInput"
+                multiple
+                onChange={handleFolderUpload}
+                webkitdirectory="true"
+                directory="true"
+              />
+              <label
+                htmlFor="folderInput"
+                className="px-4 py-2 rounded cursor-pointer hover:bg-gray-100 w-full" // Agregar w-full aquí si quieres que el label también ocupe el ancho completo
+              >
+                <FontAwesomeIcon icon={faFolderOpen} />
+                Subir Carpeta
+              </label>
+            </li>
+          </ul>
+          </div>
           <input
             type="file"
             className="hidden"
@@ -470,22 +520,7 @@ const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
             <FontAwesomeIcon icon={faFileCirclePlus} />
           </label>
 
-          <input
-            type="file"
-            className="hidden"
-            id="folderInput"
-            multiple
-            onChange={handleFolderUpload}
-            webkitdirectory="true"
-            directory="true"
-          />
-          <label
-            htmlFor="folderInput"
-            className="bg-purple-500 text-white px-4 py-2 rounded cursor-pointer"
-          >
-            Seleccionar Carpeta
-            <FontAwesomeIcon icon={faFolderOpen} />
-          </label>
+          
         </div>
 
         {currentContents.length === 0 ? (
@@ -495,7 +530,7 @@ const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
             <div className="flex flex-row items-center" key={node.id}>
               <li
                 onClick={() => node.type === "folder" && setCurrentFolder(node.id)}
-                className="cursor-pointer flex items-center justify-between hover:bg-gray-100 p-2 rounded flex-grow"
+                className="cursor-pointer flex items-center justify-between hover:bg-gray-100 px-4 py-2 rounded flex-grow"
               >
                 <span>
                   {node.type === "folder" ? "📁" : "📄"} {node.name}
@@ -515,20 +550,20 @@ const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
                   <li>
                     <button
                       onClick={() => (node.type === "folder" ? handleDownloadFolder(node) : handleDownloadFile(node))}
-                      className="w-full text-left"
+                      className="w-full text-left hover:bg-gray-100 px-4 py-1"
                     >
                       Descargar
                     </button>
                   </li>
                   <li>
-                  <button onClick={() => handleRenameNode(node)} className="w-full text-left">
+                  <button onClick={() => handleRenameNode(node)} className="w-full text-left hover:bg-gray-100 px-4 py-1">
                     Renombrar
                   </button>
                   </li>
                   <li>
                     <button
                       onClick={() => handleDeleteNode(node.id)}
-                      className="w-full text-left text-red-500"
+                      className="w-full text-left text-red-500 hover:bg-red-100 px-4 py-1"
                     >
                       Eliminar
                     </button>

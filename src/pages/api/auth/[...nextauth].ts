@@ -39,10 +39,6 @@ export default NextAuth({
           throw new Error('Contraseña incorrecta');
         }
       
-        // Convierte la imagen `Buffer` a un `string` en formato base64
-        const imageBase64 = user.profile_picture
-          ? `data:image/png;base64,${user.profile_picture.toString('base64')}`
-          : null;
       
         // Retorna el usuario con los datos del rol, usando la imagen como base64
         return {
