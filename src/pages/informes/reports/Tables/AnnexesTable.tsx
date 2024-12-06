@@ -37,12 +37,12 @@ const AnnexesTable: React.FC<AnnexesFormProps> = ({ annexes, onRowSelected, onRo
           <FontAwesomeIcon
             icon={faDownload}
             className="text-blue-600 cursor-pointer hover:text-blue-800"
-            onClick={() => handleDownload(row.id)} // Pasa el ID del anexo para descargar el archivo
+            onClick={() => handleDownload(row.id)} 
           />
         </div>
       ),
       sortable: true,
-      width: '20em', // Puedes ajustar el ancho si lo deseas
+      width: '20em', 
     }
   ];
 

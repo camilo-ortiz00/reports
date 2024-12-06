@@ -1,4 +1,6 @@
 export interface User {
+  profile_picture_type: string;
+  profile_picture_name: string;
   id: number;
   name: string;
   email: string;

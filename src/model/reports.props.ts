@@ -97,3 +97,17 @@ export interface ReportTrackingProps {
   initialData?: ReportTracking;
   handleClose: () => void;
 }
+
+export interface FileSystem {
+  id: number;
+  name: string;
+  type: 'folder' | 'file';
+  parentId: number | null;
+  children?: FileSystem[];
+  content?: string;
+  creator: string;
+  user: {
+    id: number;
+    name: string;
+  };
+}

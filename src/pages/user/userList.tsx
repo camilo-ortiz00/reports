@@ -130,6 +130,7 @@ const UserList: FC = () => {
   };
 
   const handleSaveUser = async (user: User) => {
+    console.log(user)
     try {
       const { password, ...userWithoutPassword } = user;
       const url = `/api/user/users?id=${user.id}`;

@@ -21,11 +21,13 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
       name: 'Entregable',
       selector: (row: DeliverableData) => row?.description || 'N/A',
       sortable: true,
+      width: '15em',
     },
     {
       name: 'Fecha de ejecución',
       selector: (row: DeliverableData) => row?.date || 'N/A',
       sortable: true,
+      width: '10em',
     },
     {
       name: 'URL del anexo',
@@ -45,16 +47,19 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
         </div>
       ),
       sortable: true,
+      width: '15em',
     },
     {
       name: 'Cambios aprobados por supervisor',
       selector: (row: DeliverableData) => row?.approved_changes || 'N/A',
       sortable: true,
+      width: '15em',
     },
     {
       name: 'Plan de contingencia',
       selector: (row: DeliverableData) => row?.contingency_plan || 'N/A',
       sortable: true,
+      width: '15em',
     },
     {
       name: '% Avance Mes',
@@ -120,12 +125,12 @@ const DeliverableTable: React.FC<DeliverableTableProps > = ({ deliverables, onRo
         customStyles={{
           rows: {
             style: {
-              backgroundColor: 'white', // Cambia el color de fondo de las filas
+              backgroundColor: 'white', 
             },
           },
           headCells: {
             style: {
-              backgroundColor: '#f3f4f6', // Cambia el color del encabezado
+              backgroundColor: '#f3f4f6',
               color: '#374151',
               fontWeight: 'bold',
             },

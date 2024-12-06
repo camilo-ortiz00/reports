@@ -39,6 +39,16 @@ model User {
   component              Component[]
   reports                Report[]
   role                   Role        @relation(fields: [role_id], references: [id])
+  passwordResets         PasswordReset[]
+  FileSystemNode FileSystemNode[]
+}
+
+model PasswordReset {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expires   DateTime
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Role {
@@ -86,8 +96,28 @@ model ReportTracking {
   id         Int      @id @default(autoincrement())
   report_id  Int
   note       String
-  report     Report   @relation(fields: [report_id], references: [id])
+  report     Report   @relation(fields: [report_id], references: [id], onDelete: Cascade)
 }
+
+model FileSystemNode {
+  id        String   @id @default(cuid()) 
+  name      String
+  type      NodeType 
+  parentId  String? 
+  fileUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy Int      
+  parent   FileSystemNode? @relation("ParentChild", fields: [parentId], references: [id])
+  children FileSystemNode[] @relation("ParentChild")
+  creator   User    @relation(fields: [createdBy], references: [id]) 
+}
+
+enum NodeType {
+  FILE
+  FOLDER
+}
+
 
 model TechnicalSummary {
   id                  Int    @id @default(autoincrement())

@@ -44,6 +44,7 @@ async function getUser(req: NextApiRequest, res: NextApiResponse) {
 
     return res.status(200).json(user);
   } catch (error) {
+    console.error("Error fetching user:", error);
     return res.status(500).json({ error: 'Error retrieving user' });
   }
 }
@@ -104,6 +105,8 @@ async function updateUser(req: NextApiRequest, res: NextApiResponse) {
           contact_person_phone: fields.contact_person_phone ? String(fields.contact_person_phone) : undefined,
           contact_person_email: fields.contact_person_email ? String(fields.contact_person_email) : undefined,
           profile_picture: profilePictureDetails ? profilePictureDetails.fileBuffer : undefined,
+          profile_picture_name: profilePictureDetails?.originalName,
+          profile_picture_type: profilePictureDetails?.mimeType,
           cv_file: cvFileDetails ? cvFileDetails.fileBuffer : undefined,
           cv_file_name: cvFileDetails?.originalName,
           cv_file_type: cvFileDetails?.mimeType,

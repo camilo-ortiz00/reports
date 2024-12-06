@@ -37,26 +37,27 @@ async function getUsers(req: NextApiRequest, res: NextApiResponse) {
 
 // Actualizar un usuario
 async function updateUser(req: NextApiRequest, res: NextApiResponse) {
-  const { id, name, email, password, identity_document } = req.body;
+  const { id } = req.query; // Extraer el ID de la consulta
+  const { name, email, password, identity_document } = req.body;
+
+  if (!id || isNaN(Number(id))) {
+    return res.status(400).json({ error: 'ID inválido' });
+  }
 
   try {
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({ where: { id: Number(id) } });
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    const updatedData: any = {
-      name,
-      email,
-      identity_document,
-    };
+    const updatedData: any = { name, email, identity_document };
 
     if (password) {
       updatedData.password = await bcrypt.hash(password, 10);
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id },
+      where: { id: Number(id) },
       data: updatedData,
     });
 
@@ -66,6 +67,7 @@ async function updateUser(req: NextApiRequest, res: NextApiResponse) {
     return res.status(500).json({ error: 'Error al actualizar usuario' });
   }
 }
+
 
 
 // Eliminar un usuario

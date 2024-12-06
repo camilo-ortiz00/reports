@@ -22,7 +22,6 @@ const Page = () => {
   const [deliverables, setDeliverables] = useState<DeliverableData[]>([]);
   const [annexes, setAnnexes] = useState<AnnexData[]>([]);
   const [reports, setReports] = useState<ReportData[]>([]);
-  const [filteredReports, setFilteredReports] = useState<ReportData[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [selectedReport, setSelectedReport] = useState<ReportData | null>(null);
@@ -105,7 +104,6 @@ const Page = () => {
 
     setReports(updatedReports);
     setSelectedReport(updatedReport);
-    setFilteredReports(updatedReports);
   } else {
     setSummaryAlertMessage('Deslizar hacia abajo si el texto del resumen es muy grande o no se aprecia completamente');
     setShowSummaryAlert(true);
@@ -148,7 +146,6 @@ const updateReportSummary = async (updatedReport: ReportData) => {
 
     setReports(updatedReports);
     setSelectedReport(updatedReport);
-    setFilteredReports(updatedReports);
 
     setAlertMessage('Resumen actualizado con éxito');
     setAlertType('success');
@@ -165,11 +162,14 @@ const updateReportSummary = async (updatedReport: ReportData) => {
 const handleCheckboxChange = (reportId: number) => {
   if (selectedReport?.id === reportId) {
     setSelectedReport(null);
+    setSelectedReportId(null);
   } else {
     const report = reports.find(report => report.id === reportId);
     setSelectedReport(report || null);
+    setSelectedReportId(report?.id || null);
   }
 };
+
 
 // Modales
 const handleOpenModal = (type: 'technical' | 'deliverable' | 'annex') => {
@@ -223,23 +223,20 @@ const handleCreateReport = async () => {
     console.error("Usuario no autenticado");
     return;
   }
-  
+
   const formData = {
-    summary: "", // Resumen inicial
+    summary: "",
     project_id: selectedProjectId,
-    user_id: parseInt(session?.user.id),
+    user_id: parseInt(session.user.id),
     status: 0,
-    created_at: new Date().toISOString(),  // Fecha de creación
-    updated_at: new Date().toISOString(),  // Fecha de última modificación
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   };
 
-  console.log("Form data enviado:", formData);
   try {
     const response = await fetch('/api/reports/reports', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
     });
 
@@ -248,33 +245,34 @@ const handleCreateReport = async () => {
       throw new Error(errorData.message);
     }
 
-    const data = await response.json();
-    console.log('Informe creado:', data);
+    const newReport = await response.json();
+    console.log('Informe creado:', newReport);
 
-    // Agregar el informe creado a los estados
-    setReports((prevReports) => [...prevReports, data]);
-    setFilteredReports((prevReports) => [...prevReports, data]);
-    setSelectedReport(data);
+    // Agregar el nuevo informe a la lista
+    setReports((prevReports) => {
+      const updatedReports = [...prevReports, newReport];
+      console.log('Reports actualizados:', updatedReports);
+      return updatedReports;
+    });
+    // Seleccionar automáticamente el nuevo informe
+    setSelectedReport(newReport);
+    setSelectedReportId(newReport.id);
 
+    // Mostrar alerta de éxito
     setAlertMessage('Informe creado con éxito');
     setAlertType('success');
     setShowAlert(true);
+
     setIsCreatingNewReport(false);
-  } catch (error: unknown) { 
-    console.error('Error', error);
-    let errorMessage = 'Error al crear el informe';
-
-    if (error instanceof Error) {
-      errorMessage = error.message; 
-    } else if (typeof error === 'string') {
-      errorMessage = error;
-    }
-
-    setAlertMessage('Error al crear el informe ' + errorMessage);
+  } catch (error) {
+    console.error('Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    setAlertMessage(`Error al crear el informe: ${errorMessage}`);
     setAlertType('error');
     setShowAlert(true);
   }
 };
+
 
 const updateReportModifiedDate = async (reportId: number) => {
   try {

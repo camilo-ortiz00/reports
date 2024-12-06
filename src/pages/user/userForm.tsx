@@ -1,7 +1,5 @@
 import { FC, useEffect, useState } from 'react';
 import { User } from '@/model/user.props';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 const UserForm: FC<{ user: User | null; onSave: (user: User) => void; onDelete?: (id: number) => void }> = ({ user, onSave, onDelete }) => {
   const [id, setId] = useState<number>(0);

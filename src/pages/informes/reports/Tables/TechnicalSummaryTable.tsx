@@ -95,7 +95,7 @@ const TechnicalSummaryTable: React.FC<TechnicalFormProps> = ({
           },
           header: {
             style: {
-              display: 'none', // Oculta el checkbox global
+              display: 'none',
             },
           },
         }}

@@ -8,7 +8,7 @@ import Image from 'next/image';
 const Navbar = () => {
   const { data: session } = useSession();
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
-  const userId = session?.user.id; // Asegúrate de que `session` esté disponible
+  const userId = session?.user.id ? Number(session.user.id) : null;
 
   useEffect(() => {
     if (userId) {

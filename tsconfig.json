@@ -18,13 +18,14 @@
     "jsx": "preserve",
     "baseUrl": ".",                 
     "paths": {                     
-      "@/*": ["src/*"]  // Cambiado para indicar la carpeta 'src'
+      "@/*": ["src/*"] 
     }
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx"
+  "next-env.d.ts",
+  "**/*.ts",
+  "**/*.tsx",
+  "src/model/global.d.ts"
   ],
   "exclude": [
     "node_modules"

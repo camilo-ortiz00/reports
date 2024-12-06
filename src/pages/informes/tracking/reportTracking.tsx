@@ -4,7 +4,6 @@ import { ReportTrackingProps, ReportTracking } from '@/model/reports.props';
 import ModalComponent from '@/components/Modal';
 import AlertComponent from '@/components/Alert';
 import TrackingForm from './TrackingForm';
-import { fetchData } from 'next-auth/client/_utils';
 
 const ReportTrackingComponent: FC<ReportTrackingProps> = () => {
   const [reports, setReports] = useState([]);

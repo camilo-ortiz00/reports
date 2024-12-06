@@ -84,6 +84,11 @@ const SideBar = () => {
                     Seguimiento de Informes
                   </p>
                 </Link>
+                <Link href="/informes/filesManagement/fileSystem">
+                  <p className="m-1 p-2 w-full border-b border-gray-400 hover:bg-gray-200 hover:text-black transition-colors duration-300 rounded">
+                    Gestor de archivos
+                  </p>
+                </Link>
               </div>
             </div>
           )}

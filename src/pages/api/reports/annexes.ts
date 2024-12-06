@@ -56,15 +56,13 @@ export async function createAnnex(req: NextApiRequest, res: NextApiResponse) {
 
   const form = formidable({
      keepExtensions: true,
-      maxFileSize: 10 * 1024 * 1024 }); // 5 MB
+    maxFileSize: 10 * 1024 * 1024 }); // 5 MB
 
   form.parse(req, async (err, fields, files) => {
     if (err) {
       console.error('Error parsing files:', err);
       return res.status(500).json({ error: 'Error al procesar los archivos' });
     }
-    console.log('Campos recibidos:', fields);
-    console.log('Archivos recibidos:', files);
     const { description, report_id } = fields;
     if (!description || !report_id || !files.file) {
       return res.status(400).json({ error: 'Faltan datos requeridos' });

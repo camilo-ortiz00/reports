@@ -59,8 +59,8 @@ const ComponentForm: React.FC<ComponentFormProps> = ({ onSave, initialData, user
           ))}
         </select>
       </div>
-      <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
-        Guardar
+      <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">
+        {initialData ? 'Editar Componente' : 'Crear Componente'}
       </button>
     </form>
   );
