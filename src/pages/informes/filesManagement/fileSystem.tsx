@@ -487,15 +487,19 @@ const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
               </button>
             </li>
             <li>
-              <input
-                type="file"
-                className="hidden"
-                id="folderInput"
-                multiple
-                onChange={handleFolderUpload}
-                webkitdirectory="true"
-                directory="true"
-              />
+            <input
+              type="file"
+              className="your-class"
+              id="your-id"
+              multiple
+              onChange={handleFolderUpload}
+              // @ts-ignore
+              webkitdirectory="true"
+              // @ts-ignore
+              directory="true"
+            />
+
+
               <label
                 htmlFor="folderInput"
                 className="px-4 py-2 rounded cursor-pointer hover:bg-gray-100 w-full" // Agregar w-full aquí si quieres que el label también ocupe el ancho completo

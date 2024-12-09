@@ -36,7 +36,9 @@ const UserForm: FC<{ user: User | null; onSave: (user: User) => void; onDelete?:
       role_id: roleId,
       role: user?.role || { id: 1, description: '', name: '' },
       profile_status: 0,
-      password: ''
+      password: '',
+      profile_picture_type: '',
+      profile_picture_name: ''
     };
   
     onSave(updatedUser);

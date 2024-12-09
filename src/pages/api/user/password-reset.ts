@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+{/*import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../../lib/prisma';
 import { sendEmail } from '../../../../lib/email'; // Función para enviar correos
 import crypto from 'crypto';
@@ -58,3 +58,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'No se pudo enviar el correo' });
   }
 }
+*/}

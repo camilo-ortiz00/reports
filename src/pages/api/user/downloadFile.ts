@@ -24,15 +24,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     switch (fileType) {
       case 'cv_file':
-        fileBuffer = user.cv_file;
+        //fileBuffer = user.cv_file;
         fileName = user.cv_file_name || 'Hoja_de_vida';
         break;
       case 'id_file':
-        fileBuffer = user.id_file;
+        //fileBuffer = user.id_file;
         fileName = user.id_file_name || 'Documento_identidad';
         break;
       case 'academic_support_files':
-        fileBuffer = user.academic_support_files;
+        //fileBuffer = user.academic_support_files;
         fileName = user.academic_support_name || 'Soporte_academico';
         break;
       default:
