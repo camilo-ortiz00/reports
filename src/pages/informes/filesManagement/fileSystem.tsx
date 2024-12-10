@@ -3,7 +3,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import RenameForm from "./renameform";
 import JSZip from "jszip";
 import path from 'path';
-
 import { faFolderPlus, faFileCirclePlus, faFolderOpen, faEllipsisVertical, faTurnUp } from "@fortawesome/free-solid-svg-icons";
 import FolderNameForm from "./foldernameform";
 

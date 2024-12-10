@@ -7,7 +7,7 @@ import { Project } from '@/model/projects.props';
 import ProjectForm from './projectForm';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleArrowLeft, faDiagramProject, faFolderTree } from '@fortawesome/free-solid-svg-icons';
+import { faFolderTree } from '@fortawesome/free-solid-svg-icons';
 
 const ProjectManagement = () => {
   const [projects, setProjects] = useState<Project[]>([]);

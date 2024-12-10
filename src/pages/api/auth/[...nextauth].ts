@@ -24,9 +24,20 @@ export default NextAuth({
               { identity_document: credentials.identifier } // O buscar por documento de identidad
             ],
           },
-          include: {
-            role: true, // Incluir los datos del rol del usuario
-          },
+          select: {  // Utilizar 'select' para obtener solo los campos específicos
+            id: true,
+            name: true,
+            email: true,
+            password: true,
+            identity_document: true,
+            profile_picture: true,
+            role: { // Incluir solo los datos del rol necesarios
+              select: {
+                id: true,
+                name: true,
+              }
+            }
+          }
         });
       
         if (!user) {
@@ -48,7 +59,6 @@ export default NextAuth({
           role: {
             id: user.role.id,
             name: user.role.name,
-            description: user.role.description,
           },
         };
       },

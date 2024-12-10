@@ -8,7 +8,7 @@ import ComponentForm from './componentForm';
 import { User } from '@/model/user.props';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link';
-import { faCircleArrowLeft, faDiagramProject, faFolderOpen } from '@fortawesome/free-solid-svg-icons';
+import { faFolderOpen } from '@fortawesome/free-solid-svg-icons';
 
 const ComponentManagement = () => {
   const [components, setComponents] = useState<Component[]>([]);

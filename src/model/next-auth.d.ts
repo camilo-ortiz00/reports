@@ -11,7 +11,6 @@ declare module 'next-auth' {
       role: {
         id: number;
         name: string;
-        description: string;
       };
     };
   }
@@ -21,7 +20,6 @@ declare module 'next-auth' {
     role: {
       id: number;
       name: string;
-      description: string;
     };
   }
 }
@@ -32,7 +30,6 @@ declare module 'next-auth/jwt' {
     role: {
       id: number;
       name: string;
-      description: string;
     };
     image: string;
   }

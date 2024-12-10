@@ -1,4 +1,9 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
-import {faBan, faCirclePlus, faFloppyDisk, faPenToSquare, faFolderPlus, faFileCirclePlus, faFolderOpen, faEllipsisVertical, faTurnUp } from '@fortawesome/free-solid-svg-icons';
+import { faCircleArrowLeft, faPen, faFolderTree, faDownload, faTrash, faEye,
+         faEyeSlash, faIdCard, faRightToBracket, faUser, faBan, faCirclePlus,
+         faFloppyDisk, faPenToSquare, faFolderPlus, faFileCirclePlus, faFolderOpen, 
+         faEllipsisVertical, faTurnUp } from '@fortawesome/free-solid-svg-icons';
 
-library.add(faBan, faCirclePlus, faFloppyDisk, faPenToSquare, faFolderPlus, faFileCirclePlus, faFolderOpen, faEllipsisVertical, faTurnUp); 
+library.add( faCircleArrowLeft, faPen, faFolderTree, faDownload, faTrash, faEye,
+             faEyeSlash, faIdCard, faRightToBracket, faUser, faBan, faCirclePlus,
+             faFloppyDisk, faPenToSquare, faFolderPlus, faFileCirclePlus, faFolderOpen, faEllipsisVertical, faTurnUp); 

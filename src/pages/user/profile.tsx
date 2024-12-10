@@ -6,7 +6,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Image from 'next/image';
 import AlertComponent from '@/components/Alert';
 import CircularProgress from '@/components/CircularProgress';
-import { profile } from 'console';
 
 interface UserFormProps {
   userData?: User;
