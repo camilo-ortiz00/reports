@@ -86,6 +86,10 @@ const Page = () => {
       setSummaryText('');
     }
   }, [selectedReport]);
+
+  useEffect(() => {
+    console.log('selectedReportId cambió:', selectedReportId);
+  }, [selectedReportId]); // Este useEffect se ejecutará cada vez que `selectedReportId` cambie
   
  //resumen
  const handleEditClick = () => {
@@ -254,9 +258,10 @@ const handleCreateReport = async () => {
       console.log('Reports actualizados:', updatedReports);
       return updatedReports;
     });
-    // Seleccionar automáticamente el nuevo informe
     setSelectedReport(newReport);
-    setSelectedReportId(newReport.id);
+    setSelectedReportId(newReport.report.id); 
+    console.log('newreport', newReport)
+    console.log('selectedReportId después de crear:', newReport.report.id); // Verifica que se actualiza
 
     // Mostrar alerta de éxito
     setAlertMessage('Informe creado con éxito');
@@ -272,7 +277,6 @@ const handleCreateReport = async () => {
     setShowAlert(true);
   }
 };
-
 
 const updateReportModifiedDate = async (reportId: number) => {
   try {

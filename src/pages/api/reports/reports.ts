@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
+import { getSession } from 'next-auth/react';
 
 const prisma = new PrismaClient();
 
@@ -7,8 +8,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { method } = req;
 
   switch (method) {
-    case 'GET':
-      return getReports(req, res);
+    case 'GET': {
+      const session = await getSession({ req });
+      if (!session) {
+        return res.status(401).json({ error: 'Usuario no autenticado' });
+      }
+      return getReports(req, res, session);
+    }
     case 'POST':
       return createReport(req, res);
     case 'PUT':
@@ -22,9 +28,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
   
 // Obtener todos los informes o por ID
-async function getReports(req: NextApiRequest, res: NextApiResponse) {
+async function getReports(req: NextApiRequest, res: NextApiResponse, session: any) {
+  const userId = Number(session.user.id);
+
   try {
     const reports = await prisma.report.findMany({
+      where: {
+        user_id: userId,
+      },
       include: {
         user: true,
         project: true,
@@ -36,13 +47,13 @@ async function getReports(req: NextApiRequest, res: NextApiResponse) {
     });
     return res.status(200).json(reports);
   } catch (error) {
-    console.error(error);
+    console.error('Error al obtener informes:', error);
     return res.status(500).json({ error: 'Error al obtener informes' });
   }
 }
 
 // Crear reporte
-async function createReport(req: NextApiRequest, res: NextApiResponse) {
+async function createReport(req: NextApiRequest, res: NextApiResponse,) {
   const { summary, project_id, user_id, technicalSummary, deliverables, annexes } = req.body;
 
   if (!project_id || !user_id) {
@@ -88,8 +99,6 @@ async function createReport(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-
-
 // Actualizar un reporte existente, con opción de solo actualizar la fecha de modificación
 async function updateReport(req: NextApiRequest, res: NextApiResponse) {
   const { id, summary, technicalSummary, deliverables, annexes } = req.body;
@@ -116,7 +125,6 @@ async function updateReport(req: NextApiRequest, res: NextApiResponse) {
     return res.status(500).json({ error: 'Error al actualizar el informe' });
   }
 }
-
 
 async function deleteReport(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
@@ -187,4 +195,3 @@ async function deleteReport(req: NextApiRequest, res: NextApiResponse) {
     
       return Math.min(status, totalWeight); // Limitar a 100%
     }
-    

@@ -3,10 +3,8 @@ import path from 'path';
 import formidable, { File } from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { IncomingMessage } from 'http';
-import { PrismaClient } from '@prisma/client';
 import { getSession } from "next-auth/react";
 
-const prisma = new PrismaClient();
 
 export const config = {
   api: {
@@ -90,6 +88,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       uploadDir,
       keepExtensions: true,
       multiples: true,
+      maxFileSize: 4 * 1024 * 1024 * 1024, 
     });
   
     form.parse(req, async (err, fields, files) => {

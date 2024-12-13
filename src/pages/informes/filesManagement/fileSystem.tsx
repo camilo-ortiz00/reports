@@ -488,8 +488,8 @@ const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
             <li>
             <input
               type="file"
-              className="your-class"
-              id="your-id"
+              className="hidden"
+              id="folderInput"
               multiple
               onChange={handleFolderUpload}
               // @ts-ignore
