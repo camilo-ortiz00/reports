@@ -347,38 +347,42 @@ const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
   };  
 
   const handleDownloadFile = (node: any) => {
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(node.file);
+    const link = document.createElement('a');
+    link.href = `/api/reports/filesystem?id=${encodeURIComponent(node.id)}&download=true`;
     link.download = node.name;
     link.click();
   };
-  
+
   const handleDownloadFolder = async (folderNode: any) => {
     try {
       const zip = new JSZip();
-  
+      
       // Función recursiva para agregar archivos y carpetas al ZIP
-      const addFolderContentsToZip = (folder, parentZip) => {
+      const addFolderContentsToZip = async (folder, parentZip) => {
         const folderZip = parentZip.folder(folder.name);
   
         // Obtener los elementos de la carpeta actual
         const contents = fileSystem.filter((node) => node.parentId === folder.id);
   
-        contents.forEach((item) => {
+        for (const item of contents) {
           if (item.type === "folder") {
             // Recursivamente agregar subcarpetas
-            addFolderContentsToZip(item, folderZip);
+            await addFolderContentsToZip(item, folderZip);
           } else if (item.type === "file") {
-            // Agregar archivos al ZIP
-            folderZip.file(item.name, item.file); // `item.file` debe ser un Blob o Uint8Array
+            // Hacer una solicitud para obtener el contenido del archivo
+            const fileResponse = await fetch(`/api/reports/filesystem?id=${encodeURIComponent(item.id)}&download=true`);
+            const fileBlob = await fileResponse.blob(); // Asumimos que el servidor responde con un Blob
+  
+            // Agregar archivo al ZIP
+            folderZip.file(item.name, fileBlob); 
           }
-        });
+        }
       };
   
       // Iniciar la construcción del ZIP desde la carpeta seleccionada
-      addFolderContentsToZip(folderNode, zip);
+      await addFolderContentsToZip(folderNode, zip);
   
-      // Generar el ZIP
+      // Generar el archivo ZIP
       const content = await zip.generateAsync({ type: "blob" });
   
       // Crear un enlace de descarga dinámico
@@ -395,6 +399,7 @@ const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
       alert("Hubo un error al descargar la carpeta.");
     }
   };
+  
   
   const getBreadcrumbs = () => {
     const breadcrumbs: any[] = [];

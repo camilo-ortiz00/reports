@@ -18,7 +18,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   
     switch (method) {
       case 'GET':
-        return get(req, res);
+        if (req.query.download) {
+          return download(req, res); // Llama a la función de descarga
+        }
+        return get(req, res); // Función existente para listar archivos
       case 'POST':
         return create(req, res);
       case 'PUT':
@@ -243,5 +246,27 @@ const deletes = async (req: NextApiRequest, res: NextApiResponse) => {
   } catch (error) {
     console.error('Error processing delete request:', error);
     res.status(500).json({ error: 'Error processing delete request' });
+  }
+};
+
+
+const download = async (req: NextApiRequest, res: NextApiResponse) => {
+  try {
+    const { id } = req.query;
+    if (!id) {
+      return res.status(400).json({ error: 'File id is required' });
+    }
+
+    const filePath = path.resolve(uploadDir, id as string);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+
+    res.setHeader('Content-Disposition', `attachment; filename="${path.basename(filePath)}"`);
+    res.setHeader('Content-Type', 'application/octet-stream');
+    fs.createReadStream(filePath).pipe(res);
+  } catch (error) {
+    console.error('Error downloading file:', error);
+    res.status(500).json({ error: 'Error downloading file' });
   }
 };
