@@ -129,34 +129,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   
         return res.status(200).json({ message: 'Carpeta creada exitosamente', path: newPath });
       } else if (nodeType === 'file') {
-        // Manejar archivo
-        const uploadedFile = Array.isArray(files.file) ? files.file[0] : files.file;
+        // Para archivos múltiples
+        const uploadedFiles = Array.isArray(files.file) ? files.file : [files.file]; // Asegurarse de que sea un array
   
-        if (!uploadedFile || !uploadedFile.filepath) {
-          return res.status(400).json({ error: 'No file provided or invalid file' });
-        }
+        const uploadPromises = uploadedFiles.map((uploadedFile) => {
+          return new Promise((resolve, reject) => {
+            const originalName = uploadedFile.originalFilename || uploadedFile.newFilename;
+            const newFilePath = path.join(parentDir, originalName);
   
-        const originalName = uploadedFile.originalFilename || uploadedFile.newFilename;
-        const newFilePath = path.join(parentDir, originalName);
-  
-        fs.rename(uploadedFile.filepath, newFilePath, async (renameErr) => {
-          if (renameErr) {
-            console.error('Error al renombrar el archivo:', renameErr);
-            return res.status(500).json({ error: 'Error renaming the file' });
-          }
-  
-          res.status(200).json({
-            message: 'File uploaded successfully',
-            file: {
-              name: originalName,
-              path: newFilePath,
-              size: uploadedFile.size,
-              type: uploadedFile.mimetype,
-            },
+            fs.rename(uploadedFile.filepath, newFilePath, (renameErr) => {
+              if (renameErr) {
+                console.error('Error al renombrar el archivo:', renameErr);
+                reject('Error renaming the file');
+              } else {
+                resolve({
+                  name: originalName,
+                  path: newFilePath,
+                  size: uploadedFile.size,
+                  type: uploadedFile.mimetype,
+                });
+              }
+            });
           });
         });
+  
+        try {
+          const uploadedFilesData = await Promise.all(uploadPromises);
+          res.status(200).json({
+            message: 'Archivos subidos correctamente',
+            files: uploadedFilesData,
+          });
+        } catch (uploadError) {
+          res.status(500).json({ error: 'Error al subir algunos archivos' });
+        }
       } else {
-        return res.status(400).json({ error: 'Invalid type. Expected "folder" or "file"' });
+        return res.status(400).json({ error: 'Tipo inválido. Se esperaba "folder" o "file"' });
       }
     });
   };
@@ -248,7 +255,6 @@ const deletes = async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(500).json({ error: 'Error processing delete request' });
   }
 };
-
 
 const download = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

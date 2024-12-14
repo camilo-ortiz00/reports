@@ -199,9 +199,9 @@ const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
     if (files) {
       const formData = new FormData();
       Array.from(files).forEach((file) => formData.append('file', file));
-      formData.append('name', 'uploaded-file-name'); // Nombre del archivo
-      formData.append('type', 'file'); // Tipo de nodo
-      formData.append('parentId', currentFolder || null); // Cambiar a "parent"
+      formData.append('name', 'uploaded-file-name'); 
+      formData.append('type', 'file'); 
+      formData.append('parentId', currentFolder || null); 
     
       const response = await fetch('/api/reports/filesystem', {
         method: 'POST',
@@ -209,7 +209,6 @@ const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
       });
   
       if (response.ok) {
-        // Si la carga es exitosa, actualiza el sistema de archivos
         const fetchUpdatedFileSystem = async () => {
           const response = await fetch('/api/reports/filesystem');
           if (response.ok) {
@@ -221,16 +220,15 @@ const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
             // También actualizamos currentContents
             if (currentFolder === null) {
               const rootContents = data.filter((node) => node.parentId === null);
-              console.log('Contenido de la raíz:', rootContents);  // Verifica si la carpeta aparece en los contenidos
+              console.log('Contenido de la raíz:', rootContents);  
               setCurrentContents(rootContents);
             } else {
               const folderContents = data.filter((node) => node.parentId === currentFolder);
-              console.log('Contenido de la carpeta:', folderContents);  // Verifica si la carpeta aparece en los contenidos
+              console.log('Contenido de la carpeta:', folderContents); 
               setCurrentContents(folderContents);
             }
           }
         };
-
         fetchUpdatedFileSystem();
       } else {
         alert('Error al subir archivos');
@@ -399,7 +397,6 @@ const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
       alert("Hubo un error al descargar la carpeta.");
     }
   };
-  
   
   const getBreadcrumbs = () => {
     const breadcrumbs: any[] = [];
