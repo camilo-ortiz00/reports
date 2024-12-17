@@ -254,12 +254,18 @@ const handleCreateReport = async () => {
 
     // Agregar el nuevo informe a la lista
     setReports((prevReports) => {
-      const updatedReports = [...prevReports, newReport];
-      console.log('Reports actualizados:', updatedReports);
-      return updatedReports;
+      const normalizedReport = {
+        ...newReport.report,
+        trackings: [newReport.tracking], // Normaliza `tracking` como array
+      };
+      return [...prevReports, normalizedReport];
     });
-    setSelectedReport(newReport);
-    setSelectedReportId(newReport.report.id); 
+    
+    setSelectedReportId(newReport.report.id);
+    setSelectedReport({
+      ...newReport.report,
+      trackings: [newReport.tracking],
+    });
     console.log('newreport', newReport)
     console.log('selectedReportId después de crear:', newReport.report.id); // Verifica que se actualiza
 
