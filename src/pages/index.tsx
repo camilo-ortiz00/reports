@@ -14,7 +14,7 @@ const Page = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className='text-3xl font-bold mb-20 mt-20 text-center w-full'>Bienvenido a la página principal!</h1>
+      <h1 className='text-3xl font-bold mb-10 mt-10 text-center w-full'>Bienvenido a la página principal!</h1>
       <div className={styles.cardContainer}>
 
         {/* Tarjeta adicional con fondo animado */}

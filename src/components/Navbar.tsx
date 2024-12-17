@@ -21,11 +21,15 @@ const Navbar = () => {
         })
         .then((data) => {
           if (data.profile_picture) {
-            const imageBuffer = new Uint8Array(data.profile_picture.data);
-            const imageType = data.profile_picture.mimeType; // Asegúrate de que tienes el tipo MIME adecuado (por ejemplo, 'image/jpeg', 'image/png', etc.)
-            const blob = new Blob([imageBuffer], { type: imageType });
-            setProfilePicture(URL.createObjectURL(blob));
+            const imageBuffer = new Uint8Array(Object.values(data.profile_picture));
+            const mimeType = data.profile_picture_type || 'image/jpeg';
+            const blob = new Blob([imageBuffer], { type: mimeType });
+            const imageUrl = URL.createObjectURL(blob);
+            setProfilePicture(imageUrl);
+          } else {
+            setProfilePicture('/default-image.jpg'); // Imagen por defecto si no existe
           }
+          
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
@@ -43,7 +47,7 @@ const Navbar = () => {
         </label>
       </div>
       <div className="flex">
-        <Link href="/informes/">
+        <Link href="/">
           <h1 className="btn btn-ghost text-xl font-bold">Inicio</h1>
         </Link>
         
