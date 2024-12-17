@@ -112,128 +112,129 @@ const handleCreateFolder = async (folderName: string) => {
     setShowCreateFolderModal(false);  // Cerrar el modal
   };
   
-const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-  const files = event.target.files;
-
-  if (files) {
-    const fileArray: UploadedFile[] = [];
-    const virtualFileSystem: any[] = [];
-    const folderMap = new Map();
-
-    Array.from(files).forEach((file) => {
-      const path = (file as any).webkitRelativePath;
-      fileArray.push({ path, file });
-
-      const parts = path.split("/");
-      let currentParentId = null;
-
-      parts.forEach((part, index) => {
-        const isFile = index === parts.length - 1;
-
-        if (!folderMap.has(part)) {
-          const id = `${currentParentId || "root"}-${part}`; // Generar un ID único para cada carpeta
-          const newNode = {
-            id,
-            name: part,
-            type: isFile ? "file" : "folder",
-            parentId: currentParentId, // Asignar el ID del padre correctamente
-            content: isFile ? file : null,
-          };
-          virtualFileSystem.push(newNode);
-          folderMap.set(part, id);
-        }
-
-        currentParentId = folderMap.get(part); // Actualizar el parentId al ID del folder actual
-      });
-    });
-
-    // Enviar los archivos con la estructura de carpetas generada
-    const formData = new FormData();
-    fileArray.forEach((fileData) => {
-      formData.append('file', fileData.file);
-      formData.append('path', fileData.path); // Enviar la ruta para crear las carpetas
-    });
-
-    try {
-      const response = await fetch('/api/reports/uploads', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Si la carga es exitosa, actualiza el sistema de archivos
-        const fetchUpdatedFileSystem = async () => {
-          const response = await fetch('/api/reports/filesystem');
-          if (response.ok) {
-            const data = await response.json();
-            console.log('Datos del sistema de archivos después de subir la carpeta:', data);
-
-            setFileSystem(data);
-
-            // También actualizamos currentContents
-            if (currentFolder === null) {
-              const rootContents = data.filter((node) => node.parentId === null);
-              console.log('Contenido de la raíz:', rootContents);  // Verifica si la carpeta aparece en los contenidos
-              setCurrentContents(rootContents);
-            } else {
-              const folderContents = data.filter((node) => node.parentId === currentFolder);
-              console.log('Contenido de la carpeta:', folderContents);  // Verifica si la carpeta aparece en los contenidos
-              setCurrentContents(folderContents);
-            }
-          }
-        };
-
-        fetchUpdatedFileSystem();
-      } else {
-        alert('Error al subir archivos');
-      }
-    } catch (error) {
-      alert('Error al conectar con el servidor');
-    }
-  }
-};
-
-  const handleUploadFile = async (files: FileList | null) => {
+  const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+  
     if (files) {
-      const formData = new FormData();
-      Array.from(files).forEach((file) => formData.append('file', file));
-      formData.append('name', 'uploaded-file-name'); 
-      formData.append('type', 'file'); 
-      formData.append('parentId', currentFolder || null); 
-    
-      const response = await fetch('/api/reports/filesystem', {
-        method: 'POST',
-        body: formData,
+      const fileArray: UploadedFile[] = [];
+      const virtualFileSystem: any[] = [];
+      const folderMap = new Map();
+  
+      // Proceso de cargar archivos individualmente
+      Array.from(files).forEach((file) => {
+        const path = (file as any).webkitRelativePath;
+        fileArray.push({ path, file });
+  
+        const parts = path.split("/");
+        let currentParentId = null;
+  
+        parts.forEach((part, index) => {
+          const isFile = index === parts.length - 1;
+  
+          if (!folderMap.has(part)) {
+            const id = `${currentParentId || "root"}-${part}`; 
+            const newNode = {
+              id,
+              name: part,
+              type: isFile ? "file" : "folder",
+              parentId: currentParentId,
+              content: isFile ? file : null,
+            };
+            virtualFileSystem.push(newNode);
+            folderMap.set(part, id);
+          }
+  
+          currentParentId = folderMap.get(part);
+        });
       });
   
-      if (response.ok) {
-        const fetchUpdatedFileSystem = async () => {
-          const response = await fetch('/api/reports/filesystem');
-          if (response.ok) {
-            const data = await response.json();
-            console.log('Datos del sistema de archivos después de subir la carpeta:', data);
-
-            setFileSystem(data);
-
-            // También actualizamos currentContents
-            if (currentFolder === null) {
-              const rootContents = data.filter((node) => node.parentId === null);
-              console.log('Contenido de la raíz:', rootContents);  
-              setCurrentContents(rootContents);
-            } else {
-              const folderContents = data.filter((node) => node.parentId === currentFolder);
-              console.log('Contenido de la carpeta:', folderContents); 
-              setCurrentContents(folderContents);
+      // Enviar archivos de manera incremental (uno a uno)
+      const formData = new FormData();
+      fileArray.forEach((fileData) => {
+        formData.append('file', fileData.file);
+        formData.append('path', fileData.path); // Enviar la ruta para crear las carpetas
+      });
+  
+      try {
+        const response = await fetch('/api/reports/uploads', {
+          method: 'POST',
+          body: formData,
+        });
+  
+        const data = await response.json();
+  
+        if (response.ok) {
+          // Si la carga es exitosa, actualiza el sistema de archivos
+          const fetchUpdatedFileSystem = async () => {
+            const response = await fetch('/api/reports/filesystem');
+            if (response.ok) {
+              const data = await response.json();
+              console.log('Datos del sistema de archivos después de subir la carpeta:', data);
+  
+              setFileSystem(data);
+  
+              // También actualizamos currentContents
+              if (currentFolder === null) {
+                const rootContents = data.filter((node) => node.parentId === null);
+                console.log('Contenido de la raíz:', rootContents);  // Verifica si la carpeta aparece en los contenidos
+                setCurrentContents(rootContents);
+              } else {
+                const folderContents = data.filter((node) => node.parentId === currentFolder);
+                console.log('Contenido de la carpeta:', folderContents);  // Verifica si la carpeta aparece en los contenidos
+                setCurrentContents(folderContents);
+              }
             }
-          }
-        };
-        fetchUpdatedFileSystem();
-      } else {
-        alert('Error al subir archivos');
-      }}
+          };
+  
+          fetchUpdatedFileSystem();
+        } else {
+          alert('Error al subir archivos');
+        }
+      } catch (error) {
+        alert('Error al conectar con el servidor');
+      }
+    }
   };
+  
+const handleUploadFile = async (files: FileList | null) => {
+  if (files) {
+    const formData = new FormData();
+    Array.from(files).forEach((file) => formData.append('file', file));
+    formData.append('name', 'uploaded-file-name'); 
+    formData.append('type', 'file'); 
+    formData.append('parentId', currentFolder || null); 
+  
+    const response = await fetch('/api/reports/filesystem', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (response.ok) {
+      const fetchUpdatedFileSystem = async () => {
+        const response = await fetch('/api/reports/filesystem');
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Datos del sistema de archivos después de subir la carpeta:', data);
+
+          setFileSystem(data);
+
+          // También actualizamos currentContents
+          if (currentFolder === null) {
+            const rootContents = data.filter((node) => node.parentId === null);
+            console.log('Contenido de la raíz:', rootContents);  
+            setCurrentContents(rootContents);
+          } else {
+            const folderContents = data.filter((node) => node.parentId === currentFolder);
+            console.log('Contenido de la carpeta:', folderContents); 
+            setCurrentContents(folderContents);
+          }
+        }
+      };
+      fetchUpdatedFileSystem();
+    } else {
+      alert('Error al subir archivos');
+    }}
+};
 
   const handleRenameNode = (node: any) => {
     setSelectedNode(node);
